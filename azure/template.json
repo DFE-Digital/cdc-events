@@ -1,0 +1,582 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "serviceIdentifier": {
+      "type": "string",
+      "minLength": 4,
+      "maxLength": 4
+    },
+    "environment": {
+      "type": "string",
+      "defaultValue": "d",
+      "allowedValues": [
+        "d",
+        "t",
+        "p"
+      ]
+    },
+    "environmentName": {
+      "type": "string",
+      "defaultValue": "DEV",
+      "allowedValues": [
+        "DEV",
+        "TEST",
+        "OAT",
+        "PROD"
+      ]
+    },
+    "environmentInstance": {
+      "type": "string",
+      "minLength": 2,
+      "maxLength": 2,
+      "defaultValue": "01"
+    },
+    "sharedResourcesAppName": {
+      "type": "string",
+      "defaultValue": "common"
+    },
+    "eapimPublicIpAddress": {
+      "type": "string"
+    },
+    "keyVaultInstance": {
+      "type": "string",
+      "minLength": 2,
+      "maxLength": 2,
+      "defaultValue": "01"
+    },
+    "keyVaultSecretNameCdcEventsSubscriptionKey": {
+      "type": "string",
+      "defaultValue": "cdc-events-subscription-key"
+    },
+    "keyVaultSecretNameKycloudApiPassword": {
+      "type": "string",
+      "defaultValue": "kycloud-api-password"
+    },
+    "keyVaultSecretNameKycloudApiToken": {
+      "type": "string",
+      "defaultValue": "kycloud-api-token"
+    },
+    "cdcEventsApiBaseUri": {
+      "type": "string"
+    },
+    "kycloudApiBaseUri": {
+      "type": "string"
+    },
+    "kycloudApiEmail": {
+      "type": "string"
+    },
+    "loginEndpoint": {
+      "type": "string",
+      "defaultValue": "user/login"
+    },
+    "dataPathPrefix": {
+      "type": "string",
+      "defaultValue": "data"
+    },
+    "appName": {
+      "type": "string",
+      "defaultValue": "cdcaeg"
+    },
+    "appInstance": {
+      "type": "string",
+      "defaultValue": "01"
+    }
+  },
+  "variables": {
+    "singleQuote": "'",
+    "namePrefix": "[concat(parameters('serviceIdentifier'), parameters('environment'), parameters('environmentInstance'))]",
+    "sharedResourceGroupName": "[concat(variables('namePrefix'), '-', parameters('sharedResourcesAppName'))]",
+    "keyVaultName": "[concat(variables('namePrefix'), '-kv-', parameters('keyVaultInstance'))]",
+    "logicAppName": "[concat(variables('namePrefix'), '-', parameters('appName'), '-la-', parameters('appInstance'))]",
+    "logicAppId": "[resourceId('Microsoft.Logic/workflows/', variables('logicAppName'))]",
+    "keyVaultSecretCdcEventsSubscriptionKey": "[resourceId(variables('sharedResourceGroupName'), 'Microsoft.KeyVault/vaults/secrets', variables('keyVaultName'), parameters('keyVaultSecretNameCdcEventsSubscriptionKey'))]",
+    "keyVaultSecretKycloudApiPassword": "[resourceId(variables('sharedResourceGroupName'), 'Microsoft.KeyVault/vaults/secrets', variables('keyVaultName'), parameters('keyVaultSecretNameKycloudApiPassword'))]",
+    "keyVaultSecretKycloudApiToken": "[resourceId(variables('sharedResourceGroupName'), 'Microsoft.KeyVault/vaults/secrets', variables('keyVaultName'), parameters('keyVaultSecretNameKycloudApiToken'))]",
+    "loginUri": "[concat(parameters('kycloudApiBaseUri'), '/', parameters('loginEndpoint'))]",
+    "dataPathUri": "[concat(parameters('kycloudApiBaseUri'), '/', parameters('dataPathPrefix'))]"
+  },
+  "resources": [
+    {
+      "apiVersion": "2017-07-01",
+      "type": "Microsoft.Logic/workflows",
+      "name": "[variables('logicAppName')]",
+      "location": "[resourceGroup().location]",
+      "tags": {
+        "environment": "[parameters('environmentName')]",
+        "app": "[parameters('appName')]"
+      },
+      "identity": {
+        "type": "SystemAssigned"
+      },
+      "properties": {
+        "state": "Enabled",
+        "definition": {
+          "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+          "contentVersion": "1.0.0.0",
+          "parameters": {
+            "ApiEntitiesToPull": {
+              "defaultValue": [
+                "sites",
+                "surveysectionelements",
+                "portfolios",
+                "users",
+                "deleted",
+                "surveylots",
+                "activities",
+                "actuals",
+                "oncosts",
+                "plans",
+                "spends",
+                "surveysections",
+                "surveys"
+              ],
+              "type": "Array"
+            },
+            "KycloudApiEmail": {
+              "defaultValue": "[parameters('kycloudApiEmail')]",
+              "type": "String"
+            }
+          },
+          "triggers": {
+            "Recurrence": {
+              "recurrence": {
+                "frequency": "Day",
+                "interval": 1,
+                "schedule": {
+                  "hours": [
+                    "13"
+                  ]
+                }
+              },
+              "type": "Recurrence"
+            }
+          },
+          "actions": {
+            "Get_and_Parse_Secrets_from_KeyVault": {
+              "actions": {
+                "Get_kycloud-api-token_from_KeyVault": {
+                  "type": "Http",
+                  "inputs": {
+                    "authentication": {
+                      "audience": "https://vault.azure.net",
+                      "type": "ManagedServiceIdentity"
+                    },
+                    "method": "GET",
+                    "uri": "[concat(reference(variables('keyVaultSecretKycloudApiToken'), '2019-09-01').secretUriWithVersion, '?api-version=2016-10-01')]"
+                  }
+                },
+                "Parse_kycloud-api-token": {
+                  "runAfter": {
+                    "Get_kycloud-api-token_from_KeyVault": [
+                      "Succeeded"
+                    ]
+                  },
+                  "type": "ParseJson",
+                  "inputs": {
+                    "content": "@body('Get_kycloud-api-token_from_KeyVault')",
+                    "schema": {
+                      "properties": {
+                        "value": {
+                          "type": "string"
+                        }
+                      },
+                      "type": "object"
+                    }
+                  }
+                },
+                "Get_kycloud-api-password_from_KeyVault": {
+                  "runAfter": {
+                    "Parse_kycloud-api-token": [
+                      "Succeeded"
+                    ]
+                  },
+                  "type": "Http",
+                  "inputs": {
+                    "authentication": {
+                      "audience": "https://vault.azure.net",
+                      "type": "ManagedServiceIdentity"
+                    },
+                    "method": "GET",
+                    "uri": "[concat(reference(variables('keyVaultSecretKycloudApiPassword'), '2019-09-01').secretUriWithVersion, '?api-version=2016-10-01')]"
+                  }
+                },
+                "Parse_kycloud-api-password": {
+                  "runAfter": {
+                    "Get_kycloud-api-password_from_KeyVault": [
+                      "Succeeded"
+                    ]
+                  },
+                  "type": "ParseJson",
+                  "inputs": {
+                    "content": "@body('Get_kycloud-api-password_from_KeyVault')",
+                    "schema": {
+                      "properties": {
+                        "value": {
+                          "type": "string"
+                        }
+                      },
+                      "type": "object"
+                    }
+                  }
+                },
+                "Get_cdc-events-subscription-key": {
+                  "runAfter": {
+                    "Parse_kycloud-api-password": [
+                      "Succeeded"
+                    ]
+                  },
+                  "type": "Http",
+                  "inputs": {
+                    "authentication": {
+                      "audience": "https://vault.azure.net",
+                      "type": "ManagedServiceIdentity"
+                    },
+                    "method": "GET",
+                    "uri": "[concat(reference(variables('keyVaultSecretCdcEventsSubscriptionKey'), '2019-09-01').secretUriWithVersion, '?api-version=2016-10-01')]"
+                  }
+                },
+                "Parse_cdc-events-subscription-key": {
+                  "runAfter": {
+                    "Get_cdc-events-subscription-key": [
+                      "Succeeded"
+                    ]
+                  },
+                  "type": "ParseJson",
+                  "inputs": {
+                    "content": "@body('Get_cdc-events-subscription-key')",
+                    "schema": {
+                      "properties": {
+                        "value": {
+                          "type": "string"
+                        }
+                      },
+                      "type": "object"
+                    }
+                  }
+                }
+              },
+              "type": "Scope"
+            },
+            "Initialise_nowDateTime": {
+              "runAfter": {
+                "Get_and_Parse_Secrets_from_KeyVault": [
+                  "Succeeded"
+                ]
+              },
+              "type": "InitializeVariable",
+              "inputs": {
+                "variables": [
+                  {
+                    "name": "nowDateTime",
+                    "type": "string",
+                    "value": "@{utcNow()}"
+                  }
+                ]
+              }
+            },
+            "Initialise_sinceDateTime": {
+              "runAfter": {
+                "Initialise_nowDateTime": [
+                  "Succeeded"
+                ]
+              },
+              "type": "InitializeVariable",
+              "inputs": {
+                "variables": [
+                  {
+                    "name": "sinceDateTime",
+                    "type": "string",
+                    "value": "@{subtractFromTime(variables('nowDateTime'), 1, 'Day')}"
+                  }
+                ]
+              }
+            },
+            "Get_sessionId": {
+              "actions": {
+                "Get_sessionId_from_login_endpoint": {
+                  "type": "Http",
+                  "inputs": {
+                    "headers": {
+                      "Accept": "application/json"
+                    },
+                    "method": "POST",
+                    "queries": {
+                      "ApiToken": "@body('Parse_kycloud-api-token')?['value']",
+                      "Email": "@parameters('KycloudApiEmail')",
+                      "Password": "@body('Parse_kycloud-api-password')?['value']"
+                    },
+                    "uri": "[variables('loginUri')]"
+                  }
+                },
+                "Parse_sessionId": {
+                  "runAfter": {
+                    "Get_sessionId_from_login_endpoint": [
+                      "Succeeded"
+                    ]
+                  },
+                  "type": "ParseJson",
+                  "inputs": {
+                    "content": "@body('Get_sessionId_from_login_endpoint')",
+                    "schema": {
+                      "properties": {
+                        "SessionId": {
+                          "type": "string"
+                        },
+                        "Success": {
+                          "type": "boolean"
+                        }
+                      },
+                      "type": "object"
+                    }
+                  }
+                },
+                "Check_if_logging_in_was_a_success": {
+                  "actions": {
+                    "Login_was_a_success_-_continuing_with_execution": {
+                      "type": "Scope"
+                    }
+                  },
+                  "runAfter": {
+                    "Parse_sessionId": [
+                      "Succeeded"
+                    ]
+                  },
+                  "else": {
+                    "actions": {
+                      "Terminate_-_couldn't_log_in,_for_whatever_reason": {
+                        "type": "Terminate",
+                        "inputs": {
+                          "runStatus": "Failed"
+                        }
+                      }
+                    }
+                  },
+                  "expression": {
+                    "and": [
+                      {
+                        "equals": [
+                          "@body('Parse_sessionId')?['Success']",
+                          true
+                        ]
+                      }
+                    ]
+                  },
+                  "type": "If"
+                }
+              },
+              "runAfter": {
+                "Initialise_sinceDateTime": [
+                  "Succeeded"
+                ]
+              },
+              "type": "Scope"
+            },
+            "Initialise_continuePaging": {
+              "runAfter": {
+                "Get_sessionId": [
+                  "Succeeded"
+                ]
+              },
+              "type": "InitializeVariable",
+              "inputs": {
+                "variables": [
+                  {
+                    "name": "continuePaging",
+                    "type": "boolean"
+                  }
+                ]
+              }
+            },
+            "Initialise_currentPage": {
+              "runAfter": {
+                "Initialise_continuePaging": [
+                  "Succeeded"
+                ]
+              },
+              "type": "InitializeVariable",
+              "inputs": {
+                "variables": [
+                  {
+                    "name": "currentPage",
+                    "type": "integer"
+                  }
+                ]
+              }
+            },
+            "For_each_ApiEntitiesToPull": {
+              "foreach": "@parameters('ApiEntitiesToPull')",
+              "actions": {
+                "Set_continuePaging_=_true": {
+                  "type": "SetVariable",
+                  "inputs": {
+                    "name": "continuePaging",
+                    "value": true
+                  }
+                },
+                "Set_currentPage_=_1": {
+                  "runAfter": {
+                    "Set_continuePaging_=_true": [
+                      "Succeeded"
+                    ]
+                  },
+                  "type": "SetVariable",
+                  "inputs": {
+                    "name": "currentPage",
+                    "value": 1
+                  }
+                },
+                "Loop_through_pages": {
+                  "actions": {
+                    "Pull_entity_page": {
+                      "type": "Http",
+                      "inputs": {
+                        "headers": {
+                          "Accept": "application/json"
+                        },
+                        "method": "GET",
+                        "queries": {
+                          "Page": "@{variables('currentPage')}",
+                          "SessionId": "@body('Parse_sessionId')?['SessionId']",
+                          "UpdatedSince": "@variables('sinceDateTime')",
+                          "format": "json",
+                          "jsconfig": "dh:iso8601"
+                        },
+                        "retryPolicy": {
+                          "type": "none"
+                        },
+                        "uri": "[concat(variables('dataPathUri'), '/@{items(', variables('singleQuote'), 'For_each_ApiEntitiesToPull', variables('singleQuote'), ')}')]" 
+                      }
+                    },
+                    "Parse_entity_page": {
+                      "runAfter": {
+                        "Pull_entity_page": [
+                          "Succeeded"
+                        ]
+                      },
+                      "type": "ParseJson",
+                      "inputs": {
+                        "content": "@body('Pull_entity_page')",
+                        "schema": {
+                          "properties": {
+                            "Infos": {
+                              "items": {
+                                "type": "object"
+                              },
+                              "type": "array"
+                            },
+                            "Success": {
+                              "type": "boolean"
+                            }
+                          },
+                          "type": "object"
+                        }
+                      }
+                    },
+                    "Increment_variable": {
+                      "runAfter": {
+                        "Parse_entity_page": [
+                          "Succeeded"
+                        ]
+                      },
+                      "type": "IncrementVariable",
+                      "inputs": {
+                        "name": "currentPage",
+                        "value": 1
+                      }
+                    },
+                    "Check_results_for_entities": {
+                      "actions": {
+                        "Push_to_CDC_events_API_endpoint": {
+                          "type": "Http",
+                          "inputs": {
+                            "body": "@body('Parse_entity_page')?['Infos']",
+                            "headers": {
+                              "Content-Type": "application/octet-stream",
+                              "Ocp-Apim-Subscription-Key": "@body('Parse_cdc-events-subscription-key')?['value']",
+                              "X-Page": "@{variables('currentPage')}",
+                              "X-Run-Identifier": "@variables('nowDateTime')"
+                            },
+                            "method": "PUT",
+                            "retryPolicy": {
+                              "type": "none"
+                            },
+                            "uri": "[concat(parameters('cdcEventsApiBaseUri'), '/@{items(', variables('singleQuote'), 'For_each_ApiEntitiesToPull', variables('singleQuote'), ')}')]"
+                          }
+                        }
+                      },
+                      "runAfter": {
+                        "Increment_variable": [
+                          "Succeeded"
+                        ]
+                      },
+                      "else": {
+                        "actions": {
+                          "Set_continuePaging_=_false": {
+                            "type": "SetVariable",
+                            "inputs": {
+                              "name": "continuePaging",
+                              "value": false
+                            }
+                          }
+                        }
+                      },
+                      "expression": {
+                        "and": [
+                          {
+                            "greater": [
+                              "@length(body('Parse_entity_page')['Infos'])",
+                              0
+                            ]
+                          }
+                        ]
+                      },
+                      "type": "If"
+                    }
+                  },
+                  "runAfter": {
+                    "Set_currentPage_=_1": [
+                      "Succeeded"
+                    ]
+                  },
+                  "expression": "@equals(variables('continuePaging'), false)",
+                  "limit": {
+                    "count": 60,
+                    "timeout": "PT1H"
+                  },
+                  "type": "Until"
+                }
+              },
+              "runAfter": {
+                "Initialise_currentPage": [
+                  "Succeeded"
+                ]
+              },
+              "type": "Foreach",
+              "runtimeConfiguration": {
+                "concurrency": {
+                  "repetitions": 1
+                }
+              }
+            }
+          }
+        },
+        "accessControl": {
+          "triggers": {
+            "allowedCallerIpAddresses": [
+              {
+                "addressRange": "[concat(parameters('eapimPublicIpAddress'), '/32')]"
+              }
+            ]
+          }
+        }
+      }
+    }
+  ],
+  "outputs": {
+    "logicAppPrincipalId": {
+      "value": "[reference(variables('logicAppId'), '2019-05-01', 'Full').identity.principalId]",
+      "type": "string"
+    }
+  }
+}
