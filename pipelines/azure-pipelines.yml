@@ -1,0 +1,25 @@
+trigger:
+  batch: true
+  branches:
+    include:
+      - "*"
+
+workspace:
+  clean: all
+
+variables:
+  BuildConfiguration: 'Release'
+
+steps:
+  - task: CopyFiles@2
+    displayName: 'Copy ARM template'
+    inputs:
+      Contents: |
+        azure/*
+      TargetFolder: '$(Build.ArtifactStagingDirectory)/publish'
+      OverWrite: true
+
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish All Artifacts'
+    inputs:
+      PathtoPublish: '$(Build.ArtifactStagingDirectory)/publish'
