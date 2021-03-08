@@ -84,7 +84,9 @@
 
             try
             {
-                await this.entityProcessor.ProcessEntitiesAsync(modelsBases)
+                await this.entityProcessor.ProcessEntitiesAsync(
+                    modelsBases,
+                    cancellationToken)
                     .ConfigureAwait(false);
 
                 this.loggerProvider.Info(
@@ -103,7 +105,6 @@
                     $"thrown, returning {HttpStatusCode.NotImplemented}. " +
                     $"Message: {missingDataHandlerAttributeException.Message}",
                     missingDataHandlerAttributeException);
-
             }
 
             return toReturn;

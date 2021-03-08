@@ -4,6 +4,7 @@
     using System.Collections.Generic;
     using System.Data;
     using System.Linq;
+    using System.Threading;
     using System.Threading.Tasks;
     using Dfe.CdcEventApi.Application.Definitions;
     using Dfe.CdcEventApi.Application.Exceptions;
@@ -16,35 +17,50 @@
     /// </summary>
     public class EntityProcessor : IEntityProcessor
     {
+        private readonly IEntityStorageAdapter entityStorageAdapter;
         private readonly ILoggerProvider loggerProvider;
 
         /// <summary>
         /// Initialises a new instance of the <see cref="EntityProcessor" />
         /// class.
         /// </summary>
+        /// <param name="entityStorageAdapter">
+        /// An instance of type <see cref="IEntityStorageAdapter" />.
+        /// </param>
         /// <param name="loggerProvider">
         /// An instance of type <see cref="ILoggerProvider" />.
         /// </param>
-        public EntityProcessor(ILoggerProvider loggerProvider)
+        public EntityProcessor(
+            IEntityStorageAdapter entityStorageAdapter,
+            ILoggerProvider loggerProvider)
         {
+            this.entityStorageAdapter = entityStorageAdapter;
             this.loggerProvider = loggerProvider;
         }
 
         /// <inheritdoc />
         public async Task ProcessEntitiesAsync<TModelsBase>(
-            IEnumerable<TModelsBase> modelsBases)
+            IEnumerable<TModelsBase> modelsBases,
+            CancellationToken cancellationToken)
             where TModelsBase : ModelsBase
         {
-            // 1) Prepare the main DataTable to be passed to the data-layer.
-            DataTable dataTable = this.ConvertToDataTable(modelsBases);
-
-            // 2) Figure out which embedded TSQL script to invoke from the
+            // 1) Figure out which embedded TSQL script to invoke from the
             //    meta-data of TModels base.
             string identifier =
                 this.ExtractDataHandlerIdentifier<TModelsBase>();
 
+            // 2) Prepare the main DataTable to be passed to the data-layer.
+            using (DataTable dataTable = this.ConvertToDataTable(modelsBases))
+            {
+                // 3) Invoke the data-layer with the script and the DataTable.
+                await this.entityStorageAdapter.StoreEntitiesAsync(
+                    identifier,
+                    dataTable,
+                    cancellationToken)
+                    .ConfigureAwait(false);
+            }
+
             // TODO:
-            // 3) Invoke the data-layer with the script and the DataTable.
             // 4) Recursively check the model meta-data for embedded
             //    collections.
         }

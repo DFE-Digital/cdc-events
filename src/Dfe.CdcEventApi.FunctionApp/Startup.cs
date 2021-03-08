@@ -4,7 +4,9 @@
     using System.Diagnostics.CodeAnalysis;
     using Dfe.CdcEventApi.Application;
     using Dfe.CdcEventApi.Application.Definitions;
+    using Dfe.CdcEventApi.Domain.Definitions;
     using Dfe.CdcEventApi.FunctionApp.Infrastructure;
+    using Dfe.CdcEventApi.Infrastructure.SqlServer;
     using Microsoft.Azure.Functions.Extensions.DependencyInjection;
     using Microsoft.Azure.WebJobs.Logging;
     using Microsoft.Extensions.DependencyInjection;
@@ -31,6 +33,7 @@
 
             AddLogging(serviceCollection);
             AddProcessors(serviceCollection);
+            AddAdapters(serviceCollection);
         }
 
         private static void AddLogging(IServiceCollection serviceCollection)
@@ -44,6 +47,12 @@
         {
             serviceCollection
                 .AddScoped<IEntityProcessor, EntityProcessor>();
+        }
+
+        private static void AddAdapters(IServiceCollection serviceCollection)
+        {
+            serviceCollection
+                .AddScoped<IEntityStorageAdapter, EntityStorageAdapter>();
         }
 
         private static ILogger CreateILogger(IServiceProvider serviceProvider)

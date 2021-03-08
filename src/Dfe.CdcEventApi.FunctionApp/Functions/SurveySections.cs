@@ -23,7 +23,7 @@
         /// An instance of type <see cref="IEntityProcessor" />.
         /// </param>
         /// <param name="loggerProvider">
-        /// An instance of type <see cref="ILoggerProvider" />. 
+        /// An instance of type <see cref="ILoggerProvider" />.
         /// </param>
         public SurveySections(
             IEntityProcessor entityProcessor,
