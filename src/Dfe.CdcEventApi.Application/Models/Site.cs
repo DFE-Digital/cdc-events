@@ -5,7 +5,7 @@
     /// <summary>
     /// Represents an individual <c>sites</c> entity.
     /// </summary>
-    [DataHandler("site")]
+    [DataHandler("CreateSites")]
     public class Site : ModelsBase
     {
         // Nothing for now.

@@ -6,6 +6,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="DataHandlers\CreateSites.sql" />
+  </ItemGroup>
+
+  <ItemGroup>
 
     <!-- Microsoft -->
     <PackageReference Include="System.Data.SqlClient" Version="4.8.2" />
@@ -27,6 +31,10 @@
 
   <ItemGroup>
     <AdditionalFiles Include="..\stylecop.json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="DataHandlers\CreateSites.sql" />
   </ItemGroup>
 
   <ItemGroup>
