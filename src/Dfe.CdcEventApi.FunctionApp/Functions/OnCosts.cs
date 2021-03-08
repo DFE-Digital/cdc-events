@@ -1,12 +1,12 @@
 ﻿namespace Dfe.CdcEventApi.FunctionApp.Functions
 {
+    using System.Net.Http;
     using System.Threading;
     using System.Threading.Tasks;
     using Dfe.CdcEventApi.Application.Definitions;
     using Dfe.CdcEventApi.Application.Models;
     using Dfe.CdcEventApi.Domain.Definitions;
     using Microsoft.AspNetCore.Http;
-    using Microsoft.AspNetCore.Mvc;
     using Microsoft.Azure.WebJobs;
     using Microsoft.Azure.WebJobs.Extensions.Http;
 
@@ -44,15 +44,15 @@
         /// An instance of <see cref="CancellationToken" />.
         /// </param>
         /// <returns>
-        /// An instance of type <see cref="IActionResult" />.
+        /// An instance of type <see cref="HttpResponseMessage" />.
         /// </returns>
         [FunctionName("oncosts")]
-        public async Task<IActionResult> RunAsync(
+        public async Task<HttpResponseMessage> RunAsync(
             [HttpTrigger(AuthorizationLevel.Function, "POST")]
             HttpRequest httpRequest,
             CancellationToken cancellationToken)
         {
-            IActionResult toReturn =
+            HttpResponseMessage toReturn =
                 await this.RunAsync<OnCost>(
                     httpRequest,
                     cancellationToken)

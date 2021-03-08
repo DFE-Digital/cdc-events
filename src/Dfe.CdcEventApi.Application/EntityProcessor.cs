@@ -1,10 +1,12 @@
 ﻿namespace Dfe.CdcEventApi.Application
 {
+    using System;
     using System.Collections.Generic;
     using System.Data;
     using System.Linq;
     using System.Threading.Tasks;
     using Dfe.CdcEventApi.Application.Definitions;
+    using Dfe.CdcEventApi.Application.Exceptions;
     using Dfe.CdcEventApi.Application.Models;
     using Dfe.CdcEventApi.Domain.Definitions;
     using Newtonsoft.Json.Linq;
@@ -36,12 +38,38 @@
             // 1) Prepare the main DataTable to be passed to the data-layer.
             DataTable dataTable = this.ConvertToDataTable(modelsBases);
 
-            // TODO:
             // 2) Figure out which embedded TSQL script to invoke from the
             //    meta-data of TModels base.
+            string identifier =
+                this.ExtractDataHandlerIdentifier<TModelsBase>();
+
+            // TODO:
             // 3) Invoke the data-layer with the script and the DataTable.
             // 4) Recursively check the model meta-data for embedded
             //    collections.
+        }
+
+        private string ExtractDataHandlerIdentifier<TModelsBase>()
+            where TModelsBase : ModelsBase
+        {
+            string toReturn = null;
+
+            Type entityType = typeof(TModelsBase);
+            Type attributeType = typeof(DataHandlerAttribute);
+
+            DataHandlerAttribute dataHandlerAttribute =
+                (DataHandlerAttribute)Attribute.GetCustomAttribute(
+                    entityType,
+                    attributeType);
+
+            if (dataHandlerAttribute == null)
+            {
+                throw new MissingDataHandlerAttributeException(entityType);
+            }
+
+            toReturn = dataHandlerAttribute.Identifier;
+
+            return toReturn;
         }
 
         private DataTable ConvertToDataTable(
@@ -89,6 +117,10 @@
 
                 toReturn.Rows.Add(dataRow);
             }
+
+            this.loggerProvider.Debug(
+                $"{toReturn.Rows.Count} row(s) appended to " +
+                $"{nameof(toReturn)}.");
 
             return toReturn;
         }

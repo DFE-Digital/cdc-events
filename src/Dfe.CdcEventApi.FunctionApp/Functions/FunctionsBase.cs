@@ -2,13 +2,15 @@
 {
     using System.Collections.Generic;
     using System.Linq;
+    using System.Net;
+    using System.Net.Http;
     using System.Threading;
     using System.Threading.Tasks;
     using Dfe.CdcEventApi.Application.Definitions;
+    using Dfe.CdcEventApi.Application.Exceptions;
     using Dfe.CdcEventApi.Application.Models;
     using Dfe.CdcEventApi.Domain.Definitions;
     using Microsoft.AspNetCore.Http;
-    using Microsoft.AspNetCore.Mvc;
     using Microsoft.Azure.WebJobs.Extensions.Http;
     using Newtonsoft.Json;
 
@@ -51,14 +53,14 @@
         /// An instance of <see cref="CancellationToken" />.
         /// </param>
         /// <returns>
-        /// An instance of type <see cref="IActionResult" />.
+        /// An instance of <see cref="HttpResponseMessage" />.
         /// </returns>
-        protected async Task<IActionResult> RunAsync<TModelsBase>(
+        protected async Task<HttpResponseMessage> RunAsync<TModelsBase>(
             HttpRequest httpRequest,
             CancellationToken cancellationToken)
             where TModelsBase : ModelsBase
         {
-            IActionResult toReturn = null;
+            HttpResponseMessage toReturn = null;
 
             string body = await httpRequest.ReadAsStringAsync()
                 .ConfigureAwait(false);
@@ -80,14 +82,29 @@
                 $"Passing {modelsBases.Count()} entities to the entity " +
                 $"processor...");
 
-            await this.entityProcessor.ProcessEntitiesAsync(modelsBases)
-                .ConfigureAwait(false);
+            try
+            {
+                await this.entityProcessor.ProcessEntitiesAsync(modelsBases)
+                    .ConfigureAwait(false);
 
-            this.loggerProvider.Info(
-                $"All {modelsBases.Count()} entities processed.");
+                this.loggerProvider.Info(
+                    $"All {modelsBases.Count()} entities processed.");
 
-            // Everything good? Return accepted.
-            toReturn = new AcceptedResult();
+                // Everything good? Return accepted.
+                toReturn = new HttpResponseMessage(HttpStatusCode.Accepted);
+            }
+            catch (MissingDataHandlerAttributeException missingDataHandlerAttributeException)
+            {
+                toReturn = new HttpResponseMessage(
+                    HttpStatusCode.NotImplemented);
+
+                this.loggerProvider.Error(
+                    $"A {nameof(MissingDataHandlerAttributeException)} was " +
+                    $"thrown, returning {HttpStatusCode.NotImplemented}. " +
+                    $"Message: {missingDataHandlerAttributeException.Message}",
+                    missingDataHandlerAttributeException);
+
+            }
 
             return toReturn;
         }
