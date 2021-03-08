@@ -1,7 +1,7 @@
 ﻿namespace Dfe.CdcEventApi.Application.Models
 {
     /// <summary>
-    /// Represents a <c>portfolio</c> entity.
+    /// Represents an individual <c>protfolios</c> entity.
     /// </summary>
     public class Portfolio : ModelsBase
     {

@@ -1,7 +1,7 @@
 ﻿namespace Dfe.CdcEventApi.Application.Models
 {
     /// <summary>
-    /// Represents a <c>site</c> entity.
+    /// Represents an individual <c>sites</c> entity.
     /// </summary>
     public class Site : ModelsBase
     {
