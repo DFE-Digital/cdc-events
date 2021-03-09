@@ -5,7 +5,9 @@
     using Dfe.CdcEventApi.Application;
     using Dfe.CdcEventApi.Application.Definitions;
     using Dfe.CdcEventApi.Domain.Definitions;
+    using Dfe.CdcEventApi.Domain.Definitions.SettingsProviders;
     using Dfe.CdcEventApi.FunctionApp.Infrastructure;
+    using Dfe.CdcEventApi.FunctionApp.Infrastructure.SettingsProviders;
     using Dfe.CdcEventApi.Infrastructure.SqlServer;
     using Microsoft.Azure.Functions.Extensions.DependencyInjection;
     using Microsoft.Azure.WebJobs.Logging;
@@ -32,6 +34,7 @@
                 functionsHostBuilder.Services;
 
             AddLogging(serviceCollection);
+            AddSettingsProviders(serviceCollection);
             AddProcessors(serviceCollection);
             AddAdapters(serviceCollection);
         }
@@ -41,6 +44,13 @@
             serviceCollection
                 .AddScoped<ILogger>(CreateILogger)
                 .AddScoped<ILoggerProvider, LoggerProvider>();
+        }
+
+        private static void AddSettingsProviders(
+            IServiceCollection serviceCollection)
+        {
+            serviceCollection
+                .AddSingleton<IEntityStorageAdapterSettingsProvider, EntityStorageAdapterSettingsProvider>();
         }
 
         private static void AddProcessors(IServiceCollection serviceCollection)

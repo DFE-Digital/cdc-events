@@ -1,8 +1,8 @@
 ﻿namespace Dfe.CdcEventApi.Domain.Definitions
 {
-    using System.Data;
     using System.Threading;
     using System.Threading.Tasks;
+    using System.Xml.Linq;
 
     /// <summary>
     /// Describes the operations of the entity storage adapter.
@@ -15,8 +15,8 @@
         /// <param name="dataHandlerIdentifier">
         /// The data handler identifier.
         /// </param>
-        /// <param name="dataTable">
-        /// The datatable containing the entities.
+        /// <param name="xDocument">
+        /// The <see cref="XDocument" /> containing the entities.
         /// </param>
         /// <param name="cancellationToken">
         /// An instance of <see cref="CancellationToken" />.
@@ -26,7 +26,7 @@
         /// </returns>
         Task StoreEntitiesAsync(
             string dataHandlerIdentifier,
-            DataTable dataTable,
+            XDocument xDocument,
             CancellationToken cancellationToken);
     }
 }

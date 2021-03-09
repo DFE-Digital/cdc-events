@@ -3,9 +3,11 @@
     using System;
     using System.Collections.Generic;
     using System.Data;
+    using System.IO;
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
+    using System.Xml.Linq;
     using Dfe.CdcEventApi.Application.Definitions;
     using Dfe.CdcEventApi.Application.Exceptions;
     using Dfe.CdcEventApi.Application.Models;
@@ -46,26 +48,24 @@
         {
             // 1) Figure out which embedded TSQL script to invoke from the
             //    meta-data of TModels base.
-            string identifier =
-                this.ExtractDataHandlerIdentifier<TModelsBase>();
+            string identifier = ExtractDataHandlerIdentifier<TModelsBase>();
 
-            // 2) Prepare the main DataTable to be passed to the data-layer.
-            using (DataTable dataTable = this.ConvertToDataTable(modelsBases))
-            {
-                // 3) Invoke the data-layer with the script and the DataTable.
-                await this.entityStorageAdapter.StoreEntitiesAsync(
-                    identifier,
-                    dataTable,
-                    cancellationToken)
-                    .ConfigureAwait(false);
-            }
+            // 2) Prepare the main XDocument to be passed to the data-layer.
+            XDocument xDocument = this.ConvertToXDocument(modelsBases);
+
+            // 3) Invoke the data-layer with the script and the DataTable.
+            await this.entityStorageAdapter.StoreEntitiesAsync(
+                identifier,
+                xDocument,
+                cancellationToken)
+                .ConfigureAwait(false);
 
             // TODO:
             // 4) Recursively check the model meta-data for embedded
             //    collections.
         }
 
-        private string ExtractDataHandlerIdentifier<TModelsBase>()
+        private static string ExtractDataHandlerIdentifier<TModelsBase>()
             where TModelsBase : ModelsBase
         {
             string toReturn = null;
@@ -88,10 +88,10 @@
             return toReturn;
         }
 
-        private DataTable ConvertToDataTable(
+        private XDocument ConvertToXDocument(
             IEnumerable<ModelsBase> modelsBases)
         {
-            DataTable toReturn = null;
+            XDocument toReturn = null;
 
             IEnumerable<IDictionary<string, JToken>> datas = modelsBases
                 .Select(x => x.Data);
@@ -109,34 +109,49 @@
                 $"{nameof(distinctColumnNamesList)} = " +
                 $"\"{distinctColumnNames}\"");
 
-            toReturn = new DataTable();
-
-            DataColumn[] dataColumns = distinctColumnNames
-                .Select(x => new DataColumn(x))
-                .ToArray();
-
-            toReturn.Columns.AddRange(dataColumns);
-
-            this.loggerProvider.Debug(
-                $"{dataColumns.Length} {nameof(DataColumn)}s added to " +
-                $"{nameof(toReturn)}.");
-
-            DataRow dataRow = null;
-            foreach (IDictionary<string, JToken> data in datas)
+            string dataTableXmlStr = null;
+            using (DataTable dataTable = new DataTable("Entity"))
             {
-                dataRow = toReturn.NewRow();
+                DataColumn[] dataColumns = distinctColumnNames
+                    .Select(x => new DataColumn(x))
+                    .ToArray();
 
-                foreach (KeyValuePair<string, JToken> keyValuePair in data)
+                dataTable.Columns.AddRange(dataColumns);
+
+                this.loggerProvider.Debug(
+                    $"{dataColumns.Length} {nameof(DataColumn)}s added to " +
+                    $"{nameof(dataTable)}.");
+
+                DataRow dataRow = null;
+                foreach (IDictionary<string, JToken> data in datas)
                 {
-                    dataRow[keyValuePair.Key] = keyValuePair.Value;
+                    dataRow = dataTable.NewRow();
+
+                    foreach (KeyValuePair<string, JToken> keyValuePair in data)
+                    {
+                        dataRow[keyValuePair.Key] = keyValuePair.Value;
+                    }
+
+                    dataTable.Rows.Add(dataRow);
                 }
 
-                toReturn.Rows.Add(dataRow);
+                this.loggerProvider.Debug(
+                    $"{dataTable.Rows.Count} row(s) appended to " +
+                    $"{nameof(dataTable)}.");
+
+                this.loggerProvider.Debug(
+                    $"Transforming {nameof(dataTable)} to " +
+                    $"{nameof(XDocument)}...");
+
+                using (StringWriter stringWriter = new StringWriter())
+                {
+                    dataTable.WriteXml(stringWriter);
+
+                    dataTableXmlStr = stringWriter.ToString();
+                }
             }
 
-            this.loggerProvider.Debug(
-                $"{toReturn.Rows.Count} row(s) appended to " +
-                $"{nameof(toReturn)}.");
+            toReturn = XDocument.Parse(dataTableXmlStr);
 
             return toReturn;
         }
