@@ -5,6 +5,7 @@
     using System.Data;
     using System.IO;
     using System.Linq;
+    using System.Reflection;
     using System.Threading;
     using System.Threading.Tasks;
     using System.Xml.Linq;
@@ -46,6 +47,11 @@
             CancellationToken cancellationToken)
             where TModelsBase : ModelsBase
         {
+            if (modelsBases == null)
+            {
+                throw new ArgumentNullException(nameof(modelsBases));
+            }
+
             // 1) Figure out which embedded TSQL script to invoke from the
             //    meta-data of TModels base.
             string identifier = ExtractDataHandlerIdentifier<TModelsBase>();
@@ -60,9 +66,60 @@
                 cancellationToken)
                 .ConfigureAwait(false);
 
-            // TODO:
-            // 4) Recursively check the model meta-data for embedded
-            //    collections.
+            // 4) Identify any sub-collection properties for DataHandler
+            //    identifiers.
+            Dictionary<PropertyInfo, string> propertiesToProcess =
+                ExtractPropertyInfosAndDataHanderIdentifiers<TModelsBase>();
+
+            this.loggerProvider.Debug(
+                $"This entity has {propertiesToProcess.Count} children to " +
+                $"also process.");
+
+            foreach (TModelsBase modelsBase in modelsBases)
+            {
+                foreach (KeyValuePair<PropertyInfo, string> propertyToProcess in propertiesToProcess)
+                {
+                    await this.ProcessProperty(
+                        modelsBase,
+                        propertyToProcess,
+                        cancellationToken)
+                        .ConfigureAwait(false);
+                }
+            }
+        }
+
+        private static Dictionary<PropertyInfo, string> ExtractPropertyInfosAndDataHanderIdentifiers<TModelsBase>()
+            where TModelsBase : ModelsBase
+        {
+            Dictionary<PropertyInfo, string> toReturn = null;
+
+            Type entityType = typeof(TModelsBase);
+            Type attributeType = typeof(DataHandlerAttribute);
+
+            toReturn = entityType
+                .GetProperties()
+                .Select(x =>
+                {
+                    string identifier = null;
+
+                    DataHandlerAttribute dataHandlerAttribute =
+                        (DataHandlerAttribute)x.GetCustomAttribute(attributeType);
+
+                    if (dataHandlerAttribute != null)
+                    {
+                        identifier = dataHandlerAttribute.Identifier;
+                    }
+
+                    return new
+                    {
+                        PropertyInfo = x,
+                        Identifier = identifier,
+                    };
+                })
+                .Where(x => !string.IsNullOrEmpty(x.Identifier))
+                .ToDictionary(x => x.PropertyInfo, x => x.Identifier);
+
+            return toReturn;
         }
 
         private static string ExtractDataHandlerIdentifier<TModelsBase>()
@@ -86,6 +143,48 @@
             toReturn = dataHandlerAttribute.Identifier;
 
             return toReturn;
+        }
+
+        private async Task ProcessProperty(
+            ModelsBase modelsBase,
+            KeyValuePair<PropertyInfo, string> propertyToProcess,
+            CancellationToken cancellationToken)
+        {
+            // 1) Pull back the value for this model, and this
+            //    property.
+            PropertyInfo propertyInfo = propertyToProcess.Key;
+            string identifier = propertyToProcess.Value;
+
+            this.loggerProvider.Debug(
+                $"Extracting property \"{propertyInfo.Name}\"...");
+
+            object propertyValue = propertyInfo.GetValue(modelsBase);
+
+            // 2) Should be a collection of models inheriting from
+            //    ModelsBase.
+            //    If it's not, we'll need to implement it. For now,
+            //    no point in gold-plating.
+            IEnumerable<ModelsBase> subCollection =
+                (IEnumerable<ModelsBase>)propertyValue;
+
+            this.loggerProvider.Info(
+                $"{subCollection.Count()} {nameof(ModelsBase)}s extracted. " +
+                $"Converting to {nameof(XDocument)}...");
+
+            XDocument xDocument = this.ConvertToXDocument(subCollection);
+
+            this.loggerProvider.Debug(
+                $"Storing {subCollection.Count()} entities using data " +
+                $"handler identifier \"{identifier}\"...");
+
+            await this.entityStorageAdapter.StoreEntitiesAsync(
+                identifier,
+                xDocument,
+                cancellationToken)
+                .ConfigureAwait(false);
+
+            this.loggerProvider.Info(
+                $"Property \"{propertyInfo.Name}\" processed with success.");
         }
 
         private XDocument ConvertToXDocument(

@@ -13,6 +13,7 @@
         /// <summary>
         /// Gets or sets the <c>Fields</c> property.
         /// </summary>
+        [DataHandler("CreateSitesCustomFields")]
         [JsonProperty("Fields")]
         public IEnumerable<CustomField> Fields
         {

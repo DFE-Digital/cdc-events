@@ -10,6 +10,7 @@
     using Dfe.CdcEventApi.Application.Exceptions;
     using Dfe.CdcEventApi.Application.Models;
     using Dfe.CdcEventApi.Domain.Definitions;
+    using Dfe.CdcEventApi.Domain.Exceptions;
     using Microsoft.AspNetCore.Http;
     using Microsoft.Azure.WebJobs.Extensions.Http;
     using Newtonsoft.Json;
@@ -105,6 +106,17 @@
                     $"thrown, returning {HttpStatusCode.NotImplemented}. " +
                     $"Message: {missingDataHandlerAttributeException.Message}",
                     missingDataHandlerAttributeException);
+            }
+            catch (MissingDataHandlerFileException missingDataHandlerFileException)
+            {
+                toReturn = new HttpResponseMessage(
+                    HttpStatusCode.NotImplemented);
+
+                this.loggerProvider.Error(
+                    $"A {nameof(MissingDataHandlerFileException)} was " +
+                    $"thrown, returning {HttpStatusCode.NotImplemented}. " +
+                    $"Message: {missingDataHandlerFileException.Message}",
+                    missingDataHandlerFileException);
             }
 
             return toReturn;

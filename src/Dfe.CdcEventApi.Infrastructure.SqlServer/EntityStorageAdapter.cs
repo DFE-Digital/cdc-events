@@ -13,6 +13,7 @@
     using System.Xml.Linq;
     using Dfe.CdcEventApi.Domain.Definitions;
     using Dfe.CdcEventApi.Domain.Definitions.SettingsProviders;
+    using Dfe.CdcEventApi.Domain.Exceptions;
 
     /// <summary>
     /// Implements <see cref="IEntityStorageAdapter" />.
@@ -172,6 +173,12 @@
 
             using (Stream stream = this.assembly.GetManifestResourceStream(dataHandlerPath))
             {
+                if (stream == null)
+                {
+                    throw new MissingDataHandlerFileException(
+                        dataHandlerIdentifier);
+                }
+
                 using (StreamReader streamReader = new StreamReader(stream))
                 {
                     toReturn = streamReader.ReadToEnd();
