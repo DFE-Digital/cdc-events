@@ -1,0 +1,43 @@
+﻿[
+  {
+    "id": 1234,
+    "someBool": true,
+    "additional": [
+      {
+        "id": "56f5dd48-6043-4df0-a461-06adcd3269c2",
+        "exampleEntityId": 1234,
+        "key": "some key value pair name",
+        "value": "some value"
+      },
+      {
+        "id": "79b11674-0d78-4c56-9055-29af28c9f59c",
+        "exampleEntityId": 1234,
+        "key": "some other key value pair name",
+        "value": "some value again"
+      }
+    ],
+    "someText": "example entitiy 1234",
+    "anotherProperty": "hello"
+  },
+  {
+    "id": 1235,
+    "someBool": false,
+    "additional": [],
+    "someText": "example entitiy 1235",
+    "anotherProperty": "hello"
+  },
+  {
+    "id": 1236,
+    "someBool": false,
+    "additional": [
+      {
+        "id": "390d6345-6809-480e-bb37-76f1b3ce3299",
+        "exampleEntityId": 1236,
+        "key": "hello",
+        "value": "world"
+      }
+    ],
+    "someText": "example entitiy 1236",
+    "anotherProperty": "hello"
+  }
+]
