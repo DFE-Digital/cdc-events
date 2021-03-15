@@ -1,0 +1,70 @@
+trigger:
+  batch: true
+  branches:
+    include:
+      - "*"
+  paths:
+    include:
+      - /pipelines/cdc-events-event-api.yml
+      - /src/*
+
+workspace:
+  clean: all
+
+variables:
+  BuildConfiguration: 'Release'
+
+steps:
+  - task: NuGetToolInstaller@1
+    displayName: 'Use NuGet 4.9.1'
+    inputs:
+      versionSpec: '4.9.1'
+
+  - task: NuGetCommand@2
+    displayName: 'Restore Public NuGet Packages'
+    inputs:
+      command: 'restore'
+      restoreSolution: '**/*.sln'
+
+  - task: DotNetCoreCLI@2
+    displayName: 'Build Everything'
+    inputs:
+      command: 'build'
+      projects: 'src/**/*.csproj'
+      arguments: '--configuration $(BuildConfiguration) --no-restore'
+
+  - task: DotNetCoreCLI@2
+    displayName: 'Run Unit Tests'
+    inputs:
+      command: test
+      projects: 'src/**/*.UnitTests.csproj'
+      arguments: '--configuration $(BuildConfiguration) --no-restore'
+
+  - task: DotNetCoreCLI@2
+    displayName: 'Publish CDC Event API App'
+    inputs:
+      command: publish
+      publishWebProjects: false
+      projects: 'src/Dfe.CdcEventApi.FunctionApp/Dfe.CdcEventApi.FunctionApp.csproj'
+      arguments: '--configuration $(BuildConfiguration) --output $(Build.ArtifactStagingDirectory)/publish --no-restore --no-build'
+
+  - task: CopyFiles@2
+    displayName: 'Copy ARM template'
+    inputs:
+      Contents: |
+        azure/event-api-template.json
+      TargetFolder: '$(Build.ArtifactStagingDirectory)/publish'
+      OverWrite: true
+
+  - task: CopyFiles@2
+    displayName: 'Copy EAPIM files'
+    inputs:
+      Contents: |
+        eapim/*
+      TargetFolder: '$(Build.ArtifactStagingDirectory)/publish'
+      OverWrite: true
+
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish All Artifacts'
+    inputs:
+      PathtoPublish: '$(Build.ArtifactStagingDirectory)/publish'
