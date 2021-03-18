@@ -6,8 +6,34 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="DataHandlers\Create_Raw_Activity.sql" />
+    <None Remove="DataHandlers\Create_Raw_Activity_Field.sql" />
+    <None Remove="DataHandlers\Create_Raw_Actual.sql" />
+    <None Remove="DataHandlers\Create_Raw_Actual_Field.sql" />
+    <None Remove="DataHandlers\Create_Raw_Deleted.sql" />
+    <None Remove="DataHandlers\Create_Raw_Oncost.sql" />
+    <None Remove="DataHandlers\Create_Raw_Oncost_Field.sql" />
+    <None Remove="DataHandlers\Create_Raw_Plan.sql" />
+    <None Remove="DataHandlers\Create_Raw_Plan_Field.sql" />
+    <None Remove="DataHandlers\Create_Raw_Portfolio.sql" />
+    <None Remove="DataHandlers\Create_Raw_Portfolio_Field.sql" />
+    <None Remove="DataHandlers\Create_Raw_Portfolio_SiteInfo.sql" />
     <None Remove="DataHandlers\Create_Raw_Site.sql" />
     <None Remove="DataHandlers\Create_Raw_Site_Field.sql" />
+    <None Remove="DataHandlers\Create_Raw_Spend.sql" />
+    <None Remove="DataHandlers\Create_Raw_Spend_Field.sql" />
+    <None Remove="DataHandlers\Create_Raw_Survey.sql" />
+    <None Remove="DataHandlers\Create_Raw_SurveyLot.sql" />
+    <None Remove="DataHandlers\Create_Raw_SurveyLot_Field.sql" />
+    <None Remove="DataHandlers\Create_Raw_SurveyLot_SiteInfo.sql" />
+    <None Remove="DataHandlers\Create_Raw_SurveySection.sql" />
+    <None Remove="DataHandlers\Create_Raw_SurveySectionElement.sql" />
+    <None Remove="DataHandlers\Create_Raw_SurveySectionElement_Evidence.sql" />
+    <None Remove="DataHandlers\Create_Raw_SurveySectionElement_Field.sql" />
+    <None Remove="DataHandlers\Create_Raw_SurveySection_Evidence.sql" />
+    <None Remove="DataHandlers\Create_Raw_SurveySection_Field.sql" />
+    <None Remove="DataHandlers\Create_Raw_Survey_Evidence.sql" />
+    <None Remove="DataHandlers\Create_Raw_Survey_Field.sql" />
   </ItemGroup>
 
   <ItemGroup>
@@ -35,8 +61,34 @@
   </ItemGroup>
 
   <ItemGroup>
+    <EmbeddedResource Include="DataHandlers\Create_Raw_Activity.sql" />
+    <EmbeddedResource Include="DataHandlers\Create_Raw_Activity_Field.sql" />
+    <EmbeddedResource Include="DataHandlers\Create_Raw_Actual.sql" />
+    <EmbeddedResource Include="DataHandlers\Create_Raw_Actual_Field.sql" />
+    <EmbeddedResource Include="DataHandlers\Create_Raw_Deleted.sql" />
+    <EmbeddedResource Include="DataHandlers\Create_Raw_Oncost.sql" />
+    <EmbeddedResource Include="DataHandlers\Create_Raw_Oncost_Field.sql" />
+    <EmbeddedResource Include="DataHandlers\Create_Raw_Plan.sql" />
+    <EmbeddedResource Include="DataHandlers\Create_Raw_Plan_Field.sql" />
+    <EmbeddedResource Include="DataHandlers\Create_Raw_Portfolio.sql" />
+    <EmbeddedResource Include="DataHandlers\Create_Raw_Portfolio_Field.sql" />
+    <EmbeddedResource Include="DataHandlers\Create_Raw_Portfolio_SiteInfo.sql" />
     <EmbeddedResource Include="DataHandlers\Create_Raw_Site.sql" />
     <EmbeddedResource Include="DataHandlers\Create_Raw_Site_Field.sql" />
+    <EmbeddedResource Include="DataHandlers\Create_Raw_Spend.sql" />
+    <EmbeddedResource Include="DataHandlers\Create_Raw_Spend_Field.sql" />
+    <EmbeddedResource Include="DataHandlers\Create_Raw_Survey.sql" />
+    <EmbeddedResource Include="DataHandlers\Create_Raw_SurveyLot.sql" />
+    <EmbeddedResource Include="DataHandlers\Create_Raw_SurveyLot_Field.sql" />
+    <EmbeddedResource Include="DataHandlers\Create_Raw_SurveyLot_SiteInfo.sql" />
+    <EmbeddedResource Include="DataHandlers\Create_Raw_SurveySection.sql" />
+    <EmbeddedResource Include="DataHandlers\Create_Raw_SurveySectionElement.sql" />
+    <EmbeddedResource Include="DataHandlers\Create_Raw_SurveySectionElement_Evidence.sql" />
+    <EmbeddedResource Include="DataHandlers\Create_Raw_SurveySectionElement_Field.sql" />
+    <EmbeddedResource Include="DataHandlers\Create_Raw_SurveySection_Evidence.sql" />
+    <EmbeddedResource Include="DataHandlers\Create_Raw_SurveySection_Field.sql" />
+    <EmbeddedResource Include="DataHandlers\Create_Raw_Survey_Evidence.sql" />
+    <EmbeddedResource Include="DataHandlers\Create_Raw_Survey_Field.sql" />
   </ItemGroup>
 
   <ItemGroup>
