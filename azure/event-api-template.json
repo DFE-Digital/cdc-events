@@ -198,7 +198,7 @@
             },
             {
               "name": "WEBSITE_VNET_ROUTE_ALL",
-              "value": "1"
+              "value": "0"
             },
             {
               "name": "WEBSITE_ENABLE_SYNC_UPDATE_SITE",
