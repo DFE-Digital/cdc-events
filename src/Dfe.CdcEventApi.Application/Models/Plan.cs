@@ -1,10 +1,24 @@
 ﻿namespace Dfe.CdcEventApi.Application.Models
 {
+    using System.Collections.Generic;
+    using Dfe.CdcEventApi.Application.Definitions;
+    using Newtonsoft.Json;
+
     /// <summary>
     /// Represents an individual <c>plans</c> entity.
     /// </summary>
+    [DataHandler("Create_Raw_Plan")]
     public class Plan : ModelsBase
     {
-        // Nothing for now.
+        /// <summary>
+        /// Gets or sets the <c>Fields</c> property.
+        /// </summary>
+        [DataHandler("Create_Raw_Plan_Field")]
+        [JsonProperty("Fields")]
+        public IEnumerable<CustomField> Fields
+        {
+            get;
+            set;
+        }
     }
 }
