@@ -1,0 +1,29 @@
+<policies>
+  
+  <inbound>
+    
+    <base />
+    
+    <set-header name="X-Functions-Key" exists-action="skip">
+      <value>{{cdcea-function-app-key}}</value>
+    </set-header>
+
+    <set-header name="Content-Type" exists-action="override">
+      <value>application/json</value>
+    </set-header>
+
+  </inbound>
+  
+  <backend>
+    <base />
+  </backend>
+  
+  <outbound>
+    <base />
+  </outbound>
+  
+  <on-error>
+    <base />
+  </on-error>
+  
+</policies>

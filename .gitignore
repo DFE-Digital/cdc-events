@@ -338,3 +338,9 @@ ASALocalRun/
 
 # BeatPulse healthcheck temp database
 healthchecksdb
+
+# Local settings
+local.settings.json
+
+# XML docs
+Dfe.CdcEventApi.*.xml

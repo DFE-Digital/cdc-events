@@ -1,0 +1,259 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "serviceIdentifier": {
+      "type": "string",
+      "minLength": 4,
+      "maxLength": 4
+    },
+    "environment": {
+      "type": "string",
+      "defaultValue": "d",
+      "allowedValues": [
+        "d",
+        "t",
+        "p"
+      ]
+    },
+    "environmentName": {
+      "type": "string",
+      "defaultValue": "DEV",
+      "allowedValues": [
+        "DEV",
+        "TEST",
+        "OAT",
+        "PROD"
+      ]
+    },
+    "environmentInstance": {
+      "type": "string",
+      "minLength": 2,
+      "maxLength": 2,
+      "defaultValue": "01"
+    },
+    "sharedResourcesAppName": {
+      "type": "string",
+      "defaultValue": "common"
+    },
+    "appInsightsInstance": {
+      "type": "string",
+      "minLength": 2,
+      "maxLength": 2,
+      "defaultValue": "01"
+    },
+    "coreResourceGroupEnvironmentInstance": {
+      "type": "string",
+      "minLength": 2,
+      "maxLength": 2,
+      "defaultValue": "01"
+    },
+    "vNetInstance": {
+      "type": "string",
+      "minLength": 2,
+      "maxLength": 2,
+      "defaultValue": "01"
+    },
+    "subnetInstance": {
+      "type": "string",
+      "minLength": 2,
+      "maxLength": 2,
+      "defaultValue": "01"
+    },
+    "eapimPublicIpAddress": {
+      "type": "string"
+    },
+    "cdcDataSqlAppName": {
+      "type": "string",
+      "defaultValue": "cdcdata"
+    },
+    "sqlDatabaseNameSuffix": {
+      "type": "string",
+      "defaultValue": "CDC-Raw-Data"
+    },
+    "sqlServerUsername": {
+      "type": "string",
+      "minLength": 6,
+      "maxLength": 20
+    },
+    "sqlServerPassword": {
+      "type": "securestring",
+      "minLength": 12
+    },
+    "websiteRunFromPackage": {
+      "type": "string",
+      "defaultValue":  "0"
+    },
+    "appName": {
+      "type": "string",
+      "maxLength": 8
+    }
+  },
+  "variables": {
+
+    "namePrefix": "[concat(parameters('serviceIdentifier'), parameters('environment'), parameters('environmentInstance'))]",
+    "sharedResourceGroupName": "[concat(variables('namePrefix'), '-', parameters('sharedResourcesAppName'))]",
+    "appNamePrefix": "[concat(variables('namePrefix'), '-', parameters('appName'))]",
+
+    "servicePlanName": "[concat(variables('namePrefix'), '-asp-01')]",
+    "servicePlanId": "[resourceId(variables('sharedResourceGroupName'), 'Microsoft.Web/serverfarms', variables('servicePlanName'))]",
+
+    "appInsightsName": "[concat(variables('namePrefix'), '-ai-', parameters('appInsightsInstance'))]",
+    "appInsightsId": "[resourceId(variables('sharedResourceGroupName'), 'Microsoft.Insights/components', variables('appInsightsName'))]",
+
+    "storageAccountName": "[concat(variables('namePrefix'), parameters('appName'), 'sa01')]",
+    "storageAccountId": "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName'))]",
+    "storageAccountConnStr": "[concat('DefaultEndpointsProtocol=https;AccountName=', variables('storageAccountName'), ';AccountKey=')]",
+
+    "corePrefix": "[concat(parameters('serviceIdentifier'), parameters('environment'), parameters('coreResourceGroupEnvironmentInstance'), '-core')]",
+    "vNetName": "[concat(concat(variables('corePrefix'), '-vn-'), parameters('vNetInstance'))]",
+    "subnetName": "[concat(variables('corePrefix'), '-sn-', parameters('subnetInstance'))]",
+    "subnetId": "[resourceId(variables('corePrefix'), 'Microsoft.Network/virtualNetworks/subnets', variables('vNetName'), variables('subnetName'))]",
+
+    "functionAppName": "[concat(variables('appNamePrefix'), '-fa-01')]",
+    "functionAppId": "[resourceId('Microsoft.Web/sites/', variables('functionAppName'))]",
+
+    "sqlServerName": "[concat(variables('namePrefix'), '-', parameters('cdcDataSqlAppName'), '-sql-01')]",
+    "sqlDatabaseName": "[concat(variables('namePrefix'), '-', parameters('sqlDatabaseNameSuffix'))]"
+
+  },
+  "resources": [
+
+    {
+      "apiVersion": "2019-06-01",
+      "name": "[variables('storageAccountName')]",
+      "type": "Microsoft.Storage/storageAccounts",
+      "location": "[resourceGroup().location]",
+      "tags": {
+        "environment": "[parameters('environmentName')]",
+        "app": "[parameters('appName')]"
+      },
+      "sku": {
+        "name": "Standard_LRS",
+        "tier": "Standard"
+      },
+      "kind": "StorageV2",
+      "properties": {
+        "supportsHttpsTrafficOnly": true,
+        "encryption": {
+          "services": {
+            "file": {
+              "enabled": true
+            },
+            "blob": {
+              "enabled": true
+            }
+          },
+          "keySource": "Microsoft.Storage"
+        },
+        "accessTier": "Hot"
+      }
+    },
+
+    {
+      "apiVersion": "2018-11-01",
+      "name": "[variables('functionAppName')]",
+      "type": "Microsoft.Web/sites",
+      "location": "[resourceGroup().location]",
+      "dependsOn": [
+        "[variables('storageAccountId')]"
+      ],
+      "tags": {
+        "environment": "[parameters('environmentName')]",
+        "app": "[parameters('appName')]"
+      },
+      "kind": "functionapp",
+      "properties": {
+        "serverFarmId": "[variables('servicePlanId')]",
+        "siteConfig": {
+          "appSettings": [
+
+            {
+              "name": "APPINSIGHTS_INSTRUMENTATIONKEY",
+              "value": "[reference(variables('appInsightsId'), '2015-05-01').InstrumentationKey]"
+            },
+            {
+              "name": "WEBSITE_CONTENTAZUREFILECONNECTIONSTRING",
+              "value": "[concat(variables('storageAccountConnStr'), listKeys(variables('storageAccountId'), '2015-05-01-preview').key1)]"
+            },
+            {
+              "name": "AzureWebJobsDashboard",
+              "value": "[concat(variables('storageAccountConnStr'), listKeys(variables('storageAccountId'), '2015-05-01-preview').key1)]"
+            },
+            {
+              "name": "AzureWebJobsStorage",
+              "value": "[concat(variables('storageAccountConnStr'), listKeys(variables('storageAccountId'), '2015-05-01-preview').key1)]"
+            },
+            {
+              "name": "WEBSITE_CONTENTSHARE",
+              "value": "[toLower(variables('functionAppName'))]"
+            },
+            {
+              "name": "FUNCTIONS_EXTENSION_VERSION",
+              "value": "~3"
+            },
+            {
+              "name": "FUNCTIONS_WORKER_RUNTIME",
+              "value": "dotnet"
+            },
+            {
+              "name": "WEBSITE_VNET_ROUTE_ALL",
+              "value": "0"
+            },
+            {
+              "name": "WEBSITE_ENABLE_SYNC_UPDATE_SITE",
+              "value": "true"
+            },
+            {
+              "name": "WEBSITE_RUN_FROM_PACKAGE",
+              "value": "[parameters('websiteRunFromPackage')]"
+            },
+
+            {
+              "name": "RawDbConnectionString",
+              "value": "[concat('Server=tcp:', variables('sqlServerName'), '.database.windows.net,1433;Initial Catalog=', variables('sqlDatabaseName'), ';Persist Security Info=False;User ID=', parameters('sqlServerUsername'), ';Password=', parameters('sqlServerPassword'), ';MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;')]"
+            }
+
+          ],
+
+          "ipSecurityRestrictions": [
+            {
+              "ipAddress": "[concat(parameters('eapimPublicIpAddress'), '/32')]",
+              "action": "Allow",
+              "name": "Allow EAPIM",
+              "priority": 1
+            }
+          ]
+
+        }
+      },
+      "identity": {
+        "type": "SystemAssigned"
+      },
+      "resources": [
+        {
+          "apiVersion": "2016-08-01",
+          "type": "Microsoft.Web/sites/networkConfig",
+          "name": "[concat(variables('functionAppName'), '/VirtualNetwork')]",
+          "location": "[resourceGroup().location]",
+          "dependsOn": [
+            "[concat('Microsoft.Web/sites/', variables('functionAppName'))]"
+          ],
+          "properties": {
+            "subnetResourceId": "[variables('subnetId')]"
+          }
+        }
+      ]
+    }
+  ],
+  "outputs": {
+    "functionAppKey": {
+      "value": "[listkeys(concat(variables('functionAppId'), '/host/default/'), '2016-08-01').functionKeys.default]",
+      "type": "string"
+    },
+    "functionAppPrincipalId": {
+      "value": "[reference(variables('functionAppId'), '2017-08-01', 'Full').identity.principalId]",
+      "type": "string"
+    }
+  }
+}

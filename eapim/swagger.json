@@ -1,0 +1,336 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "CDC Events API",
+    "version": "1.0",
+    "description": "Accepts event data regarding changes of CDC collections."
+  },
+  "basePath": "/api",
+  "host": "__function_app_host__",
+  "paths": {
+    "/activities": {
+      "post": {
+        "summary": "Activities Created",
+        "description": "Accepts event data for the activities collection.",
+        "operationId": "activities-created",
+        "parameters": [
+          {
+            "in": "header",
+            "type": "string",
+            "name": "Authorization",
+            "description": "Bearer token authorization.",
+            "required": true
+          }
+        ],
+        "responses": {
+          "202": {
+            "description": "The event data was accepted and processed."
+          },
+          "500": {
+            "description": "An unexpected error has occurred - please get in touch with us so we can check our logs!"
+          }
+        }
+      }
+    },
+    "/actuals": {
+      "post": {
+        "summary": "Actuals Created",
+        "description": "Accepts event data for the actuals collection.",
+        "operationId": "actuals-created",
+        "parameters": [
+          {
+            "in": "header",
+            "type": "string",
+            "name": "Authorization",
+            "description": "Bearer token authorization.",
+            "required": true
+          }
+        ],
+        "responses": {
+          "202": {
+            "description": "The event data was accepted and processed."
+          },
+          "500": {
+            "description": "An unexpected error has occurred - please get in touch with us so we can check our logs!"
+          }
+        }
+      }
+    },
+    "/deleted": {
+      "post": {
+        "summary": "Deleted Created",
+        "description": "Accepts event data for the deleted collection.",
+        "operationId": "deleted-created",
+        "parameters": [
+          {
+            "in": "header",
+            "type": "string",
+            "name": "Authorization",
+            "description": "Bearer token authorization.",
+            "required": true
+          }
+        ],
+        "responses": {
+          "202": {
+            "description": "The event data was accepted and processed."
+          },
+          "500": {
+            "description": "An unexpected error has occurred - please get in touch with us so we can check our logs!"
+          }
+        }
+      }
+    },
+    "/oncosts": {
+      "post": {
+        "summary": "OnCosts Created",
+        "description": "Accepts event data for the oncosts collection.",
+        "operationId": "oncosts-created",
+        "parameters": [
+          {
+            "in": "header",
+            "type": "string",
+            "name": "Authorization",
+            "description": "Bearer token authorization.",
+            "required": true
+          }
+        ],
+        "responses": {
+          "202": {
+            "description": "The event data was accepted and processed."
+          },
+          "500": {
+            "description": "An unexpected error has occurred - please get in touch with us so we can check our logs!"
+          }
+        }
+      }
+    },
+    "/plans": {
+      "post": {
+        "summary": "Plans Created",
+        "description": "Accepts event data for the plans collection.",
+        "operationId": "plans-created",
+        "parameters": [
+          {
+            "in": "header",
+            "type": "string",
+            "name": "Authorization",
+            "description": "Bearer token authorization.",
+            "required": true
+          }
+        ],
+        "responses": {
+          "202": {
+            "description": "The event data was accepted and processed."
+          },
+          "500": {
+            "description": "An unexpected error has occurred - please get in touch with us so we can check our logs!"
+          }
+        }
+      }
+    },
+    "/portfolios": {
+      "post": {
+        "summary": "Portfolios Created",
+        "description": "Accepts event data for the portfolios collection.",
+        "operationId": "portfolios-created",
+        "parameters": [
+          {
+            "in": "header",
+            "type": "string",
+            "name": "Authorization",
+            "description": "Bearer token authorization.",
+            "required": true
+          }
+        ],
+        "responses": {
+          "202": {
+            "description": "The event data was accepted and processed."
+          },
+          "500": {
+            "description": "An unexpected error has occurred - please get in touch with us so we can check our logs!"
+          }
+        }
+      }
+    },
+    "/sites": {
+      "post": {
+        "summary": "Sites Created",
+        "description": "Accepts event data for the sites collection.",
+        "operationId": "sites-created",
+        "parameters": [
+          {
+            "in": "header",
+            "type": "string",
+            "name": "Authorization",
+            "description": "Bearer token authorization.",
+            "required": true
+          }
+        ],
+        "responses": {
+          "202": {
+            "description": "The event data was accepted and processed."
+          },
+          "500": {
+            "description": "An unexpected error has occurred - please get in touch with us so we can check our logs!"
+          }
+        }
+      }
+    },
+    "/spends": {
+      "post": {
+        "summary": "Spends Created",
+        "description": "Accepts event data for the spends collection.",
+        "operationId": "spends-created",
+        "parameters": [
+          {
+            "in": "header",
+            "type": "string",
+            "name": "Authorization",
+            "description": "Bearer token authorization.",
+            "required": true
+          }
+        ],
+        "responses": {
+          "202": {
+            "description": "The event data was accepted and processed."
+          },
+          "500": {
+            "description": "An unexpected error has occurred - please get in touch with us so we can check our logs!"
+          }
+        }
+      }
+    },
+    "/surveylots": {
+      "post": {
+        "summary": "SuveryLots Created",
+        "description": "Accepts event data for the surveylots collection.",
+        "operationId": "surveylots-created",
+        "parameters": [
+          {
+            "in": "header",
+            "type": "string",
+            "name": "Authorization",
+            "description": "Bearer token authorization.",
+            "required": true
+          }
+        ],
+        "responses": {
+          "202": {
+            "description": "The event data was accepted and processed."
+          },
+          "500": {
+            "description": "An unexpected error has occurred - please get in touch with us so we can check our logs!"
+          }
+        }
+      }
+    },
+    "/surveys": {
+      "post": {
+        "summary": "Surveys Created",
+        "description": "Accepts event data for the surveys collection.",
+        "operationId": "surveys-created",
+        "parameters": [
+          {
+            "in": "header",
+            "type": "string",
+            "name": "Authorization",
+            "description": "Bearer token authorization.",
+            "required": true
+          }
+        ],
+        "responses": {
+          "202": {
+            "description": "The event data was accepted and processed."
+          },
+          "500": {
+            "description": "An unexpected error has occurred - please get in touch with us so we can check our logs!"
+          }
+        }
+      }
+    },
+    "/surveysectionelements": {
+      "post": {
+        "summary": "SurveySectionElements Created",
+        "description": "Accepts event data for the surveysectionelements collection.",
+        "operationId": "surveysectionelements-created",
+        "parameters": [
+          {
+            "in": "header",
+            "type": "string",
+            "name": "Authorization",
+            "description": "Bearer token authorization.",
+            "required": true
+          }
+        ],
+        "responses": {
+          "202": {
+            "description": "The event data was accepted and processed."
+          },
+          "500": {
+            "description": "An unexpected error has occurred - please get in touch with us so we can check our logs!"
+          }
+        }
+      }
+    },
+    "/surveysections": {
+      "post": {
+        "summary": "SurveySections Created",
+        "description": "Accepts event data for the surveysections collection.",
+        "operationId": "surveysections-created",
+        "parameters": [
+          {
+            "in": "header",
+            "type": "string",
+            "name": "Authorization",
+            "description": "Bearer token authorization.",
+            "required": true
+          }
+        ],
+        "responses": {
+          "202": {
+            "description": "The event data was accepted and processed."
+          },
+          "500": {
+            "description": "An unexpected error has occurred - please get in touch with us so we can check our logs!"
+          }
+        }
+      }
+    },
+    "/users": {
+      "post": {
+        "summary": "Users Created",
+        "description": "Accepts event data for the users collection.",
+        "operationId": "users-created",
+        "parameters": [
+          {
+            "in": "header",
+            "type": "string",
+            "name": "Authorization",
+            "description": "Bearer token authorization.",
+            "required": true
+          }
+        ],
+        "responses": {
+          "202": {
+            "description": "The event data was accepted and processed."
+          },
+          "500": {
+            "description": "An unexpected error has occurred - please get in touch with us so we can check our logs!"
+          }
+        }
+      }
+    },
+    "/HeartBeat": {
+      "get": {
+        "description": "Standard diagnostics method, used to test the health of the facade's underlying system.",
+        "operationId": "heart-beat",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "The standard/only response from the method."
+          }
+        }
+      }
+    }
+  }
+}

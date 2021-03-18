@@ -1,0 +1,49 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30002.166
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dfe.CdcEventApi.Application", "Dfe.CdcEventApi.Application\Dfe.CdcEventApi.Application.csproj", "{719DBC67-E269-4220-B3BF-728B32EAD482}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dfe.CdcEventApi.Domain", "Dfe.CdcEventApi.Domain\Dfe.CdcEventApi.Domain.csproj", "{E47498BA-D3F6-4F98-B0C9-34790C7FC9D4}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dfe.CdcEventApi.FunctionApp", "Dfe.CdcEventApi.FunctionApp\Dfe.CdcEventApi.FunctionApp.csproj", "{B05F39CE-67E0-4403-B647-BF6E1A7BB9E7}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dfe.CdcEventApi.Infrastructure.SqlServer", "Dfe.CdcEventApi.Infrastructure.SqlServer\Dfe.CdcEventApi.Infrastructure.SqlServer.csproj", "{2D169F53-38A2-4E09-BB9C-647BEAB19ABB}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dfe.CdcEventApi.Application.UnitTests", "Dfe.CdcEventApi.Application.UnitTests\Dfe.CdcEventApi.Application.UnitTests.csproj", "{3D16E4E4-41FB-4619-B9F0-A8DAE1A2A636}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{719DBC67-E269-4220-B3BF-728B32EAD482}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{719DBC67-E269-4220-B3BF-728B32EAD482}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{719DBC67-E269-4220-B3BF-728B32EAD482}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{719DBC67-E269-4220-B3BF-728B32EAD482}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E47498BA-D3F6-4F98-B0C9-34790C7FC9D4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E47498BA-D3F6-4F98-B0C9-34790C7FC9D4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E47498BA-D3F6-4F98-B0C9-34790C7FC9D4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E47498BA-D3F6-4F98-B0C9-34790C7FC9D4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B05F39CE-67E0-4403-B647-BF6E1A7BB9E7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B05F39CE-67E0-4403-B647-BF6E1A7BB9E7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B05F39CE-67E0-4403-B647-BF6E1A7BB9E7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B05F39CE-67E0-4403-B647-BF6E1A7BB9E7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2D169F53-38A2-4E09-BB9C-647BEAB19ABB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2D169F53-38A2-4E09-BB9C-647BEAB19ABB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2D169F53-38A2-4E09-BB9C-647BEAB19ABB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2D169F53-38A2-4E09-BB9C-647BEAB19ABB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3D16E4E4-41FB-4619-B9F0-A8DAE1A2A636}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3D16E4E4-41FB-4619-B9F0-A8DAE1A2A636}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3D16E4E4-41FB-4619-B9F0-A8DAE1A2A636}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3D16E4E4-41FB-4619-B9F0-A8DAE1A2A636}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {24CBACA4-EF05-492A-9D42-7B5AC48A066B}
+	EndGlobalSection
+EndGlobal

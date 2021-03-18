@@ -1,0 +1,258 @@
+﻿namespace Dfe.CdcEventApi.Application
+{
+    using System;
+    using System.Collections.Generic;
+    using System.Data;
+    using System.IO;
+    using System.Linq;
+    using System.Reflection;
+    using System.Threading;
+    using System.Threading.Tasks;
+    using System.Xml.Linq;
+    using Dfe.CdcEventApi.Application.Definitions;
+    using Dfe.CdcEventApi.Application.Exceptions;
+    using Dfe.CdcEventApi.Application.Models;
+    using Dfe.CdcEventApi.Domain.Definitions;
+    using Newtonsoft.Json.Linq;
+
+    /// <summary>
+    /// Implements <see cref="IEntityProcessor" />.
+    /// </summary>
+    public class EntityProcessor : IEntityProcessor
+    {
+        private readonly IEntityStorageAdapter entityStorageAdapter;
+        private readonly ILoggerProvider loggerProvider;
+
+        /// <summary>
+        /// Initialises a new instance of the <see cref="EntityProcessor" />
+        /// class.
+        /// </summary>
+        /// <param name="entityStorageAdapter">
+        /// An instance of type <see cref="IEntityStorageAdapter" />.
+        /// </param>
+        /// <param name="loggerProvider">
+        /// An instance of type <see cref="ILoggerProvider" />.
+        /// </param>
+        public EntityProcessor(
+            IEntityStorageAdapter entityStorageAdapter,
+            ILoggerProvider loggerProvider)
+        {
+            this.entityStorageAdapter = entityStorageAdapter;
+            this.loggerProvider = loggerProvider;
+        }
+
+        /// <inheritdoc />
+        public async Task ProcessEntitiesAsync<TModelsBase>(
+            IEnumerable<TModelsBase> modelsBases,
+            CancellationToken cancellationToken)
+            where TModelsBase : ModelsBase
+        {
+            if (modelsBases == null)
+            {
+                throw new ArgumentNullException(nameof(modelsBases));
+            }
+
+            // 1) Figure out which embedded TSQL script to invoke from the
+            //    meta-data of TModels base.
+            string identifier = ExtractDataHandlerIdentifier<TModelsBase>();
+
+            // 2) Prepare the main XDocument to be passed to the data-layer.
+            XDocument xDocument = this.ConvertToXDocument(modelsBases);
+
+            // 3) Invoke the data-layer with the script and the DataTable.
+            await this.entityStorageAdapter.StoreEntitiesAsync(
+                identifier,
+                xDocument,
+                cancellationToken)
+                .ConfigureAwait(false);
+
+            // 4) Identify any sub-collection properties for DataHandler
+            //    identifiers.
+            Dictionary<PropertyInfo, string> propertiesToProcess =
+                ExtractPropertyInfosAndDataHanderIdentifiers<TModelsBase>();
+
+            this.loggerProvider.Debug(
+                $"This entity has {propertiesToProcess.Count} children to " +
+                $"also process.");
+
+            foreach (TModelsBase modelsBase in modelsBases)
+            {
+                foreach (KeyValuePair<PropertyInfo, string> propertyToProcess in propertiesToProcess)
+                {
+                    await this.ProcessProperty(
+                        modelsBase,
+                        propertyToProcess,
+                        cancellationToken)
+                        .ConfigureAwait(false);
+                }
+            }
+        }
+
+        private static Dictionary<PropertyInfo, string> ExtractPropertyInfosAndDataHanderIdentifiers<TModelsBase>()
+            where TModelsBase : ModelsBase
+        {
+            Dictionary<PropertyInfo, string> toReturn = null;
+
+            Type entityType = typeof(TModelsBase);
+            Type attributeType = typeof(DataHandlerAttribute);
+
+            toReturn = entityType
+                .GetProperties()
+                .Select(x =>
+                {
+                    string identifier = null;
+
+                    DataHandlerAttribute dataHandlerAttribute =
+                        (DataHandlerAttribute)x.GetCustomAttribute(attributeType);
+
+                    if (dataHandlerAttribute != null)
+                    {
+                        identifier = dataHandlerAttribute.Identifier;
+                    }
+
+                    return new
+                    {
+                        PropertyInfo = x,
+                        Identifier = identifier,
+                    };
+                })
+                .Where(x => !string.IsNullOrEmpty(x.Identifier))
+                .ToDictionary(x => x.PropertyInfo, x => x.Identifier);
+
+            return toReturn;
+        }
+
+        private static string ExtractDataHandlerIdentifier<TModelsBase>()
+            where TModelsBase : ModelsBase
+        {
+            string toReturn = null;
+
+            Type entityType = typeof(TModelsBase);
+            Type attributeType = typeof(DataHandlerAttribute);
+
+            DataHandlerAttribute dataHandlerAttribute =
+                (DataHandlerAttribute)Attribute.GetCustomAttribute(
+                    entityType,
+                    attributeType);
+
+            if (dataHandlerAttribute == null)
+            {
+                throw new MissingDataHandlerAttributeException(entityType);
+            }
+
+            toReturn = dataHandlerAttribute.Identifier;
+
+            return toReturn;
+        }
+
+        private async Task ProcessProperty(
+            ModelsBase modelsBase,
+            KeyValuePair<PropertyInfo, string> propertyToProcess,
+            CancellationToken cancellationToken)
+        {
+            // 1) Pull back the value for this model, and this
+            //    property.
+            PropertyInfo propertyInfo = propertyToProcess.Key;
+            string identifier = propertyToProcess.Value;
+
+            this.loggerProvider.Debug(
+                $"Extracting property \"{propertyInfo.Name}\"...");
+
+            object propertyValue = propertyInfo.GetValue(modelsBase);
+
+            // 2) Should be a collection of models inheriting from
+            //    ModelsBase.
+            //    If it's not, we'll need to implement it. For now,
+            //    no point in gold-plating.
+            IEnumerable<ModelsBase> subCollection =
+                (IEnumerable<ModelsBase>)propertyValue;
+
+            this.loggerProvider.Info(
+                $"{subCollection.Count()} {nameof(ModelsBase)}s extracted. " +
+                $"Converting to {nameof(XDocument)}...");
+
+            XDocument xDocument = this.ConvertToXDocument(subCollection);
+
+            this.loggerProvider.Debug(
+                $"Storing {subCollection.Count()} entities using data " +
+                $"handler identifier \"{identifier}\"...");
+
+            await this.entityStorageAdapter.StoreEntitiesAsync(
+                identifier,
+                xDocument,
+                cancellationToken)
+                .ConfigureAwait(false);
+
+            this.loggerProvider.Info(
+                $"Property \"{propertyInfo.Name}\" processed with success.");
+        }
+
+        private XDocument ConvertToXDocument(
+            IEnumerable<ModelsBase> modelsBases)
+        {
+            XDocument toReturn = null;
+
+            IEnumerable<IDictionary<string, JToken>> datas = modelsBases
+                .Select(x => x.Data);
+
+            string[] distinctColumnNames = datas
+                .SelectMany(x => x.Keys)
+                .Distinct()
+                .ToArray();
+
+            string distinctColumnNamesList = string.Join(
+                ", ",
+                distinctColumnNames);
+
+            this.loggerProvider.Debug(
+                $"{nameof(distinctColumnNamesList)} = " +
+                $"\"{distinctColumnNames}\"");
+
+            string dataTableXmlStr = null;
+            using (DataTable dataTable = new DataTable("Entity"))
+            {
+                DataColumn[] dataColumns = distinctColumnNames
+                    .Select(x => new DataColumn(x))
+                    .ToArray();
+
+                dataTable.Columns.AddRange(dataColumns);
+
+                this.loggerProvider.Debug(
+                    $"{dataColumns.Length} {nameof(DataColumn)}s added to " +
+                    $"{nameof(dataTable)}.");
+
+                DataRow dataRow = null;
+                foreach (IDictionary<string, JToken> data in datas)
+                {
+                    dataRow = dataTable.NewRow();
+
+                    foreach (KeyValuePair<string, JToken> keyValuePair in data)
+                    {
+                        dataRow[keyValuePair.Key] = keyValuePair.Value;
+                    }
+
+                    dataTable.Rows.Add(dataRow);
+                }
+
+                this.loggerProvider.Debug(
+                    $"{dataTable.Rows.Count} row(s) appended to " +
+                    $"{nameof(dataTable)}.");
+
+                this.loggerProvider.Debug(
+                    $"Transforming {nameof(dataTable)} to " +
+                    $"{nameof(XDocument)}...");
+
+                using (StringWriter stringWriter = new StringWriter())
+                {
+                    dataTable.WriteXml(stringWriter);
+
+                    dataTableXmlStr = stringWriter.ToString();
+                }
+            }
+
+            toReturn = XDocument.Parse(dataTableXmlStr);
+
+            return toReturn;
+        }
+    }
+}
