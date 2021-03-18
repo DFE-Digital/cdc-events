@@ -6,6 +6,7 @@ trigger:
   paths:
     include:
       - /pipelines/cdc-events-event-api.yml
+      - /azure/event-api-template.json
       - /src/*
 
 workspace:

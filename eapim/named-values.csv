@@ -1,0 +1,4 @@
+ID,Name,Value,State
+1,cdcea-function-app-key,__arm_functionAppKey__,1
+2,internal-oauth-config-uri,__internal_oauth_config_uri__,1
+3,cdcea-oauth-aud-claim,__cdcea_oauth_aud_claim__,1
