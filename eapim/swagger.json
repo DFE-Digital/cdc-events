@@ -10,6 +10,7 @@
   "paths": {
     "/activities": {
       "post": {
+        "summary": "Activities Created",
         "description": "Accepts event data for the activities collection.",
         "operationId": "activities-created",
         "parameters": [
@@ -33,6 +34,7 @@
     },
     "/actuals": {
       "post": {
+        "summary": "Actuals Created",
         "description": "Accepts event data for the actuals collection.",
         "operationId": "actuals-created",
         "parameters": [
@@ -56,6 +58,7 @@
     },
     "/deleted": {
       "post": {
+        "summary": "Deleted Created",
         "description": "Accepts event data for the deleted collection.",
         "operationId": "deleted-created",
         "parameters": [
@@ -79,6 +82,7 @@
     },
     "/oncosts": {
       "post": {
+        "summary": "OnCosts Created",
         "description": "Accepts event data for the oncosts collection.",
         "operationId": "oncosts-created",
         "parameters": [
@@ -102,6 +106,7 @@
     },
     "/plans": {
       "post": {
+        "summary": "Plans Created",
         "description": "Accepts event data for the plans collection.",
         "operationId": "plans-created",
         "parameters": [
@@ -125,6 +130,7 @@
     },
     "/portfolios": {
       "post": {
+        "summary": "Portfolios Created",
         "description": "Accepts event data for the portfolios collection.",
         "operationId": "portfolios-created",
         "parameters": [
@@ -148,6 +154,7 @@
     },
     "/sites": {
       "post": {
+        "summary": "Sites Created",
         "description": "Accepts event data for the sites collection.",
         "operationId": "sites-created",
         "parameters": [
@@ -171,6 +178,7 @@
     },
     "/spends": {
       "post": {
+        "summary": "Spends Created",
         "description": "Accepts event data for the spends collection.",
         "operationId": "spends-created",
         "parameters": [
@@ -194,6 +202,7 @@
     },
     "/surveylots": {
       "post": {
+        "summary": "SuveryLots Created",
         "description": "Accepts event data for the surveylots collection.",
         "operationId": "surveylots-created",
         "parameters": [
@@ -217,6 +226,7 @@
     },
     "/surveys": {
       "post": {
+        "summary": "Surveys Created",
         "description": "Accepts event data for the surveys collection.",
         "operationId": "surveys-created",
         "parameters": [
@@ -240,6 +250,7 @@
     },
     "/surveysectionelements": {
       "post": {
+        "summary": "SurveySectionElements Created",
         "description": "Accepts event data for the surveysectionelements collection.",
         "operationId": "surveysectionelements-created",
         "parameters": [
@@ -263,6 +274,7 @@
     },
     "/surveysections": {
       "post": {
+        "summary": "SurveySections Created",
         "description": "Accepts event data for the surveysections collection.",
         "operationId": "surveysections-created",
         "parameters": [
@@ -286,6 +298,7 @@
     },
     "/users": {
       "post": {
+        "summary": "Users Created",
         "description": "Accepts event data for the users collection.",
         "operationId": "users-created",
         "parameters": [
