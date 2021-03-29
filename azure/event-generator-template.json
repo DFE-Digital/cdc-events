@@ -57,6 +57,10 @@
       "type": "string",
       "defaultValue": "kycloud-api-token"
     },
+    "keyVaultSecretNameCdcEventsTokenRequestPayload": {
+      "type": "string",
+      "defaultValue": "cdc-events-token-request-payload"
+    },
     "cdcEventsApiBaseUri": {
       "type": "string"
     },
@@ -73,6 +77,9 @@
     "dataPathPrefix": {
       "type": "string",
       "defaultValue": "data"
+    },
+    "internalOAuthTokenEndpoint": {
+      "type": "string"
     },
     "appName": {
       "type": "string",
@@ -93,6 +100,7 @@
     "keyVaultSecretCdcEventsSubscriptionKey": "[resourceId(variables('sharedResourceGroupName'), 'Microsoft.KeyVault/vaults/secrets', variables('keyVaultName'), parameters('keyVaultSecretNameCdcEventsSubscriptionKey'))]",
     "keyVaultSecretKycloudApiPassword": "[resourceId(variables('sharedResourceGroupName'), 'Microsoft.KeyVault/vaults/secrets', variables('keyVaultName'), parameters('keyVaultSecretNameKycloudApiPassword'))]",
     "keyVaultSecretKycloudApiToken": "[resourceId(variables('sharedResourceGroupName'), 'Microsoft.KeyVault/vaults/secrets', variables('keyVaultName'), parameters('keyVaultSecretNameKycloudApiToken'))]",
+    "keyVaultSecretCdcEventsTokenRequestPayload": "[resourceId(variables('sharedResourceGroupName'), 'Microsoft.KeyVault/vaults/secrets', variables('keyVaultName'), parameters('keyVaultSecretNameCdcEventsTokenRequestPayload'))]",
     "loginUri": "[concat(parameters('kycloudApiBaseUri'), '/', parameters('loginEndpoint'))]",
     "dataPathUri": "[concat(parameters('kycloudApiBaseUri'), '/', parameters('dataPathPrefix'))]"
   },
@@ -254,13 +262,88 @@
                       "type": "object"
                     }
                   }
+                },
+                "Get_cdc-events-token-request-payload": {
+                  "runAfter": {
+                    "Parse_cdc-events-subscription-key": [
+                      "Succeeded"
+                    ]
+                  },
+                  "type": "Http",
+                  "inputs": {
+                    "authentication": {
+                      "audience": "https://vault.azure.net",
+                      "type": "ManagedServiceIdentity"
+                    },
+                    "method": "GET",
+                    "uri": "[concat(reference(variables('keyVaultSecretCdcEventsTokenRequestPayload'), '2019-09-01').secretUriWithVersion, '?api-version=2016-10-01')]"
+                  }
+                },
+                "Parse_cdc-events-token-request-payload": {
+                  "inputs": {
+                    "content": "@body('Get_cdc-events-token-request-payload')",
+                    "schema": {
+                      "properties": {
+                        "value": {
+                          "type": "string"
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "runAfter": {
+                    "Get_cdc-events-token-request-payload": [
+                      "Succeeded"
+                    ]
+                  },
+                  "type": "ParseJson"
                 }
               },
               "type": "Scope"
             },
-            "Initialise_nowDateTime": {
+            "Obtain_CDC_Events_OAuth_Token": {
               "runAfter": {
                 "Get_and_Parse_Secrets_from_KeyVault": [
+                  "Succeeded"
+                ]
+              },
+              "type": "Scope",
+              "actions": {
+                "Get_CDC_Events_OAuth_Token": {
+                  "type": "Http",
+                  "inputs": {
+                    "body": "@body('Parse_cdc-events-token-request-payload')?['value']",
+                    "headers": {
+                      "Content-Type": "application/x-www-form-urlencoded"
+                    },
+                    "method": "POST",
+                    "uri": "[parameters('internalOAuthTokenEndpoint')]"
+                  }
+                },
+                "Parse_CDC_Events_OAuth_Token": {
+                  "runAfter": {
+                    "Get_CDC_Events_OAuth_Token": [
+                      "Succeeded"
+                    ]
+                  },
+                  "type": "ParseJson",
+                  "inputs": {
+                    "content": "@body('Get_CDC_Events_OAuth_Token')",
+                    "schema": {
+                      "properties": {
+                        "access_token": {
+                          "type": "string"
+                        }
+                      },
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            },
+            "Initialise_nowDateTime": {
+              "runAfter": {
+                "Obtain_CDC_Events_OAuth_Token": [
                   "Succeeded"
                 ]
               },
@@ -445,7 +528,7 @@
                         "retryPolicy": {
                           "type": "none"
                         },
-                        "uri": "[concat(variables('dataPathUri'), '/@{items(', variables('singleQuote'), 'For_each_ApiEntitiesToPull', variables('singleQuote'), ')}')]" 
+                        "uri": "[concat(variables('dataPathUri'), '/@{items(', variables('singleQuote'), 'For_each_ApiEntitiesToPull', variables('singleQuote'), ')}')]"
                       }
                     },
                     "Parse_entity_page": {
@@ -492,12 +575,13 @@
                           "inputs": {
                             "body": "@body('Parse_entity_page')?['Infos']",
                             "headers": {
+                              "Authorization": "Bearer @{body('Parse_CDC_Events_OAuth_Token')?['access_token']}",
                               "Content-Type": "application/octet-stream",
                               "Ocp-Apim-Subscription-Key": "@body('Parse_cdc-events-subscription-key')?['value']",
                               "X-Page": "@{variables('currentPage')}",
                               "X-Run-Identifier": "@variables('nowDateTime')"
                             },
-                            "method": "PUT",
+                            "method": "POST",
                             "retryPolicy": {
                               "type": "none"
                             },
