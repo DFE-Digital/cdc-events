@@ -1,6 +1,8 @@
 ﻿namespace Dfe.CdcEventApi.FunctionApp.Functions
 {
+    using System;
     using System.Collections.Generic;
+    using System.Globalization;
     using System.Linq;
     using System.Net;
     using System.Net.Http;
@@ -20,6 +22,8 @@
     /// </summary>
     public abstract class FunctionsBase
     {
+        private const string HeaderNameRunIdentifier = "X-Run-Identifier";
+
         private readonly IEntityProcessor entityProcessor;
         private readonly ILoggerProvider loggerProvider;
 
@@ -63,60 +67,129 @@
         {
             HttpResponseMessage toReturn = null;
 
-            string body = await httpRequest.ReadAsStringAsync()
-                .ConfigureAwait(false);
-
-            string modelsBaseType = typeof(TModelsBase).Name;
-
-            this.loggerProvider.Debug(
-                $"Deserialising received body: \"{body}\" into an array of " +
-                $"{modelsBaseType} instance(s)...");
-
-            IEnumerable<TModelsBase> modelsBases =
-                JsonConvert.DeserializeObject<IEnumerable<TModelsBase>>(body);
-
-            this.loggerProvider.Info(
-                $"{modelsBases.Count()} {modelsBaseType} instance(s) " +
-                $"deserialised.");
-
-            this.loggerProvider.Debug(
-                $"Passing {modelsBases.Count()} entities to the entity " +
-                $"processor...");
-
-            try
+            if (httpRequest == null)
             {
-                await this.entityProcessor.ProcessEntitiesAsync(
-                    modelsBases,
-                    cancellationToken)
-                    .ConfigureAwait(false);
+                throw new ArgumentNullException(nameof(httpRequest));
+            }
+
+            this.loggerProvider.Debug(
+                $"Checking for header \"{HeaderNameRunIdentifier}\"...");
+
+            IHeaderDictionary headerDictionary = httpRequest.Headers;
+
+            DateTime? runIdentifier = null;
+            string runIdentifierStr = null;
+            if (headerDictionary.ContainsKey(HeaderNameRunIdentifier))
+            {
+                runIdentifierStr = headerDictionary[HeaderNameRunIdentifier];
 
                 this.loggerProvider.Info(
-                    $"All {modelsBases.Count()} entities processed.");
+                    $"Header \"{HeaderNameRunIdentifier}\" was specified: " +
+                    $"\"{runIdentifierStr}\". Parsing...");
 
-                // Everything good? Return accepted.
-                toReturn = new HttpResponseMessage(HttpStatusCode.Accepted);
+                try
+                {
+                    runIdentifier = DateTime.Parse(
+                        runIdentifierStr,
+                        CultureInfo.InvariantCulture);
+                }
+                catch (FormatException formatException)
+                {
+                    this.loggerProvider.Warning(
+                        $"Unable to parse the value of " +
+                        $"\"{HeaderNameRunIdentifier}\" " +
+                        $"(\"{runIdentifierStr}\") as a {nameof(DateTime)}.",
+                        formatException);
+                }
             }
-            catch (MissingDataHandlerAttributeException missingDataHandlerAttributeException)
+
+            if (string.IsNullOrEmpty(runIdentifierStr))
             {
-                toReturn = new HttpResponseMessage(
-                    HttpStatusCode.NotImplemented);
+                runIdentifier = DateTime.UtcNow;
+
+                this.loggerProvider.Info(
+                    $"Header \"{HeaderNameRunIdentifier}\" not supplied, or " +
+                    $"was blank. {nameof(runIdentifierStr)} will default to " +
+                    $"\"{runIdentifierStr}\".");
+            }
+
+            if (runIdentifier.HasValue)
+            {
+                string body = await httpRequest.ReadAsStringAsync()
+                    .ConfigureAwait(false);
+
+                string modelsBaseType = typeof(TModelsBase).Name;
+
+                this.loggerProvider.Debug(
+                    $"Deserialising received body: \"{body}\" into an array " +
+                    $"of {modelsBaseType} instance(s)...");
+
+                IEnumerable<TModelsBase> modelsBases =
+                    JsonConvert.DeserializeObject<IEnumerable<TModelsBase>>(body);
+
+                this.loggerProvider.Info(
+                    $"{modelsBases.Count()} {modelsBaseType} instance(s) " +
+                    $"deserialised.");
+
+                this.loggerProvider.Debug(
+                    $"Passing {modelsBases.Count()} entities to the entity " +
+                    $"processor...");
+
+                try
+                {
+                    await this.entityProcessor.ProcessEntitiesAsync(
+                        runIdentifier.Value,
+                        modelsBases,
+                        cancellationToken)
+                        .ConfigureAwait(false);
+
+                    this.loggerProvider.Info(
+                        $"All {modelsBases.Count()} entities processed.");
+
+                    // Everything good? Return accepted.
+                    toReturn =
+                        new HttpResponseMessage(HttpStatusCode.Accepted);
+
+                    // Also return the run identifier.
+                    runIdentifierStr = runIdentifier.ToString();
+
+                    toReturn.Headers.Add(
+                        HeaderNameRunIdentifier,
+                        runIdentifierStr);
+                }
+                catch (MissingDataHandlerAttributeException missingDataHandlerAttributeException)
+                {
+                    toReturn = new HttpResponseMessage(
+                        HttpStatusCode.NotImplemented);
+
+                    this.loggerProvider.Error(
+                        $"A {nameof(MissingDataHandlerAttributeException)} " +
+                        $"was thrown, returning " +
+                        $"{HttpStatusCode.NotImplemented}. Message: " +
+                        $"{missingDataHandlerAttributeException.Message}",
+                        missingDataHandlerAttributeException);
+                }
+                catch (MissingDataHandlerFileException missingDataHandlerFileException)
+                {
+                    toReturn = new HttpResponseMessage(
+                        HttpStatusCode.NotImplemented);
+
+                    this.loggerProvider.Error(
+                        $"A {nameof(MissingDataHandlerFileException)} was " +
+                        $"thrown, returning " +
+                        $"{HttpStatusCode.NotImplemented}. Message: " +
+                        $"{missingDataHandlerFileException.Message}",
+                        missingDataHandlerFileException);
+                }
+            }
+            else
+            {
+                toReturn = new HttpResponseMessage(HttpStatusCode.BadRequest);
 
                 this.loggerProvider.Error(
-                    $"A {nameof(MissingDataHandlerAttributeException)} was " +
-                    $"thrown, returning {HttpStatusCode.NotImplemented}. " +
-                    $"Message: {missingDataHandlerAttributeException.Message}",
-                    missingDataHandlerAttributeException);
-            }
-            catch (MissingDataHandlerFileException missingDataHandlerFileException)
-            {
-                toReturn = new HttpResponseMessage(
-                    HttpStatusCode.NotImplemented);
-
-                this.loggerProvider.Error(
-                    $"A {nameof(MissingDataHandlerFileException)} was " +
-                    $"thrown, returning {HttpStatusCode.NotImplemented}. " +
-                    $"Message: {missingDataHandlerFileException.Message}",
-                    missingDataHandlerFileException);
+                    $"A valid {nameof(runIdentifier)} was not supplied. The " +
+                    $"{nameof(runIdentifier)} should either not be " +
+                    $"specified, or be a valid {nameof(DateTime)} value.");
             }
 
             return toReturn;

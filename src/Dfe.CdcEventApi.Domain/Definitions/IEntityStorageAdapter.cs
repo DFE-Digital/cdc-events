@@ -1,5 +1,6 @@
 ﻿namespace Dfe.CdcEventApi.Domain.Definitions
 {
+    using System;
     using System.Threading;
     using System.Threading.Tasks;
     using System.Xml.Linq;
@@ -15,6 +16,9 @@
         /// <param name="dataHandlerIdentifier">
         /// The data handler identifier.
         /// </param>
+        /// <param name="runIdentifier">
+        /// An identifier for the run, as a <see cref="DateTime" /> value.
+        /// </param>
         /// <param name="xDocument">
         /// The <see cref="XDocument" /> containing the entities.
         /// </param>
@@ -26,6 +30,7 @@
         /// </returns>
         Task StoreEntitiesAsync(
             string dataHandlerIdentifier,
+            DateTime runIdentifier,
             XDocument xDocument,
             CancellationToken cancellationToken);
     }

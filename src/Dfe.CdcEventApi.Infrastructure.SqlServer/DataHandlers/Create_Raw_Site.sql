@@ -1,4 +1,3 @@
-
 INSERT INTO [Raw_Site]
     ([Name], [Description], [GrossFloorArea], [SiteFootprintArea], [AreaUnit], [MainUsage], [ConstructionCompletionDate], [OperationalStartDate], [LastMajorRefurbishmentDate], [EndOfOperationContractDate], [PeriodOfInterest], [RebuildValue], [Latitude], [Longitude], [PostCode], [Country], [Contract], [ContractEndCondition], [ContractEndResidualLife], [Customer], [ref_SectorReference], [ref_RegionReference], [ref_InsuranceReference], [HoursOfOperation], [BaseDate], [CurrentForecastPlanbk_Id], [CurrentBudgetPlanbk_Id], [Location], [ResidualLifeStartDate], [IdPath], [ExternalUUID], [sk_Id], [bk_Id], [bk_TenantId], [target_Date], [source_DateCreated], [source_DateLastModified], [EntityStatus], [Load_DateTime])
 SELECT
@@ -40,5 +39,5 @@ SELECT
     Tbl.Col.value('source_DateCreated[1]', 'nvarchar(40)') AS [source_DateCreated],
     Tbl.Col.value('source_DateLastModified[1]', 'nvarchar(40)') AS [source_DateLastModified],
     Tbl.Col.value('EntityStatus[1]', 'nvarchar(max)') AS [EntityStatus],
-    sysdatetime() as [Load_DateTime] 
+    @RunIdentifier as [Load_DateTime] 
 FROM @Entities.nodes('//Entity') Tbl(Col);

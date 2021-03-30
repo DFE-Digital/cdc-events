@@ -43,6 +43,7 @@
 
         /// <inheritdoc />
         public async Task ProcessEntitiesAsync<TModelsBase>(
+            DateTime runIdentifier,
             IEnumerable<TModelsBase> modelsBases,
             CancellationToken cancellationToken)
             where TModelsBase : ModelsBase
@@ -62,6 +63,7 @@
             // 3) Invoke the data-layer with the script and the DataTable.
             await this.entityStorageAdapter.StoreEntitiesAsync(
                 identifier,
+                runIdentifier,
                 xDocument,
                 cancellationToken)
                 .ConfigureAwait(false);
@@ -80,6 +82,7 @@
                 foreach (KeyValuePair<PropertyInfo, string> propertyToProcess in propertiesToProcess)
                 {
                     await this.ProcessProperty(
+                        runIdentifier,
                         modelsBase,
                         propertyToProcess,
                         cancellationToken)
@@ -146,6 +149,7 @@
         }
 
         private async Task ProcessProperty(
+            DateTime runIdentifier,
             ModelsBase modelsBase,
             KeyValuePair<PropertyInfo, string> propertyToProcess,
             CancellationToken cancellationToken)
@@ -164,8 +168,17 @@
             //    ModelsBase.
             //    If it's not, we'll need to implement it. For now,
             //    no point in gold-plating.
-            IEnumerable<ModelsBase> subCollection =
-                (IEnumerable<ModelsBase>)propertyValue;
+            IEnumerable<ModelsBase> subCollection = null;
+
+            if (propertyValue != null)
+            {
+                subCollection = (IEnumerable<ModelsBase>)propertyValue;
+            }
+            else
+            {
+                // If the property isn't specified.
+                subCollection = Array.Empty<ModelsBase>();
+            }
 
             this.loggerProvider.Info(
                 $"{subCollection.Count()} {nameof(ModelsBase)}s extracted. " +
@@ -179,6 +192,7 @@
 
             await this.entityStorageAdapter.StoreEntitiesAsync(
                 identifier,
+                runIdentifier,
                 xDocument,
                 cancellationToken)
                 .ConfigureAwait(false);

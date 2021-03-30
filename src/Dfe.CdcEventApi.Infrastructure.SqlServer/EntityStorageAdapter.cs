@@ -64,6 +64,7 @@
         /// <inheritdoc />
         public async Task StoreEntitiesAsync(
             string dataHandlerIdentifier,
+            DateTime runIdentifier,
             XDocument xDocument,
             CancellationToken cancellationToken)
         {
@@ -98,7 +99,7 @@
                     $"{sqlConnection.ClientConnectionId}).");
 
                 Stopwatch stopwatch = new Stopwatch();
-                using (SqlCommand sqlCommand = this.GetSqlCommand(sqlConnection, handlerScript, xDocument))
+                using (SqlCommand sqlCommand = this.GetSqlCommand(sqlConnection, handlerScript, runIdentifier, xDocument))
                 {
                     this.loggerProvider.Debug("Executing query...");
 
@@ -125,6 +126,7 @@
         private SqlCommand GetSqlCommand(
             SqlConnection sqlConnection,
             string handlerScript,
+            DateTime runIdentifier,
             XDocument xDocument)
         {
             SqlCommand toReturn = null;
@@ -152,6 +154,15 @@
                 xDocumentStr)
             {
                 DbType = DbType.Xml,
+            };
+
+            toReturn.Parameters.Add(sqlParameter);
+
+            sqlParameter = new SqlParameter(
+                "RunIdentifier",
+                runIdentifier)
+            {
+                DbType = DbType.DateTime,
             };
 
             toReturn.Parameters.Add(sqlParameter);
