@@ -1,5 +1,6 @@
 ﻿namespace Dfe.CdcEventApi.Application.Definitions
 {
+    using System;
     using System.Collections.Generic;
     using System.Threading;
     using System.Threading.Tasks;
@@ -17,6 +18,9 @@
         /// <typeparam name="TModelsBase">
         /// A type deriving from <see cref="ModelsBase" />.
         /// </typeparam>
+        /// <param name="runIdentifier">
+        /// An identifier for the run, as a <see cref="DateTime" /> value.
+        /// </param>
         /// <param name="modelsBases">
         /// A collection of instances of type
         /// <typeparamref name="TModelsBase" />.
@@ -28,6 +32,7 @@
         /// A <see cref="Task"/> representing the asynchronous operation.
         /// </returns>
         Task ProcessEntitiesAsync<TModelsBase>(
+            DateTime runIdentifier,
             IEnumerable<TModelsBase> modelsBases,
             CancellationToken cancellationToken)
             where TModelsBase : ModelsBase;

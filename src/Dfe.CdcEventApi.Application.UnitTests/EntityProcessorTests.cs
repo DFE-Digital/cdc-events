@@ -40,6 +40,7 @@ namespace Dfe.CdcEventApi.Application.UnitTests
         public async Task ProcessEntitiesAsync_ModelsBasesNull_ThrowsArgumentNullException()
         {
             // Arrange
+            DateTime runIdentifier = DateTime.UtcNow;
             ExampleEntity[] exampleEntities = null;
             CancellationToken cancellationToken = CancellationToken.None;
 
@@ -47,6 +48,7 @@ namespace Dfe.CdcEventApi.Application.UnitTests
             {
                 // Act
                 return this.entityProcessor.ProcessEntitiesAsync(
+                    runIdentifier,
                     exampleEntities,
                     cancellationToken);
             };
@@ -60,6 +62,7 @@ namespace Dfe.CdcEventApi.Application.UnitTests
         public async Task ProcessEntitiesAsync_ModelMissingDataHandlerAttribute_ThrowsMissingDataHandlerAttributeException()
         {
             // Arrange
+            DateTime runIdentifier = DateTime.UtcNow;
             DataHandlerMissingEntity[] dataHandlerMissingEntities = 
                 new DataHandlerMissingEntity[]
                 {
@@ -71,6 +74,7 @@ namespace Dfe.CdcEventApi.Application.UnitTests
             {
                 // Act
                 return this.entityProcessor.ProcessEntitiesAsync(
+                    runIdentifier,
                     dataHandlerMissingEntities,
                     cancellationToken);
             };
@@ -87,15 +91,15 @@ namespace Dfe.CdcEventApi.Application.UnitTests
             List<string> dataHandlerIdentifiers = new List<string>();
             List<XDocument> xDocuments = new List<XDocument>();
 
-            Action<string, XDocument, CancellationToken> storeEntitiesAsync =
-                (dhi, xd, ct) =>
+            Action<string, DateTime, XDocument, CancellationToken> storeEntitiesAsync =
+                (dhi, ri, xd, ct) =>
                 {
                     dataHandlerIdentifiers.Add(dhi);
                     xDocuments.Add(xd);
                 };
 
             this.mockEntityStorageAdapter
-                .Setup(x => x.StoreEntitiesAsync(It.IsAny<string>(), It.IsAny<XDocument>(), It.IsAny<CancellationToken>()))
+                .Setup(x => x.StoreEntitiesAsync(It.IsAny<string>(), It.IsAny<DateTime>(), It.IsAny<XDocument>(), It.IsAny<CancellationToken>()))
                 .Callback(storeEntitiesAsync);
 
             string[] expectedDataHandlerIdentifiers = new string[] {
@@ -107,12 +111,14 @@ namespace Dfe.CdcEventApi.Application.UnitTests
             int expectedNumberOfXDocuments = 4;
             int actualNumberOfXDocuments;
 
+            DateTime runIdentifier = DateTime.UtcNow;
             ExampleEntity[] exampleEntities = ExtractTestData<ExampleEntity>(
                 "ExampleEntities.json");
             CancellationToken cancellationToken = CancellationToken.None;
 
             // Act
             await this.entityProcessor.ProcessEntitiesAsync(
+                runIdentifier,
                 exampleEntities,
                 cancellationToken);
 

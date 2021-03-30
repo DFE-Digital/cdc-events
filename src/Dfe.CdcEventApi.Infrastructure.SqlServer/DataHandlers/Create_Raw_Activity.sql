@@ -1,4 +1,3 @@
-
 INSERT INTO [Raw_Activity]
     ([bk_PlanId], [AssetName], [ParentName], [Description], [NetRate], [Percentage], [StartYear], [ActivityCycle], [EndYear], [FrequencyInYear], [Quantity], [Contractor], [Unplanned], [Committed], [ref_ActivityTypeReference], [ref_ElementTypeReference], [ref_UnitOfMeasureReference], [CustomImpact1Rate], [CustomImpact2Rate], [CustomImpact3Rate], [CustomImpact4Rate], [CustomImpact5Rate], [SortOrder], [sk_Id], [bk_Id], [bk_TenantId], [target_Date], [source_DateCreated], [source_DateLastModified], [EntityStatus], [Load_DateTime])
 SELECT
@@ -32,5 +31,5 @@ SELECT
     Tbl.Col.value('source_DateCreated[1]', 'nvarchar(40)') AS [source_DateCreated],
     Tbl.Col.value('source_DateLastModified[1]', 'nvarchar(40)') AS [source_DateLastModified],
     Tbl.Col.value('EntityStatus[1]', 'nvarchar(max)') AS [EntityStatus],
-    sysdatetime() as [Load_DateTime] 
+    @RunIdentifier as [Load_DateTime] 
 FROM @Entities.nodes('//Entity') Tbl(Col);

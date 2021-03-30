@@ -1,4 +1,3 @@
-
 INSERT INTO [Raw_Spend]
     ([bk_ActualId], [Value], [TransactionDate], [CommittedDate], [Planned], [Description], [Contractor], [QualityStatus], [ref_ActivityTypeReference], [CustomImpact1Value], [CustomImpact2Value], [CustomImpact3Value], [CustomImpact4Value], [CustomImpact5Value], [sk_Id], [bk_Id], [bk_TenantId], [target_Date], [source_DateCreated], [source_DateLastModified], [EntityStatus], [Load_DateTime])
 SELECT
@@ -23,5 +22,5 @@ SELECT
     Tbl.Col.value('source_DateCreated[1]', 'nvarchar(40)') AS [source_DateCreated],
     Tbl.Col.value('source_DateLastModified[1]', 'nvarchar(40)') AS [source_DateLastModified],
     Tbl.Col.value('EntityStatus[1]', 'nvarchar(max)') AS [EntityStatus],
-    sysdatetime() as [Load_DateTime] 
+    @RunIdentifier as [Load_DateTime] 
 FROM @Entities.nodes('//Entity') Tbl(Col);

@@ -1,4 +1,3 @@
-
 INSERT INTO [Raw_SurveySectionElement]
     ([bk_SurveySectionId], [ref_ElementTypeReference], [ref_ElementTypeDescription], [ref_Grade], [ref_Priority], [ref_UnitOfMeasureReference], [Quantity], [ref_MethodOfMeasurementReference], [PercentageOfParent], [ref_ActionRequiredReference], [ref_FailureTypeReference], [ref_ContributingFactorReference], [HealthAndSafetyIssue], [BudgetCost], [ResidualLife], [IsComplete], [IsRemoved], [ref_AccessReference], [ref_CompositionGroupName], [ActivityCycle], [FrequencyInYear], [Latitude], [Longitude], [SortOrder], [ExternalUUID], [EstimatedCost], [bk_ParentElementId], [sk_Id], [bk_Id], [bk_TenantId], [target_Date], [source_DateCreated], [source_DateLastModified], [EntityStatus], [Load_DateTime])
 SELECT
@@ -36,5 +35,5 @@ SELECT
     Tbl.Col.value('source_DateCreated[1]', 'nvarchar(40)') AS [source_DateCreated],
     Tbl.Col.value('source_DateLastModified[1]', 'nvarchar(40)') AS [source_DateLastModified],
     Tbl.Col.value('EntityStatus[1]', 'nvarchar(max)') AS [EntityStatus],
-    sysdatetime() as [Load_DateTime] 
+    @RunIdentifier as [Load_DateTime] 
 FROM @Entities.nodes('//Entity') Tbl(Col);

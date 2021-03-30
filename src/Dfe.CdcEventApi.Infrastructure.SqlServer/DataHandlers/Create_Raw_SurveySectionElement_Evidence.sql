@@ -1,4 +1,3 @@
-
 INSERT INTO [Raw_SurveySectionElement_Evidence]
     ([bk_SurveySectionElementId], [Description], [ref_SurveySectionElementEvidenceItemTypeReference], [MimeType], [Reference], [SortOrder], [CustomReference], [CustomTag], [FileOrigin], [BlobKey], [sk_Id], [bk_Id], [bk_TenantId], [target_Date], [source_DateCreated], [source_DateLastModified], [EntityStatus], [Load_DateTime])
 SELECT
@@ -19,5 +18,5 @@ SELECT
     Tbl.Col.value('source_DateCreated[1]', 'nvarchar(40)') AS [source_DateCreated],
     Tbl.Col.value('source_DateLastModified[1]', 'nvarchar(40)') AS [source_DateLastModified],
     Tbl.Col.value('EntityStatus[1]', 'nvarchar(40)') AS [EntityStatus],
-    sysdatetime() as [Load_DateTime] 
+    @RunIdentifier as [Load_DateTime] 
 FROM @Entities.nodes('//Entity') Tbl(Col);
