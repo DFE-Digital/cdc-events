@@ -20,6 +20,8 @@
     /// </summary>
     public class EntityStorageAdapter : IEntityStorageAdapter
     {
+        private const int DefaultCommandTimeout = 300;
+
         private const string DataHandlerFileNameFormat = "{0}.sql";
 
         private readonly ILoggerProvider loggerProvider;
@@ -166,6 +168,8 @@
             };
 
             toReturn.Parameters.Add(sqlParameter);
+
+            toReturn.CommandTimeout = DefaultCommandTimeout;
 
             return toReturn;
         }
