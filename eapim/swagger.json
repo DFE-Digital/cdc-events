@@ -56,6 +56,30 @@
         }
       }
     },
+    "/blobs": {
+      "post": {
+        "summary": "Blobs Created",
+        "description": "Accepts event data for the blobs collection.",
+        "operationId": "blobs-created",
+        "parameters": [
+          {
+            "in": "header",
+            "type": "string",
+            "name": "Authorization",
+            "description": "Bearer token authorization.",
+            "required": true
+          }
+        ],
+        "responses": {
+          "202": {
+            "description": "The event data was accepted and processed."
+          },
+          "500": {
+            "description": "An unexpected error has occurred - please get in touch with us so we can check our logs!"
+          }
+        }
+      }
+    },
     "/deleted": {
       "post": {
         "summary": "Deleted Created",
