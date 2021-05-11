@@ -35,6 +35,7 @@
     <None Remove="DataHandlers\Create_Raw_SurveySection_Field.sql" />
     <None Remove="DataHandlers\Create_Raw_Survey_Evidence.sql" />
     <None Remove="DataHandlers\Create_Raw_Survey_Field.sql" />
+    <None Remove="DataHandlers\Create_Raw_User.sql" />
   </ItemGroup>
 
   <ItemGroup>
@@ -91,6 +92,7 @@
     <EmbeddedResource Include="DataHandlers\Create_Raw_SurveySection_Field.sql" />
     <EmbeddedResource Include="DataHandlers\Create_Raw_Survey_Evidence.sql" />
     <EmbeddedResource Include="DataHandlers\Create_Raw_Survey_Field.sql" />
+    <EmbeddedResource Include="DataHandlers\Create_Raw_User.sql" />
   </ItemGroup>
 
   <ItemGroup>
