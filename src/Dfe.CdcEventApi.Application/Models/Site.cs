@@ -7,13 +7,13 @@
     /// <summary>
     /// Represents an individual <c>sites</c> entity.
     /// </summary>
-    [DataHandler("Create_Raw_Site")]
+    [DataHandler("Create_Raw_Site", "Post")]
     public class Site : ModelsBase
     {
         /// <summary>
         /// Gets or sets the <c>Fields</c> property.
         /// </summary>
-        [DataHandler("Create_Raw_Site_Field")]
+        [DataHandler("Create_Raw_Site_Field", "Post")]
         [JsonProperty("Fields")]
         public IEnumerable<CustomField> Fields
         {

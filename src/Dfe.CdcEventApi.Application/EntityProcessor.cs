@@ -55,8 +55,13 @@
             }
 
             // 1) Figure out which embedded TSQL script to invoke from the
-            //    meta-data of TModels base.
-            string identifier = ExtractDataHandlerIdentifier<TModelsBase>();
+            //    meta-data of TModels base for this verb action.
+            string identifier = ExtractDataHandlerIdentifier<TModelsBase>("Post");
+
+            if (string.IsNullOrWhiteSpace(identifier))
+            {
+                throw new ArgumentNullException(typeof(DataHandlerAttribute).Name);
+            }
 
             // 2) Prepare the main XDocument to be passed to the data-layer.
             XDocument xDocument = this.ConvertToXDocument(modelsBases);
@@ -70,9 +75,9 @@
                 .ConfigureAwait(false);
 
             // 4) Identify any sub-collection properties for DataHandler
-            //    identifiers.
+            //    identifiers for this verb action.
             Dictionary<PropertyInfo, string> propertiesToProcess =
-                ExtractPropertyInfosAndDataHanderIdentifiers<TModelsBase>();
+                ExtractPropertyInfosAndDataHanderIdentifiers<TModelsBase>("Post");
 
             this.loggerProvider.Debug(
                 $"This entity has {propertiesToProcess.Count} children to " +
@@ -92,7 +97,7 @@
             }
         }
 
-        private static Dictionary<PropertyInfo, string> ExtractPropertyInfosAndDataHanderIdentifiers<TModelsBase>()
+        private static Dictionary<PropertyInfo, string> ExtractPropertyInfosAndDataHanderIdentifiers<TModelsBase>(string verb)
             where TModelsBase : ModelsBase
         {
             Dictionary<PropertyInfo, string> toReturn = null;
@@ -107,7 +112,7 @@
                     string identifier = null;
 
                     DataHandlerAttribute dataHandlerAttribute =
-                        (DataHandlerAttribute)x.GetCustomAttribute(attributeType);
+                        (DataHandlerAttribute)x.GetCustomAttributes(attributeType).FirstOrDefault(a => ((DataHandlerAttribute)a).Verb == verb);
 
                     if (dataHandlerAttribute != null)
                     {
@@ -126,7 +131,7 @@
             return toReturn;
         }
 
-        private static string ExtractDataHandlerIdentifier<TModelsBase>()
+        private static string ExtractDataHandlerIdentifier<TModelsBase>(string verb)
             where TModelsBase : ModelsBase
         {
             string toReturn = null;
@@ -134,17 +139,17 @@
             Type entityType = typeof(TModelsBase);
             Type attributeType = typeof(DataHandlerAttribute);
 
-            DataHandlerAttribute dataHandlerAttribute =
-                (DataHandlerAttribute)Attribute.GetCustomAttribute(
+            DataHandlerAttribute[] dataHandlerAttributes =
+                Attribute.GetCustomAttributes(
                     entityType,
-                    attributeType);
+                    attributeType) as DataHandlerAttribute[];
 
-            if (dataHandlerAttribute == null)
+            if (dataHandlerAttributes == null)
             {
                 throw new MissingDataHandlerAttributeException(entityType);
             }
 
-            toReturn = dataHandlerAttribute.Identifier;
+            toReturn = dataHandlerAttributes.FirstOrDefault(a => a.Verb == verb)?.Identifier;
 
             return toReturn;
         }

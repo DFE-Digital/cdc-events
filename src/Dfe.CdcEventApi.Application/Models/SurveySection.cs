@@ -7,13 +7,13 @@
     /// <summary>
     /// Represents an individual <c>surveysections</c> entity.
     /// </summary>
-    [DataHandler("Create_Raw_SurveySection")]
+    [DataHandler("Create_Raw_SurveySection", "Post")]
     public class SurveySection : ModelsBase
     {
         /// <summary>
         /// Gets or sets the <c>Evidence</c> property.
         /// </summary>
-        [DataHandler("Create_Raw_SurveySection_Evidence")]
+        [DataHandler("Create_Raw_SurveySection_Evidence", "Post")]
         [JsonProperty("Evidence")]
         public IEnumerable<CustomField> Evidence
         {
@@ -24,7 +24,7 @@
         /// <summary>
         /// Gets or sets the <c>Fields</c> property.
         /// </summary>
-        [DataHandler("Create_Raw_SurveySection_Field")]
+        [DataHandler("Create_Raw_SurveySection_Field", "Post")]
         [JsonProperty("Fields")]
         public IEnumerable<CustomField> Fields
         {

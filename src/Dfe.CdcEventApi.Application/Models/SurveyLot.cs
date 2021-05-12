@@ -7,13 +7,13 @@
     /// <summary>
     /// Represents an individual <c>surveylots</c> entity.
     /// </summary>
-    [DataHandler("Create_Raw_SurveyLot")]
+    [DataHandler("Create_Raw_SurveyLot", "Post")]
     public class SurveyLot : ModelsBase
     {
         /// <summary>
         /// Gets or sets the <c>Fields</c> property.
         /// </summary>
-        [DataHandler("Create_Raw_SurveyLot_Field")]
+        [DataHandler("Create_Raw_SurveyLot_Field", "Post")]
         [JsonProperty("Fields")]
         public IEnumerable<CustomField> Fields
         {
@@ -24,7 +24,7 @@
         /// <summary>
         /// Gets or sets the <c>SurveyLotSiteInfos</c> property.
         /// </summary>
-        [DataHandler("Create_Raw_SurveyLot_SiteInfo")]
+        [DataHandler("Create_Raw_SurveyLot_SiteInfo", "Post")]
         [JsonProperty("SurveyLotSiteInfos")]
         public IEnumerable<SiteInfo> SiteInfos
         {

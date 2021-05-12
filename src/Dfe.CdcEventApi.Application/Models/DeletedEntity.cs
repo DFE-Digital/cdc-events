@@ -5,7 +5,7 @@
     /// <summary>
     /// Represents an individual <c>deleted</c> entity.
     /// </summary>
-    [DataHandler("Create_Raw_Deleted")]
+    [DataHandler("Create_Raw_Deleted", "Post")]
     public class DeletedEntity : ModelsBase
     {
         // Nothing for now.

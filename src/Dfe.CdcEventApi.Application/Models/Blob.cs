@@ -5,7 +5,7 @@
     /// <summary>
     /// Represents an individual <c>blob</c> entity.
     /// </summary>
-    [DataHandler("Create_Raw_Blob")]
+    [DataHandler("Create_Raw_Blob", "Post")]
     public class Blob : ModelsBase
     {
         // Nothing for now.
