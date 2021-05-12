@@ -60,7 +60,7 @@
         /// <returns>
         /// An instance of <see cref="HttpResponseMessage" />.
         /// </returns>
-        protected async Task<HttpResponseMessage> RunAsync<TModelsBase>(
+        protected async Task<HttpResponseMessage> PostAsync<TModelsBase>(
             HttpRequest httpRequest,
             CancellationToken cancellationToken)
             where TModelsBase : ModelsBase
@@ -137,7 +137,7 @@
 
                 try
                 {
-                    await this.entityProcessor.ProcessEntitiesAsync(
+                    await this.entityProcessor.CreateEntitiesAsync(
                         runIdentifier.Value,
                         modelsBases,
                         cancellationToken)

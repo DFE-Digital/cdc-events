@@ -43,7 +43,7 @@
         }
 
         /// <inheritdoc />
-        public async Task ProcessEntitiesAsync<TModelsBase>(
+        public async Task CreateEntitiesAsync<TModelsBase>(
             DateTime runIdentifier,
             IEnumerable<TModelsBase> modelsBases,
             CancellationToken cancellationToken)

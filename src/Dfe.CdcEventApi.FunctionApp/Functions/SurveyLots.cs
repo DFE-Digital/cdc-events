@@ -54,7 +54,7 @@
             CancellationToken cancellationToken)
         {
             HttpResponseMessage toReturn =
-                await this.RunAsync<SurveyLot>(
+                await this.PostAsync<SurveyLot>(
                     httpRequest,
                     cancellationToken)
                 .ConfigureAwait(false);

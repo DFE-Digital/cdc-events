@@ -31,7 +31,7 @@
         /// <returns>
         /// A <see cref="Task"/> representing the asynchronous operation.
         /// </returns>
-        Task ProcessEntitiesAsync<TModelsBase>(
+        Task CreateEntitiesAsync<TModelsBase>(
             DateTime runIdentifier,
             IEnumerable<TModelsBase> modelsBases,
             CancellationToken cancellationToken)

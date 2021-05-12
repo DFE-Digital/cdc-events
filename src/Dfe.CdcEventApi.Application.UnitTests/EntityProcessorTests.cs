@@ -37,7 +37,7 @@ namespace Dfe.CdcEventApi.Application.UnitTests
         }
 
         [TestMethod]
-        public async Task ProcessEntitiesAsync_ModelsBasesNull_ThrowsArgumentNullException()
+        public async Task CreateEntitiesAsync_ModelsBasesNull_ThrowsArgumentNullException()
         {
             // Arrange
             DateTime runIdentifier = DateTime.UtcNow;
@@ -47,7 +47,7 @@ namespace Dfe.CdcEventApi.Application.UnitTests
             Func<Task> processEntitiesAsync = () =>
             {
                 // Act
-                return this.entityProcessor.ProcessEntitiesAsync(
+                return this.entityProcessor.CreateEntitiesAsync(
                     runIdentifier,
                     exampleEntities,
                     cancellationToken);
@@ -59,7 +59,7 @@ namespace Dfe.CdcEventApi.Application.UnitTests
         }
 
         [TestMethod]
-        public async Task ProcessEntitiesAsync_ModelMissingDataHandlerAttribute_ThrowsMissingDataHandlerAttributeException()
+        public async Task CreateEntitiesAsync_ModelMissingDataHandlerAttribute_ThrowsMissingDataHandlerAttributeException()
         {
             // Arrange
             DateTime runIdentifier = DateTime.UtcNow;
@@ -73,7 +73,7 @@ namespace Dfe.CdcEventApi.Application.UnitTests
             Func<Task> processEntitiesAsync = () =>
             {
                 // Act
-                return this.entityProcessor.ProcessEntitiesAsync(
+                return this.entityProcessor.CreateEntitiesAsync(
                     runIdentifier,
                     dataHandlerMissingEntities,
                     cancellationToken);
@@ -85,7 +85,7 @@ namespace Dfe.CdcEventApi.Application.UnitTests
         }
 
         [TestMethod]
-        public async Task ProcessEntitiesAsync_MethodInvokedWithValidModelAndData_CorrectDataHandlerAndXmlRepresentationPassedToDataLayer()
+        public async Task CreateEntitiesAsync_MethodInvokedWithValidModelAndData_CorrectDataHandlerAndXmlRepresentationPassedToDataLayer()
         {
             // Arrange
             List<string> dataHandlerIdentifiers = new List<string>();
@@ -117,7 +117,7 @@ namespace Dfe.CdcEventApi.Application.UnitTests
             CancellationToken cancellationToken = CancellationToken.None;
 
             // Act
-            await this.entityProcessor.ProcessEntitiesAsync(
+            await this.entityProcessor.CreateEntitiesAsync(
                 runIdentifier,
                 exampleEntities,
                 cancellationToken);

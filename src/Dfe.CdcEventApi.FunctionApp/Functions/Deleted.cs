@@ -53,7 +53,7 @@
             CancellationToken cancellationToken)
         {
             HttpResponseMessage toReturn =
-                await this.RunAsync<DeletedEntity>(
+                await this.PostAsync<DeletedEntity>(
                     httpRequest,
                     cancellationToken)
                 .ConfigureAwait(false);

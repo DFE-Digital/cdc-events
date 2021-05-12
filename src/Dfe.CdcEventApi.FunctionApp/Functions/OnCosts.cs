@@ -53,7 +53,7 @@
             CancellationToken cancellationToken)
         {
             HttpResponseMessage toReturn =
-                await this.RunAsync<OnCost>(
+                await this.PostAsync<OnCost>(
                     httpRequest,
                     cancellationToken)
                 .ConfigureAwait(false);

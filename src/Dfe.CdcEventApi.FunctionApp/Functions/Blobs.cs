@@ -51,7 +51,7 @@
             CancellationToken cancellationToken)
         {
             HttpResponseMessage toReturn =
-                await this.RunAsync<Blob>(
+                await this.PostAsync<Blob>(
                     httpRequest,
                     cancellationToken)
                 .ConfigureAwait(false);
