@@ -5,10 +5,11 @@
     using Dfe.CdcEventApi.Application.Models;
     using Newtonsoft.Json;
 
-    [DataHandler("ExampleDataHandler")]
+    [DataHandler("ExampleDataHandler", "Post")]
+    [DataHandler("ExampleDataHandler", "Get")]
     public class ExampleEntity : ModelsBase
     {
-        [DataHandler("ExampleSubEntityCollectionDataHandler")]
+        [DataHandler("ExampleSubEntityCollectionDataHandler","Post")]
         [JsonProperty("additional")]
         public IEnumerable<ExampleSubEntity> AdditionalData
         {

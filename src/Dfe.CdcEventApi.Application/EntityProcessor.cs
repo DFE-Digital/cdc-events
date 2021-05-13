@@ -60,7 +60,7 @@
 
             if (string.IsNullOrWhiteSpace(identifier))
             {
-                throw new ArgumentNullException(typeof(DataHandlerAttribute).Name);
+                throw new MissingDataHandlerAttributeException(typeof(TModelsBase));
             }
 
             // 2) Prepare the main XDocument to be passed to the data-layer.
