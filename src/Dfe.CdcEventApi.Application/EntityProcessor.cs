@@ -97,7 +97,7 @@
             }
         }
 
-        private static Dictionary<PropertyInfo, string> ExtractPropertyInfosAndDataHanderIdentifiers<TModelsBase>(string verb)
+        private static Dictionary<PropertyInfo, string> ExtractPropertyInfosAndDataHanderIdentifiers<TModelsBase>(string forVerb)
             where TModelsBase : ModelsBase
         {
             Dictionary<PropertyInfo, string> toReturn = null;
@@ -112,7 +112,7 @@
                     string identifier = null;
 
                     DataHandlerAttribute dataHandlerAttribute =
-                        (DataHandlerAttribute)x.GetCustomAttributes(attributeType).FirstOrDefault(a => ((DataHandlerAttribute)a).Verb == verb);
+                        (DataHandlerAttribute)x.GetCustomAttributes(attributeType).FirstOrDefault(a => ((DataHandlerAttribute)a).Verb == forVerb);
 
                     if (dataHandlerAttribute != null)
                     {
@@ -131,7 +131,7 @@
             return toReturn;
         }
 
-        private static string ExtractDataHandlerIdentifier<TModelsBase>(string verb)
+        private static string ExtractDataHandlerIdentifier<TModelsBase>(string forVerb)
             where TModelsBase : ModelsBase
         {
             string toReturn = null;
@@ -149,7 +149,7 @@
                 throw new MissingDataHandlerAttributeException(entityType);
             }
 
-            toReturn = dataHandlerAttributes.FirstOrDefault(a => a.Verb == verb)?.Identifier;
+            toReturn = dataHandlerAttributes.FirstOrDefault(a => a.Verb == forVerb)?.Identifier;
 
             return toReturn;
         }
