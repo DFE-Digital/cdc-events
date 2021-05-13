@@ -97,6 +97,47 @@
             }
         }
 
+        /// <summary>
+        /// Retrieves a collection of instances of type
+        /// <typeparamref name="TModelsBase" /> as dynamic objects.
+        /// </summary>
+        /// <typeparam name="TModelsBase">
+        /// A type deriving from <see cref="ModelsBase" />.
+        /// </typeparam>
+        /// <param name="runIdentifier">
+        /// An identifier for the run, as a <see cref="DateTime" /> value.
+        /// </param>
+        /// <param name="cancellationToken">
+        /// An instance of <see cref="CancellationToken" />.
+        /// </param>
+        /// <returns>
+        /// A <see cref="Task"/> if <see cref="IEnumerable{dynamic}"/> representing the retrieved entity instances.
+        /// </returns>
+        public async Task<IEnumerable<dynamic>> RetrieveEntitiesAsync<TModelsBase>(
+            DateTime runIdentifier,
+            CancellationToken cancellationToken)
+            where TModelsBase : ModelsBase
+        {
+            IEnumerable<dynamic> results = null;
+
+            // 1) Figure out which embedded TSQL script to invoke from the
+            //    meta-data of TModels base for this verb action.
+            string dataHandlerIdentifier = ExtractDataHandlerIdentifier<TModelsBase>("Get");
+
+            if (string.IsNullOrWhiteSpace(dataHandlerIdentifier))
+            {
+                throw new MissingDataHandlerAttributeException(typeof(TModelsBase));
+            }
+
+            // 2) Invoke the data-layer with the script and the DataTable.
+            results = await this.entityStorageAdapter.RetrieveEntitiesAsync(
+                dataHandlerIdentifier,
+                runIdentifier,
+                cancellationToken)
+                .ConfigureAwait(false);
+            return results;
+        }
+
         private static Dictionary<PropertyInfo, string> ExtractPropertyInfosAndDataHanderIdentifiers<TModelsBase>(string forVerb)
             where TModelsBase : ModelsBase
         {

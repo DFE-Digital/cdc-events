@@ -3,7 +3,7 @@
     using Dfe.CdcEventApi.Application.Definitions;
     using Dfe.CdcEventApi.Application.Models;
 
-    [DataHandler("ExampleSubEntityCollectionDataHandler", "Get")]
+    [DataHandler("ExampleSubEntityDataHandler", "Get")]
     public class ExampleSubEntity : ModelsBase
     {
         // Nothing for now.

@@ -22,16 +22,16 @@ namespace Dfe.CdcEventApi.Application.UnitTests
     {
         private Mock<IEntityStorageAdapter> mockEntityStorageAdapter;
 
-        private EntityProcessor entityProcessor;
+        private EntityProcessor unit;
 
         [TestInitialize]
         public void Arrange()
         {
             this.mockEntityStorageAdapter = new Mock<IEntityStorageAdapter>();
-            
+
             Mock<ILoggerProvider> mockLoggerProvider = new Mock<ILoggerProvider>();
 
-            this.entityProcessor = new EntityProcessor(
+            this.unit = new EntityProcessor(
                 this.mockEntityStorageAdapter.Object,
                 mockLoggerProvider.Object);
         }
@@ -47,7 +47,7 @@ namespace Dfe.CdcEventApi.Application.UnitTests
             Func<Task> processEntitiesAsync = () =>
             {
                 // Act
-                return this.entityProcessor.CreateEntitiesAsync(
+                return this.unit.CreateEntitiesAsync(
                     runIdentifier,
                     exampleEntities,
                     cancellationToken);
@@ -63,7 +63,7 @@ namespace Dfe.CdcEventApi.Application.UnitTests
         {
             // Arrange
             DateTime runIdentifier = DateTime.UtcNow;
-            DataHandlerMissingEntity[] dataHandlerMissingEntities = 
+            DataHandlerMissingEntity[] dataHandlerMissingEntities =
                 new DataHandlerMissingEntity[]
                 {
                     // Empty.
@@ -73,7 +73,7 @@ namespace Dfe.CdcEventApi.Application.UnitTests
             Func<Task> processEntitiesAsync = () =>
             {
                 // Act
-                return this.entityProcessor.CreateEntitiesAsync(
+                return this.unit.CreateEntitiesAsync(
                     runIdentifier,
                     dataHandlerMissingEntities,
                     cancellationToken);
@@ -104,7 +104,7 @@ namespace Dfe.CdcEventApi.Application.UnitTests
 
             string[] expectedDataHandlerIdentifiers = new string[] {
                 "ExampleDataHandler",
-                "ExampleSubEntityCollectionDataHandler"
+                "ExampleSubEntityDataHandler"
             };
             string[] actualDataHandlerIdentifiers = null;
 
@@ -117,7 +117,7 @@ namespace Dfe.CdcEventApi.Application.UnitTests
             CancellationToken cancellationToken = CancellationToken.None;
 
             // Act
-            await this.entityProcessor.CreateEntitiesAsync(
+            await this.unit.CreateEntitiesAsync(
                 runIdentifier,
                 exampleEntities,
                 cancellationToken);
@@ -126,6 +126,7 @@ namespace Dfe.CdcEventApi.Application.UnitTests
             actualDataHandlerIdentifiers = dataHandlerIdentifiers
                 .Distinct()
                 .ToArray();
+
             actualNumberOfXDocuments = xDocuments.Count;
 
             CollectionAssert.AreEqual(
@@ -134,6 +135,61 @@ namespace Dfe.CdcEventApi.Application.UnitTests
             Assert.AreEqual(
                 expectedNumberOfXDocuments,
                 actualNumberOfXDocuments);
+        }
+
+        [TestMethod]
+        public async Task GetEntitiesAsync_MethodInvokedWithValidModel_CorrectDataHandler()
+        {
+            // Arrange
+            List<string> dataHandlerIdentifiers = new List<string>();
+
+            Action<string, DateTime, CancellationToken> retrieveEntitiesAsync =
+                (dhi, ri, ct) =>
+                {
+                    dataHandlerIdentifiers.Add(dhi);
+                    //xDocuments.Add(xd);
+                };
+
+            this.mockEntityStorageAdapter
+                .Setup(x => x.RetrieveEntitiesAsync(
+                    It.IsAny<string>(),
+                    It.IsAny<DateTime>(),
+                    It.IsAny<CancellationToken>()))
+                .Callback(retrieveEntitiesAsync)
+                .ReturnsAsync(new List<dynamic>());
+
+            string[] expectedDataHandlerIdentifiers = new string[] {
+                "ExampleSubEntityDataHandler"
+            };
+
+            string[] actualDataHandlerIdentifiers = null;
+
+            DateTime runIdentifier = DateTime.UtcNow;
+
+            ExampleSubEntity[] exampleEntities = ExtractTestData<ExampleSubEntity>(
+                "ExampleEntities.json");
+
+            CancellationToken cancellationToken = CancellationToken.None;
+
+            // Act
+            var result = await this.unit.RetrieveEntitiesAsync<ExampleSubEntity>(
+                runIdentifier,
+                cancellationToken).ConfigureAwait(false);
+
+            // Assert
+            actualDataHandlerIdentifiers = dataHandlerIdentifiers
+                .Distinct()
+                .ToArray();
+
+            //actualNumberOfXDocuments = xDocuments.Count;
+
+            CollectionAssert.AreEqual(
+                expectedDataHandlerIdentifiers,
+                actualDataHandlerIdentifiers);
+
+            //Assert.AreEqual(
+            //    expectedNumberOfXDocuments,
+            //    actualNumberOfXDocuments);
         }
 
         private static TModelsBase[] ExtractTestData<TModelsBase>(

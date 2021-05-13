@@ -1,6 +1,7 @@
 ﻿namespace Dfe.CdcEventApi.Domain.Definitions
 {
     using System;
+    using System.Collections.Generic;
     using System.Threading;
     using System.Threading.Tasks;
     using System.Xml.Linq;
@@ -32,6 +33,26 @@
             string dataHandlerIdentifier,
             DateTime runIdentifier,
             XDocument xDocument,
+            CancellationToken cancellationToken);
+
+        /// <summary>
+        /// Retrieves entities in the underlying storage.
+        /// </summary>
+        /// <param name="dataHandlerIdentifier">
+        /// The data handler identifier.
+        /// </param>
+        /// <param name="runIdentifier">
+        /// An identifier for the run, as a <see cref="DateTime" /> value.
+        /// </param>
+        /// <param name="cancellationToken">
+        /// An instance of <see cref="CancellationToken" />.
+        /// </param>
+        /// <returns>
+        /// A <see cref="Task"/> representing the asynchronous operation.
+        /// </returns>
+        Task<IEnumerable<dynamic>> RetrieveEntitiesAsync(
+            string dataHandlerIdentifier,
+            DateTime runIdentifier,
             CancellationToken cancellationToken);
     }
 }

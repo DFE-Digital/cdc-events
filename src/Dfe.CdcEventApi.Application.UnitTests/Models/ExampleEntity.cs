@@ -9,7 +9,8 @@
     [DataHandler("ExampleDataHandler", "Get")]
     public class ExampleEntity : ModelsBase
     {
-        [DataHandler("ExampleSubEntityCollectionDataHandler","Post")]
+        [DataHandler("ExampleSubEntityDataHandler","Post")]
+        [DataHandler("ExampleSubEntityDataHandler", "Get")]
         [JsonProperty("additional")]
         public IEnumerable<ExampleSubEntity> AdditionalData
         {
