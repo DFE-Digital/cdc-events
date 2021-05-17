@@ -3,6 +3,7 @@
     using System.Net.Http;
     using System.Threading;
     using System.Threading.Tasks;
+    using Dfe.CdcEventApi.Application;
     using Dfe.CdcEventApi.Application.Definitions;
     using Dfe.CdcEventApi.Application.Models;
     using Dfe.CdcEventApi.Domain.Definitions;
@@ -13,20 +14,20 @@
     /// <summary>
     /// Entry class for the <c>surverysectionelements</c> function.
     /// </summary>
-    public class SurveySectionElements : FunctionsBase
+    public class LoadControl : LoadControlFunctionsBase
     {
         /// <summary>
         /// Initialises a new instance of the
-        /// <see cref="SurveySectionElements" /> class.
+        /// <see cref="LoadControl" /> class.
         /// </summary>
         /// <param name="entityProcessor">
-        /// An instance of type <see cref="IEntityProcessor" />.
+        /// An instance of type <see cref="ILoadControlProcessor" />.
         /// </param>
         /// <param name="loggerProvider">
         /// An instance of type <see cref="ILoggerProvider" />.
         /// </param>
-        public SurveySectionElements(
-            IEntityProcessor entityProcessor,
+        public LoadControl(
+            ILoadControlProcessor entityProcessor,
             ILoggerProvider loggerProvider)
             : base(
                   entityProcessor,
@@ -47,14 +48,14 @@
         /// <returns>
         /// An instance of type <see cref="HttpResponseMessage" />.
         /// </returns>
-        [FunctionName("surveysectionelements")]
-        public async Task<HttpResponseMessage> RunAsync(
+        [FunctionName("startloadcontrol")]
+        public async Task<HttpResponseMessage> PostAsync(
             [HttpTrigger(AuthorizationLevel.Function, "POST")]
             HttpRequest httpRequest,
             CancellationToken cancellationToken)
         {
             HttpResponseMessage toReturn =
-                await this.PostAsync<SurveySectionElement>(
+                await this.PostAsync<LoadControl>(
                     httpRequest,
                     cancellationToken)
                 .ConfigureAwait(false);

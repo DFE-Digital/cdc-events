@@ -16,6 +16,7 @@
     using Dfe.CdcEventApi.Domain.Definitions;
     using Newtonsoft.Json.Linq;
 
+
     /// <summary>
     /// Implements <see cref="IEntityProcessor" />.
     /// </summary>
@@ -56,7 +57,7 @@
 
             // 1) Figure out which embedded TSQL script to invoke from the
             //    meta-data of TModels base for this verb action.
-            string identifier = ExtractDataHandlerIdentifier<TModelsBase>("Post");
+            string identifier = ExtractDataHandlerIdentifier<TModelsBase>();
 
             if (string.IsNullOrWhiteSpace(identifier))
             {
@@ -77,7 +78,7 @@
             // 4) Identify any sub-collection properties for DataHandler
             //    identifiers for this verb action.
             Dictionary<PropertyInfo, string> propertiesToProcess =
-                ExtractPropertyInfosAndDataHanderIdentifiers<TModelsBase>("Post");
+                ExtractPropertyInfosAndDataHanderIdentifier<TModelsBase>();
 
             this.loggerProvider.Debug(
                 $"This entity has {propertiesToProcess.Count} children to " +
@@ -97,48 +98,7 @@
             }
         }
 
-        /// <summary>
-        /// Retrieves a collection of instances of type
-        /// <typeparamref name="TModelsBase" /> as dynamic objects.
-        /// </summary>
-        /// <typeparam name="TModelsBase">
-        /// A type deriving from <see cref="ModelsBase" />.
-        /// </typeparam>
-        /// <param name="runIdentifier">
-        /// An identifier for the run, as a <see cref="DateTime" /> value.
-        /// </param>
-        /// <param name="cancellationToken">
-        /// An instance of <see cref="CancellationToken" />.
-        /// </param>
-        /// <returns>
-        /// A <see cref="Task"/> if <see cref="IEnumerable{dynamic}"/> representing the retrieved entity instances.
-        /// </returns>
-        public async Task<IEnumerable<dynamic>> RetrieveEntitiesAsync<TModelsBase>(
-            DateTime runIdentifier,
-            CancellationToken cancellationToken)
-            where TModelsBase : ModelsBase
-        {
-            IEnumerable<dynamic> results = null;
-
-            // 1) Figure out which embedded TSQL script to invoke from the
-            //    meta-data of TModels base for this verb action.
-            string dataHandlerIdentifier = ExtractDataHandlerIdentifier<TModelsBase>("Get");
-
-            if (string.IsNullOrWhiteSpace(dataHandlerIdentifier))
-            {
-                throw new MissingDataHandlerAttributeException(typeof(TModelsBase));
-            }
-
-            // 2) Invoke the data-layer with the script and the DataTable.
-            results = await this.entityStorageAdapter.RetrieveEntitiesAsync(
-                dataHandlerIdentifier,
-                runIdentifier,
-                cancellationToken)
-                .ConfigureAwait(false);
-            return results;
-        }
-
-        private static Dictionary<PropertyInfo, string> ExtractPropertyInfosAndDataHanderIdentifiers<TModelsBase>(string forVerb)
+        private static Dictionary<PropertyInfo, string> ExtractPropertyInfosAndDataHanderIdentifier<TModelsBase>()
             where TModelsBase : ModelsBase
         {
             Dictionary<PropertyInfo, string> toReturn = null;
@@ -153,7 +113,7 @@
                     string identifier = null;
 
                     DataHandlerAttribute dataHandlerAttribute =
-                        (DataHandlerAttribute)x.GetCustomAttributes(attributeType).FirstOrDefault(a => ((DataHandlerAttribute)a).Verb == forVerb);
+                        (DataHandlerAttribute)x.GetCustomAttribute(attributeType);
 
                     if (dataHandlerAttribute != null)
                     {
@@ -172,7 +132,7 @@
             return toReturn;
         }
 
-        private static string ExtractDataHandlerIdentifier<TModelsBase>(string forVerb)
+        private static string ExtractDataHandlerIdentifier<TModelsBase>()
             where TModelsBase : ModelsBase
         {
             string toReturn = null;
@@ -180,17 +140,17 @@
             Type entityType = typeof(TModelsBase);
             Type attributeType = typeof(DataHandlerAttribute);
 
-            DataHandlerAttribute[] dataHandlerAttributes =
-                Attribute.GetCustomAttributes(
+            DataHandlerAttribute dataHandlerAttribute =
+                Attribute.GetCustomAttribute(
                     entityType,
-                    attributeType) as DataHandlerAttribute[];
+                    attributeType) as DataHandlerAttribute;
 
-            if (dataHandlerAttributes == null)
+            if (dataHandlerAttribute == null)
             {
                 throw new MissingDataHandlerAttributeException(entityType);
             }
 
-            toReturn = dataHandlerAttributes.FirstOrDefault(a => a.Verb == forVerb)?.Identifier;
+            toReturn = dataHandlerAttribute.Identifier;
 
             return toReturn;
         }
@@ -289,7 +249,7 @@
 
                     foreach (KeyValuePair<string, JToken> keyValuePair in data)
                     {
-                        dataRow[keyValuePair.Key] = HttpUtility.HtmlEncode(keyValuePair.Value);
+                        dataRow[keyValuePair.Key] = keyValuePair.Value;
                     }
 
                     dataTable.Rows.Add(dataRow);

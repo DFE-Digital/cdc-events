@@ -36,27 +36,6 @@
             IEnumerable<TModelsBase> modelsBases,
             CancellationToken cancellationToken)
             where TModelsBase : ModelsBase;
-
-
-        /// <summary>
-        /// Retrieves a collection of instances of type
-        /// <typeparamref name="TModelsBase" /> as dynamic objects.
-        /// </summary>
-        /// <typeparam name="TModelsBase">
-        /// A type deriving from <see cref="ModelsBase" />.
-        /// </typeparam>
-        /// <param name="runIdentifier">
-        /// An identifier for the run, as a <see cref="DateTime" /> value.
-        /// </param>
-        /// <param name="cancellationToken">
-        /// An instance of <see cref="CancellationToken" />.
-        /// </param>
-        /// <returns>
-        /// A <see cref="Task"/> if <see cref="IEnumerable{dynamic}"/> representing the retrieved entity instances.
-        /// </returns>
-        Task<IEnumerable<dynamic>> RetrieveEntitiesAsync<TModelsBase>(
-            DateTime runIdentifier,
-            CancellationToken cancellationToken)
-            where TModelsBase : ModelsBase;
     }
+   
 }

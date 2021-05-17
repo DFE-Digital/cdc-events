@@ -7,13 +7,13 @@
     /// <summary>
     /// Represents an individual <c>oncosts</c> entity.
     /// </summary>
-    [DataHandler("Create_Raw_Oncost", "Post")]
+    [DataHandler("Create_Raw_Oncost")]
     public class OnCost : ModelsBase
     {
         /// <summary>
         /// Gets or sets the <c>Fields</c> property.
         /// </summary>
-        [DataHandler("Create_Raw_Oncost_Field", "Post")]
+        [DataHandler("Create_Raw_Oncost_Field")]
         [JsonProperty("Fields")]
         public IEnumerable<CustomField> Fields
         {

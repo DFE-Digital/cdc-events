@@ -7,13 +7,13 @@
     /// <summary>
     /// Represents an individual <c>activities</c> entity.
     /// </summary>
-    [DataHandler("Create_Raw_Activity", "Post")]
+    [DataHandler("Create_Raw_Activity")]
     public class Activity : ModelsBase
     {
         /// <summary>
         /// Gets or sets the <c>Fields</c> property.
         /// </summary>
-        [DataHandler("Create_Raw_Activity_Field", "Post")]
+        [DataHandler("Create_Raw_Activity_Field")]
         [JsonProperty("Fields")]
         public IEnumerable<CustomField> Fields
         {

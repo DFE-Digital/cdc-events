@@ -13,7 +13,7 @@
     /// <summary>
     /// Entry class for the <c>actuals</c> function.
     /// </summary>
-    public class Actuals : FunctionsBase
+    public class Actuals : EntityFunctionsBase
     {
         /// <summary>
         /// Initialises a new instance of the <see cref="Actuals" /> class.

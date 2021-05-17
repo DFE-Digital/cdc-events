@@ -13,7 +13,7 @@
     /// <summary>
     /// Entry class for the <c>sites</c> function.
     /// </summary>
-    public class Sites : FunctionsBase
+    public class Sites : EntityFunctionsBase
     {
         /// <summary>
         /// Initialises a new instance of the <see cref="Sites" /> class.

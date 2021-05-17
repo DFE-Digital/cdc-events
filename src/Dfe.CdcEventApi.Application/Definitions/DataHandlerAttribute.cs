@@ -8,7 +8,7 @@
     /// </summary>
     [AttributeUsage(
         AttributeTargets.Class | AttributeTargets.Property,
-        AllowMultiple = true)]
+        AllowMultiple = false)]
     public class DataHandlerAttribute : Attribute
     {
         /// <summary>
@@ -18,28 +18,15 @@
         /// <param name="identifier">
         /// The data handler identifier.
         /// </param>
-        /// <param name="verb">
-        /// The data handler verb.
-        /// </param>
-        public DataHandlerAttribute(string identifier, string verb)
+        public DataHandlerAttribute(string identifier)
         {
             this.Identifier = identifier;
-            this.Verb = verb;
         }
 
         /// <summary>
         /// Gets the data handler identifier.
         /// </summary>
         public string Identifier
-        {
-            get;
-            private set;
-        }
-
-        /// <summary>
-        /// Gets the data handler verb.
-        /// </summary>
-        public string Verb
         {
             get;
             private set;

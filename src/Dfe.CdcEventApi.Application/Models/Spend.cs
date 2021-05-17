@@ -7,13 +7,13 @@
     /// <summary>
     /// Represents an individual <c>spends</c> entity.
     /// </summary>
-    [DataHandler("Create_Raw_Spend", "Post")]
+    [DataHandler("Create_Raw_Spend")]
     public class Spend : ModelsBase
     {
         /// <summary>
         /// Gets or sets the <c>Fields</c> property.
         /// </summary>
-        [DataHandler("Create_Raw_Spend_Field", "Post")]
+        [DataHandler("Create_Raw_Spend_Field")]
         [JsonProperty("Fields")]
         public IEnumerable<CustomField> Fields
         {

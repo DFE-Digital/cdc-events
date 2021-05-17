@@ -15,7 +15,7 @@
         /// </summary>
         /// <param name="reader">the prepared <see cref="SqlDataReader"/>.</param>
         /// <returns>An <see cref="IEnumerable{dynamic}"/>.</returns>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1062:Validate arguments of public methods", Justification = "Handled by client")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1062:Validate arguments of public methods", Justification = "Handled by client for DTO's")]
         public static IEnumerable<dynamic> Read(SqlDataReader reader)
         {
             while (reader.Read())

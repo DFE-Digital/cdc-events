@@ -13,7 +13,7 @@
     /// <summary>
     /// Entry class for the <c>spends</c> function.
     /// </summary>
-    public class Spends : FunctionsBase
+    public class Spends : EntityFunctionsBase
     {
         /// <summary>
         /// Initialises a new instance of the <see cref="Spends" /> class.

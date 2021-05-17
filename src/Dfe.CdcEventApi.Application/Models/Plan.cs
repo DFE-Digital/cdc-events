@@ -7,13 +7,13 @@
     /// <summary>
     /// Represents an individual <c>plans</c> entity.
     /// </summary>
-    [DataHandler("Create_Raw_Plan", "Post")]
+    [DataHandler("Create_Raw_Plan")]
     public class Plan : ModelsBase
     {
         /// <summary>
         /// Gets or sets the <c>Fields</c> property.
         /// </summary>
-        [DataHandler("Create_Raw_Plan_Field", "Post")]
+        [DataHandler("Create_Raw_Plan_Field")]
         [JsonProperty("Fields")]
         public IEnumerable<CustomField> Fields
         {

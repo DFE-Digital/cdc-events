@@ -2,6 +2,7 @@ namespace Dfe.CdcEventApi.Application.UnitTests
 {
     using System;
     using System.Collections.Generic;
+    using System.Collections.ObjectModel;
     using System.IO;
     using System.Linq;
     using System.Reflection;
@@ -137,61 +138,7 @@ namespace Dfe.CdcEventApi.Application.UnitTests
                 actualNumberOfXDocuments);
         }
 
-        [TestMethod]
-        public async Task GetEntitiesAsync_MethodInvokedWithValidModel_CorrectDataHandler()
-        {
-            // Arrange
-            List<string> dataHandlerIdentifiers = new List<string>();
-
-            Action<string, DateTime, CancellationToken> retrieveEntitiesAsync =
-                (dhi, ri, ct) =>
-                {
-                    dataHandlerIdentifiers.Add(dhi);
-                    //xDocuments.Add(xd);
-                };
-
-            this.mockEntityStorageAdapter
-                .Setup(x => x.RetrieveEntitiesAsync(
-                    It.IsAny<string>(),
-                    It.IsAny<DateTime>(),
-                    It.IsAny<CancellationToken>()))
-                .Callback(retrieveEntitiesAsync)
-                .ReturnsAsync(new List<dynamic>());
-
-            string[] expectedDataHandlerIdentifiers = new string[] {
-                "ExampleSubEntityDataHandler"
-            };
-
-            string[] actualDataHandlerIdentifiers = null;
-
-            DateTime runIdentifier = DateTime.UtcNow;
-
-            ExampleSubEntity[] exampleEntities = ExtractTestData<ExampleSubEntity>(
-                "ExampleEntities.json");
-
-            CancellationToken cancellationToken = CancellationToken.None;
-
-            // Act
-            var result = await this.unit.RetrieveEntitiesAsync<ExampleSubEntity>(
-                runIdentifier,
-                cancellationToken).ConfigureAwait(false);
-
-            // Assert
-            actualDataHandlerIdentifiers = dataHandlerIdentifiers
-                .Distinct()
-                .ToArray();
-
-            //actualNumberOfXDocuments = xDocuments.Count;
-
-            CollectionAssert.AreEqual(
-                expectedDataHandlerIdentifiers,
-                actualDataHandlerIdentifiers);
-
-            //Assert.AreEqual(
-            //    expectedNumberOfXDocuments,
-            //    actualNumberOfXDocuments);
-        }
-
+       
         private static TModelsBase[] ExtractTestData<TModelsBase>(
             string filename)
             where TModelsBase : ModelsBase

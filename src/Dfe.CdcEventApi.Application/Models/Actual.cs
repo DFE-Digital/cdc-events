@@ -7,13 +7,13 @@
     /// <summary>
     /// Represents an individual <c>actuals</c> entity.
     /// </summary>
-    [DataHandler("Create_Raw_Actual", "Post")]
+    [DataHandler("Create_Raw_Actual")]
     public class Actual : ModelsBase
     {
         /// <summary>
         /// Gets or sets the <c>Fields</c> property.
         /// </summary>
-        [DataHandler("Create_Raw_Actual_Field", "Post")]
+        [DataHandler("Create_Raw_Actual_Field")]
         [JsonProperty("Fields")]
         public IEnumerable<CustomField> Fields
         {

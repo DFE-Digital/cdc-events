@@ -13,7 +13,7 @@
     /// <summary>
     /// Entry class for the <c>deleted</c> function.
     /// </summary>
-    public class Deleted : FunctionsBase
+    public class Deleted : EntityFunctionsBase
     {
         /// <summary>
         /// Initialises a new instance of the <see cref="Deleted" /> class.

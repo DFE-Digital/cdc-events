@@ -13,7 +13,7 @@
     /// <summary>
     /// Entry class for the <c>surveylots</c> function.
     /// </summary>
-    public class SurveyLots : FunctionsBase
+    public class SurveyLots : EntityFunctionsBase
     {
         /// <summary>
         /// Initialises a new instance of the <see cref="SurveyLots" />
