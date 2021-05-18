@@ -28,11 +28,6 @@
         /// <summary>
         /// Gets or sets a value indicating whether .
         /// </summary>
-        public bool IncludeRunInfo { get; set; }
-
-        /// <summary>
-        /// Gets or sets a value indicating whether .
-        /// </summary>
         public bool IncludeRIChecks { get; set; }
     }
 }

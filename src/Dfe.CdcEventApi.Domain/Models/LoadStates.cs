@@ -1,6 +1,7 @@
 ﻿namespace Dfe.CdcEventApi.Domain.Models
 {
     using System;
+    using System.ComponentModel;
 
     /// <summary>
     /// An enumeration of available Load states.
@@ -11,31 +12,31 @@
         /// <summary>
         /// No state has yet been set as nothing has happend.
         /// </summary>
-        None = 0,
+        [Description("Nothing")] None = 0,
 
         /// <summary>
         /// The load has started running.
         /// </summary>
-        Loading = 1,
+        [Description("Failed")] Loading = 1,
 
         /// <summary>
         /// The load has failed when initialising.
         /// </summary>
-        FailedOnInitialisation = 2,
+        [Description("Init Failed")] FailedOnInitialisation = 2,
 
         /// <summary>
         /// The load has failed during entity loading.
         /// </summary>
-        FailedOnEntities = 4,
+        [Description("Entities Failed")] FailedOnEntities = 4,
 
         /// <summary>
         /// The load has failed when processing blobs.
         /// </summary>
-        FailedOnBlobHandling = 8,
+        [Description("BLOBS Failed")] FailedOnBlobHandling = 8,
 
         /// <summary>
         /// The load has succeeded.
         /// </summary>
-        Suceeeded = 32,
+        [Description("Succeded")] Suceeeded = 32,
     }
 }

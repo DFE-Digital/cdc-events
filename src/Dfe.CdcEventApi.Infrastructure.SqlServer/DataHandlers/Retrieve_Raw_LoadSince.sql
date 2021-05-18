@@ -10,6 +10,6 @@ FROM
 WHERE 
 	 [Load_DateTime]  <= @RunIdentifier
 AND
-	[Status] IN (0, 32)
+	[Status] IN (1, 32)
 ORDER BY
 	[Load_DateTime] DESC

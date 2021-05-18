@@ -76,13 +76,13 @@
                 var insertSql = this.ExtractHandler("Create_Raw_Load");
                 this.loggerProvider.Debug($"Creating Load record.");
                 var count = await sqlConnection
-                        .ExecuteAsync(insertSql, runIdentifier)
+                        .ExecuteAsync(insertSql, new { runIdentifier })
                         .ConfigureAwait(false);
 
                 this.loggerProvider.Debug($"Retrieving new Load record.");
                 string querySql = this.ExtractHandler("Retrieve_Raw_LoadSince");
                 IEnumerable<Load> loads = sqlConnection
-                        .Query<Load>(querySql, runIdentifier);
+                        .Query<Load>(querySql, new { runIdentifier });
                 return loads;
             }
         }
@@ -100,7 +100,7 @@
             {
                 string querySql = this.ExtractHandler("Retrieve_Raw_Load");
                 this.loggerProvider.Debug($"Retrieving Load record.");
-                Load load = sqlConnection.Query<Load>(querySql, runIdentifier)
+                Load load = sqlConnection.Query<Load>(querySql, new { runIdentifier })
                         .FirstOrDefault();
                 return Task.FromResult(load);
             }
@@ -120,7 +120,7 @@
             using (SqlConnection sqlConnection = new SqlConnection(this.rawDbConnectionString))
             {
                 this.loggerProvider.Debug($"Retrieving new Load record.");
-                var results = sqlConnection.Query<LoadNotification>(querySql, status);
+                var results = sqlConnection.Query<LoadNotification>(querySql, new { status });
                 return Task.FromResult(results);
             }
         }
@@ -139,7 +139,7 @@
             using (SqlConnection sqlConnection = new SqlConnection(this.rawDbConnectionString))
             {
                 this.loggerProvider.Debug($"Retrieving new Load Notification Template record.");
-                var results = sqlConnection.Query<LoadNotificationTemplate>(querySql, status).FirstOrDefault();
+                var results = sqlConnection.Query<LoadNotificationTemplate>(querySql, new { status }).FirstOrDefault();
                 return Task.FromResult(results);
             }
         }

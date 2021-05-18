@@ -103,7 +103,7 @@
         /// </returns>
         [FunctionName("finishload")]
         public async Task<HttpResponseMessage> FinishLoadAsync(
-            [HttpTrigger(AuthorizationLevel.Function, "GET")]
+            [HttpTrigger(AuthorizationLevel.Function, "PUT")]
             HttpRequest httpRequest,
             CancellationToken cancellationToken)
         {

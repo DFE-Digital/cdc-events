@@ -72,9 +72,6 @@
 
             if (runIdentifier.HasValue)
             {
-                string body = await httpRequest.ReadAsStringAsync()
-                                .ConfigureAwait(false);
-
                 try
                 {
                     var loads = await this.loadProcessor.CreateLoadAsync(
@@ -248,30 +245,38 @@
                     if (template.IncludeRIChecks)
                     {
                         // nothing yet.
+                        // var statistics = await this.loadProcessor.GetRIChecks(runIdentifier, cancellationToken).ConfigureAwait(false);
                     }
 
                     // get load stats.
                     if (template.IncludeRowStats)
                     {
                         // nothing yet.
-                    }
-
-                    if (template.IncludeRunInfo)
-                    {
-                        // nothing yet.
+                        // var statistics = await this.loadProcessor.GetLoadStatistics(runIdentifier, cancellationToken).ConfigureAwait(false);
                     }
                 }
+
+                LoadStates state = load.Status.ToString().ToEnum<LoadStates>();
+
+                load.ReportTitle = template.Subject.Replace(
+                    "{0}",
+                    state.ToDescription(),
+                    StringComparison.InvariantCultureIgnoreCase);
 
                 load.ReportTo = string.Join("; ", notifications.Select(x => x.Email));
 
                 // update the load with the report
-                StringBuilder reportBody = new StringBuilder();
+                StringBuilder reportBody = new StringBuilder("Dummy Report");
 
                 load.ReportBody = reportBody.ToString();
                 load.Finish_DateTime = DateTime.UtcNow;
 
-                // return the notification data to the caller.
-                toReturn.Content = new StringContent(JsonConvert.SerializeObject(load));
+                toReturn = new HttpResponseMessage(HttpStatusCode.Accepted)
+                {
+
+                    // return the notification data to the caller.
+                    Content = new StringContent(JsonConvert.SerializeObject(load)),
+                };
 
                 // finally update the load record back to its complete state with report and audience.
                 await this.loadProcessor.UpdateLoadAsync(load, cancellationToken)
@@ -285,6 +290,8 @@
             return toReturn;
         }
 
+
+
         private short? GetStatus(IHeaderDictionary headerDictionary)
         {
             short? status = null;
@@ -292,7 +299,7 @@
 
             if (headerDictionary.ContainsKey(HeaderNameStatus))
             {
-                var statusString = headerDictionary[HeaderNameRunIdentifier];
+                var statusString = headerDictionary[HeaderNameStatus];
 
                 this.loggerProvider.Info(
                     $"Header \"{HeaderNameStatus}\" was specified: " +
