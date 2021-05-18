@@ -137,7 +137,7 @@
 
                 try
                 {
-                    await this.entityProcessor.CreateEntitiesAsync(
+                    await this.entityProcessor.CreateEntitiesAsync<TModelsBase>(
                         runIdentifier.Value,
                         modelsBases,
                         cancellationToken)

@@ -12,7 +12,7 @@
     <None Remove="DataHandlers\Create_Raw_Actual_Field.sql" />
     <None Remove="DataHandlers\Create_Raw_Blob.sql" />
     <None Remove="DataHandlers\Create_Raw_Deleted.sql" />
-    <None Remove="DataHandlers\Create_Raw_LoadControl.sql" />
+    <None Remove="DataHandlers\Create_Raw_Load.sql" />
     <None Remove="DataHandlers\Create_Raw_Oncost.sql" />
     <None Remove="DataHandlers\Create_Raw_Oncost_Field.sql" />
     <None Remove="DataHandlers\Create_Raw_Plan.sql" />
@@ -37,8 +37,11 @@
     <None Remove="DataHandlers\Create_Raw_Survey_Evidence.sql" />
     <None Remove="DataHandlers\Create_Raw_Survey_Field.sql" />
     <None Remove="DataHandlers\Create_Raw_User.sql" />
-    <None Remove="DataHandlers\Retrieve_Raw_LoadControl.sql" />
-    <None Remove="DataHandlers\Update_Raw_LoadControl.sql" />
+    <None Remove="DataHandlers\Retrieve_Raw_Load.sql" />
+    <None Remove="DataHandlers\Retrieve_Raw_LoadNotification.sql" />
+    <None Remove="DataHandlers\Retrieve_Raw_LoadNotificationTemplate.sql" />
+    <None Remove="DataHandlers\Retrieve_Raw_LoadSince.sql" />
+    <None Remove="DataHandlers\Update_Raw_Load.sql" />
   </ItemGroup>
 
   <ItemGroup>
@@ -66,8 +69,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="DataHandlers\Update_Raw_LoadControl.sql" />
-    <EmbeddedResource Include="DataHandlers\Retrieve_Raw_LoadControl.sql" />
+    <EmbeddedResource Include="DataHandlers\Retrieve_Raw_LoadNotificationTemplate.sql" />
+    <EmbeddedResource Include="DataHandlers\Retrieve_Raw_LoadSince.sql" />
+    <EmbeddedResource Include="DataHandlers\Retrieve_Raw_LoadNotification.sql" />
+    <EmbeddedResource Include="DataHandlers\Update_Raw_Load.sql" />
+    <EmbeddedResource Include="DataHandlers\Retrieve_Raw_Load.sql" />
     <EmbeddedResource Include="DataHandlers\Create_Raw_Activity.sql" />
     <EmbeddedResource Include="DataHandlers\Create_Raw_Activity_Field.sql" />
     <EmbeddedResource Include="DataHandlers\Create_Raw_Actual.sql" />
@@ -97,7 +103,7 @@
     <EmbeddedResource Include="DataHandlers\Create_Raw_SurveySection_Field.sql" />
     <EmbeddedResource Include="DataHandlers\Create_Raw_Survey_Evidence.sql" />
     <EmbeddedResource Include="DataHandlers\Create_Raw_Survey_Field.sql" />
-    <EmbeddedResource Include="DataHandlers\Create_Raw_LoadControl.sql" />
+    <EmbeddedResource Include="DataHandlers\Create_Raw_Load.sql" />
     <EmbeddedResource Include="DataHandlers\Create_Raw_User.sql" />
   </ItemGroup>
 

@@ -1,12 +1,12 @@
-﻿namespace Dfe.CdcEventApi.Application.Models
+﻿namespace Dfe.CdcEventApi.Domain.Models
 {
-
     using System;
+    using Dfe.CdcEventApi.Application.Definitions;
 
     /// <summary>
     /// Represents the LoadControl entity.
     /// </summary>
-    public class LoadControl : LoadControlBase
+    public class Load : LoadBase
     {
         /// <summary>
         /// Gets or sets the Load Date Time.
@@ -29,9 +29,18 @@
         }
 
         /// <summary>
-        /// Gets or sets the load status
+        /// Gets or sets the load status.
         /// </summary>
         public LoadStates Status
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// Gets or sets the report title describing the load run.
+        /// </summary>
+        public string ReportTitle
         {
             get;
             set;

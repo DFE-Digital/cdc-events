@@ -57,12 +57,16 @@
         {
             serviceCollection
                 .AddScoped<IEntityProcessor, EntityProcessor>();
+            serviceCollection
+                .AddScoped<ILoadProcessor, LoadProcessor>();
         }
 
         private static void AddAdapters(IServiceCollection serviceCollection)
         {
             serviceCollection
                 .AddScoped<IEntityStorageAdapter, EntityStorageAdapter>();
+            serviceCollection
+                .AddScoped<ILoadStorageAdapter, LoadStorageAdapter>();
         }
 
         private static ILogger CreateILogger(IServiceProvider serviceProvider)

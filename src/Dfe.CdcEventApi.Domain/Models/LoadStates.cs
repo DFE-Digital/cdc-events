@@ -1,6 +1,5 @@
-﻿namespace Dfe.CdcEventApi.Application.Models
+﻿namespace Dfe.CdcEventApi.Domain.Models
 {
-
     using System;
 
     /// <summary>
@@ -10,37 +9,33 @@
     public enum LoadStates
     {
         /// <summary>
-        /// The load is running.
+        /// No state has yet been set as nothing has happend.
         /// </summary>
-        Loading = 0,
+        None = 0,
 
         /// <summary>
-        /// The load has failed initialising.
+        /// The load has started running.
         /// </summary>
-        FailedOnInitialisation = 1,
-
+        Loading = 1,
 
         /// <summary>
-        /// The load has failed entity loading.
+        /// The load has failed when initialising.
         /// </summary>
-        FailedOnEntities = 2,
+        FailedOnInitialisation = 2,
 
         /// <summary>
-        /// The load has failed processing blobs.
+        /// The load has failed during entity loading.
         /// </summary>
-        FailedOnBlobHandling = 4,
-
+        FailedOnEntities = 4,
 
         /// <summary>
-        /// The load has failed entity loading.
+        /// The load has failed when processing blobs.
         /// </summary>
-        FailedOnControl = 8,
+        FailedOnBlobHandling = 8,
 
         /// <summary>
         /// The load has succeeded.
         /// </summary>
-        Suceeeded = 16,
+        Suceeeded = 32,
     }
-
-    
 }

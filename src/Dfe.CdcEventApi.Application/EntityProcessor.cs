@@ -16,7 +16,6 @@
     using Dfe.CdcEventApi.Domain.Definitions;
     using Newtonsoft.Json.Linq;
 
-
     /// <summary>
     /// Implements <see cref="IEntityProcessor" />.
     /// </summary>
