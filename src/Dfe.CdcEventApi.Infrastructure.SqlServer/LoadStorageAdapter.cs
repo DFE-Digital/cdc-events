@@ -9,6 +9,7 @@
     using System.Reflection;
     using System.Threading.Tasks;
     using Dapper;
+    using Dfe.CdcEventApi.Domain;
     using Dfe.CdcEventApi.Domain.Definitions;
     using Dfe.CdcEventApi.Domain.Definitions.SettingsProviders;
     using Dfe.CdcEventApi.Domain.Exceptions;
@@ -19,10 +20,10 @@
     /// </summary>
     public class LoadStorageAdapter : ILoadStorageAdapter
     {
-        private const string DataHandlerFileNameFormat = "{0}.sql";
+        private const string LoadHandlerFileNameFormat = "{0}.sql";
         private readonly ILoggerProvider loggerProvider;
         private readonly Assembly assembly;
-        private readonly string dataHandlersPath;
+        private readonly string loadHandlersPath;
         private readonly string rawDbConnectionString;
 
         /// <summary>
@@ -52,7 +53,7 @@
 
             this.assembly = type.Assembly;
 
-            this.dataHandlersPath = $"{type.Namespace}.LoadHandlers";
+            this.loadHandlersPath = $"{type.Namespace}.LoadHandlers";
 
             this.rawDbConnectionString =
                 entityStorageAdapterSettingsProvider.RawDbConnectionString;
@@ -69,7 +70,7 @@
         /// </returns>
         public async Task<IEnumerable<Load>> CreateLoadAsync(DateTime runIdentifier)
         {
-            this.loggerProvider.Info($"Starting a load at {runIdentifier:u}");
+            this.loggerProvider.Info($"Starting a load at {runIdentifier:O}");
 
             using (SqlConnection sqlConnection = new SqlConnection(this.rawDbConnectionString))
             {
@@ -94,11 +95,11 @@
         /// <returns>...</returns>
         public Task<IEnumerable<Attachment>> GetAttachments(DateTime runIdentifier)
         {
-            this.loggerProvider.Info($"Getting attachments from {runIdentifier:u}");
+            this.loggerProvider.Info($"Getting attachments from {runIdentifier:O}");
 
             using (SqlConnection sqlConnection = new SqlConnection(this.rawDbConnectionString))
             {
-                string querySql = this.ExtractHandler("Retrieve_Raw_Attachments");
+                string querySql = this.ExtractHandler("Retrieve_Raw_Load_Attachments");
                 this.loggerProvider.Debug($"Retrieving attachment records.");
                 var attachments = sqlConnection.Query<Attachment>(querySql, new { runIdentifier });
                 return Task.FromResult(attachments);
@@ -112,7 +113,7 @@
         /// <returns>...</returns>
         public Task<Load> GetLoadAsync(DateTime runIdentifier)
         {
-            this.loggerProvider.Info($"Getting a load from {runIdentifier:u}");
+            this.loggerProvider.Info($"Getting a load from {runIdentifier:O}");
 
             using (SqlConnection sqlConnection = new SqlConnection(this.rawDbConnectionString))
             {
@@ -174,7 +175,7 @@
                 throw new ArgumentNullException($"{nameof(item)}");
             }
 
-            this.loggerProvider.Info($"Updating a load from {item.Load_DateTime:u}");
+            this.loggerProvider.Info($"Updating a load from {item.Load_DateTime:O}");
 
             string udpateSql = this.ExtractHandler("Update_Raw_Load");
 
@@ -194,15 +195,17 @@
         /// <returns>....</returns>
         public async Task UpdateLoadStatusAsync(DateTime runIdentifier, short status)
         {
-            this.loggerProvider.Info($"Updating load at {runIdentifier:u} to {status}");
+            this.loggerProvider.Info($"Updating load at {runIdentifier:O} to {status}");
 
-            var updateSql = "UPDATE [dbo].[Raw_Load]  SET [Status] = @status WHERE [Load_DateTime]= @runIdentifier";
+            var updateSql = this.ExtractHandler("Update_Raw_LoadStatus");
 
             using (SqlConnection sqlConnection = new SqlConnection(this.rawDbConnectionString))
             {
-                this.loggerProvider.Debug($"Updating Load record.");
+                this.loggerProvider.Debug($"Updating Load record status.");
 
-                var count = await sqlConnection.ExecuteAsync(updateSql, new { runIdentifier, status })
+                var state = status.ToEnum<LoadStates>();
+
+                await sqlConnection.ExecuteAsync(updateSql, new { runIdentifier, status, reportTitle = $"Current step: {state}" })
                         .ConfigureAwait(false);
             }
         }
@@ -213,11 +216,11 @@
 
             string dataHandlerFileName = string.Format(
                 CultureInfo.InvariantCulture,
-                DataHandlerFileNameFormat,
+                LoadHandlerFileNameFormat,
                 loadHandlerIdentifier);
 
             string dataHandlerPath =
-                this.dataHandlersPath + "." + dataHandlerFileName;
+                this.loadHandlersPath + "." + dataHandlerFileName;
 
             using (Stream stream = this.assembly.GetManifestResourceStream(dataHandlerPath))
             {

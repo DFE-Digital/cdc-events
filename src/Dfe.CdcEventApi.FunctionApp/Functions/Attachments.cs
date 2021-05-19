@@ -32,11 +32,17 @@ namespace Dfe.CdcEventApi.FunctionApp.Functions
         }
 
         /// <summary>
-        /// .
+        /// Entry method for the <c>attachments</c> function.
         /// </summary>
-        /// <param name="httpRequest">..</param>
-        /// <param name="cancellationToken">....</param>
-        /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
+        /// <param name="httpRequest">
+        /// An instance of type <see cref="HttpRequest" />.
+        /// </param>
+        /// <param name="cancellationToken">
+        /// An instance of <see cref="CancellationToken" />.
+        /// </param>
+        /// <returns>
+        /// An instance of <see cref="HttpResponseMessage" />.
+        /// </returns>
         [FunctionName("attachments")]
         public async Task<HttpResponseMessage> Run(
             [HttpTrigger(AuthorizationLevel.Function, "GET")] HttpRequest httpRequest,
@@ -50,6 +56,5 @@ namespace Dfe.CdcEventApi.FunctionApp.Functions
 
             return toReturn;
         }
-
     }
 }

@@ -9,11 +9,11 @@
     using System.Threading;
     using System.Threading.Tasks;
     using Dfe.CdcEventApi.Application.Definitions;
+    using Dfe.CdcEventApi.Domain;
     using Dfe.CdcEventApi.Domain.Definitions;
     using Dfe.CdcEventApi.Domain.Exceptions;
     using Dfe.CdcEventApi.Domain.Models;
     using Microsoft.AspNetCore.Http;
-    using Microsoft.Azure.WebJobs.Extensions.Http;
     using Newtonsoft.Json;
 
     /// <summary>
@@ -89,12 +89,12 @@
                     // Also return the run identifier as a header.
                     toReturn.Headers.Add(
                         HeaderNameRunIdentifier,
-                        $"{loads.First().Load_DateTime:u}");
+                        $"{loads.First().Load_DateTime:O}");
 
                     // also return the previous run time
                     toReturn.Headers.Add(
                         HeaderNameSince,
-                        $"{(loads.LastOrDefault()?.Load_DateTime ?? this.dafaultSinceDate).AddMilliseconds(1):u}");
+                        $"{(loads.LastOrDefault()?.Load_DateTime ?? this.dafaultSinceDate).AddMilliseconds(1):O}");
                 }
                 catch (MissingLoadHandlerFileException exception)
                 {
@@ -256,11 +256,11 @@
                     }
                 }
 
-                LoadStates state = load.Status.ToString().ToEnum<LoadStates>();
+                LoadStates state = load.Status;
 
                 load.ReportTitle = template.Subject.Replace(
                     "{0}",
-                    state.ToDescription(),
+                    state.ToEnumDescription(),
                     StringComparison.InvariantCultureIgnoreCase);
 
                 load.ReportTo = string.Join("; ", notifications.Select(x => x.Email));
@@ -346,7 +346,7 @@
                         statusString,
                         CultureInfo.InvariantCulture);
                     if (
-                            status.Value < (short)LoadStates.Loading
+                            status.Value < (short)LoadStates.Initialising
                             ||
                             status.Value > (short)LoadStates.Suceeeded)
                     {

@@ -4,10 +4,12 @@
     using System.ComponentModel;
 
     /// <summary>
-    /// An enumeration of available Load states.
+    /// An enumeration of possible Load states.
     /// </summary>
     [Flags]
-    public enum LoadStates
+#pragma warning disable CA1028 // Enum Storage should be Int32
+    public enum LoadStates : short
+#pragma warning restore CA1028 // Enum Storage should be Int32
     {
         /// <summary>
         /// No state has yet been set as nothing has happend.
@@ -17,25 +19,30 @@
         /// <summary>
         /// The load has started running.
         /// </summary>
-        [Description("Failed")] Loading = 1,
+        [Description("Start Failed")] Initialising = 1,
 
         /// <summary>
-        /// The load has failed when initialising.
+        /// The load is retrieving secrets.
         /// </summary>
-        [Description("Init Failed")] FailedOnInitialisation = 2,
+        [Description("Preparation failed")] Preparing = 2,
 
         /// <summary>
-        /// The load has failed during entity loading.
+        /// The load is logging in.
         /// </summary>
-        [Description("Entities Failed")] FailedOnEntities = 4,
+        [Description("Session failed")] Login = 4,
 
         /// <summary>
-        /// The load has failed when processing blobs.
+        /// The load is downloading entities.
         /// </summary>
-        [Description("BLOBS Failed")] FailedOnBlobHandling = 8,
+        [Description("Entities Failed")] Entities = 8,
 
         /// <summary>
-        /// The load has succeeded.
+        /// The load is downloading attachment blobs.
+        /// </summary>
+        [Description("Attachments Failed")] Attachments = 16,
+
+        /// <summary>
+        /// The load has finished.
         /// </summary>
         [Description("Succeded")] Suceeeded = 32,
     }

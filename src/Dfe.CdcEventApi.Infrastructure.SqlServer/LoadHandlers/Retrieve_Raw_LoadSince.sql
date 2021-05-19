@@ -1,4 +1,4 @@
-SELECT TOP 2
+SELECT 
 	[Load_DateTime],
 	[Finish_DateTime],
 	[Status],
@@ -8,8 +8,20 @@ SELECT TOP 2
 FROM
 	[dbo].[Raw_Load]
 WHERE 
-	 [Load_DateTime]  <= @RunIdentifier
+	 [Load_DateTime]  BETWEEN DATEADD(ms,-5, @RunIdentifier) AND DATEADD(ms,5, @RunIdentifier)
+UNION
+SELECT TOP 1
+	[Load_DateTime],
+	[Finish_DateTime],
+	[Status],
+	[ReportTitle],
+	[ReportBody],
+	[ReportedTo]
+FROM
+	[dbo].[Raw_Load]
+WHERE 
+	 [Load_DateTime]  < DATEADD(ms,-5, @RunIdentifier)
 AND
-	[Status] IN (1, 32)
+	[Status] = 32
 ORDER BY
 	[Load_DateTime] DESC

@@ -35,7 +35,7 @@
         }
 
         /// <summary>
-        /// Entry method for the <c>load</c> post function.
+        /// Entry method for the <c>load</c> function.
         /// Creates and returns a load event record.
         /// </summary>
         /// <param name="httpRequest">

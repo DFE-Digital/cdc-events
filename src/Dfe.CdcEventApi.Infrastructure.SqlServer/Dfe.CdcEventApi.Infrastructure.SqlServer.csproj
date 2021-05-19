@@ -43,6 +43,7 @@
     <None Remove="DataHandlers\Retrieve_Raw_LoadSince.sql" />
     <None Remove="DataHandlers\Update_Raw_Load.sql" />
     <None Remove="LoadHandlers\Retrieve_Raw_Load_Attachments.sql" />
+    <None Remove="LoadHandlers\Update_Raw_LoadStatus.sql" />
   </ItemGroup>
 
   <ItemGroup>
@@ -74,6 +75,7 @@
     <EmbeddedResource Include="LoadHandlers\Retrieve_Raw_LoadNotificationTemplate.sql" />
     <EmbeddedResource Include="LoadHandlers\Retrieve_Raw_LoadSince.sql" />
     <EmbeddedResource Include="LoadHandlers\Retrieve_Raw_LoadNotification.sql" />
+    <EmbeddedResource Include="LoadHandlers\Update_Raw_LoadStatus.sql" />
     <EmbeddedResource Include="LoadHandlers\Update_Raw_Load.sql" />
     <EmbeddedResource Include="LoadHandlers\Retrieve_Raw_Load.sql" />
     <EmbeddedResource Include="DataHandlers\Create_Raw_Activity.sql" />
