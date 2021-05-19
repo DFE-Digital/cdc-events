@@ -134,8 +134,6 @@
         private static string ExtractDataHandlerIdentifier<TModelsBase>()
             where TModelsBase : ModelsBase
         {
-            string toReturn = null;
-
             Type entityType = typeof(TModelsBase);
             Type attributeType = typeof(DataHandlerAttribute);
 
@@ -149,8 +147,7 @@
                 throw new MissingDataHandlerAttributeException(entityType);
             }
 
-            toReturn = dataHandlerAttribute.Identifier;
-
+            string toReturn = dataHandlerAttribute.Identifier;
             return toReturn;
         }
 

@@ -3,6 +3,7 @@
     using System;
     using System.Collections.Generic;
     using System.Data.SqlClient;
+    using System.Diagnostics;
     using System.Globalization;
     using System.IO;
     using System.Linq;
@@ -72,102 +73,205 @@
         {
             this.loggerProvider.Info($"Starting a load at {runIdentifier:O}");
 
+            Stopwatch stopwatch = new Stopwatch();
             using (SqlConnection sqlConnection = new SqlConnection(this.rawDbConnectionString))
             {
                 var insertSql = this.ExtractHandler("Create_Raw_Load");
                 this.loggerProvider.Debug($"Creating Load record.");
-                var count = await sqlConnection
+
+                stopwatch.Start();
+
+                await sqlConnection
                         .ExecuteAsync(insertSql, new { runIdentifier })
                         .ConfigureAwait(false);
 
-                this.loggerProvider.Debug($"Retrieving new Load record.");
+                stopwatch.Stop();
+
+                TimeSpan elapsed = stopwatch.Elapsed;
+
+                this.loggerProvider.Info(
+                    $"Insert executed with success, time elapsed: " +
+                    $"{elapsed}.");
+
+                this.loggerProvider.Debug($"Retrieving this current and last successful load records.");
+
                 string querySql = this.ExtractHandler("Retrieve_Raw_LoadSince");
-                IEnumerable<Load> loads = sqlConnection
-                        .Query<Load>(querySql, new { runIdentifier });
+
+                stopwatch.Restart();
+
+                IEnumerable<Load> loads = sqlConnection.Query<Load>(
+                    querySql,
+                    new { runIdentifier });
+
+                stopwatch.Stop();
+
+                elapsed = stopwatch.Elapsed;
+
+                this.loggerProvider.Info(
+                    $"Query executed with success, time elapsed: " +
+                    $"{elapsed}.");
+
                 return loads;
             }
         }
 
         /// <summary>
-        /// .
+        /// Gets the Attechment process instruction records for the current load.
         /// </summary>
-        /// <param name="runIdentifier">..</param>
-        /// <returns>...</returns>
+        /// <param name="runIdentifier">
+        /// The run identifier start date time value.
+        /// </param>
+        /// <returns>
+        /// An <see cref="Task"/> wrapping an collection of <see cref="Attachment"/> of the run.
+        /// </returns>
         public Task<IEnumerable<Attachment>> GetAttachments(DateTime runIdentifier)
         {
             this.loggerProvider.Info($"Getting attachments from {runIdentifier:O}");
 
+            Stopwatch stopwatch = new Stopwatch();
             using (SqlConnection sqlConnection = new SqlConnection(this.rawDbConnectionString))
             {
                 string querySql = this.ExtractHandler("Retrieve_Raw_Load_Attachments");
                 this.loggerProvider.Debug($"Retrieving attachment records.");
+
+                stopwatch.Start();
+
                 var attachments = sqlConnection.Query<Attachment>(querySql, new { runIdentifier });
+
+                stopwatch.Stop();
+
+                TimeSpan elapsed = stopwatch.Elapsed;
+
+                this.loggerProvider.Info(
+                    $"Query executed with success, time elapsed: " +
+                    $"{elapsed}.");
+
                 return Task.FromResult(attachments);
             }
         }
 
         /// <summary>
-        /// .
+        /// Gets the <see cref="Load"/> for the specified date and time.
         /// </summary>
-        /// <param name="runIdentifier">..</param>
-        /// <returns>...</returns>
+        /// <param name="runIdentifier">
+        /// The run identifier start date time value.
+        /// </param>
+        /// <returns>
+        /// An <see cref="Task"/> wrapping an collection of <see cref="Load"/> of the run.
+        /// </returns>
         public Task<Load> GetLoadAsync(DateTime runIdentifier)
         {
             this.loggerProvider.Info($"Getting a load from {runIdentifier:O}");
 
+            Stopwatch stopwatch = new Stopwatch();
             using (SqlConnection sqlConnection = new SqlConnection(this.rawDbConnectionString))
             {
                 string querySql = this.ExtractHandler("Retrieve_Raw_Load");
                 this.loggerProvider.Debug($"Retrieving Load record.");
-                Load load = sqlConnection.Query<Load>(querySql, new { runIdentifier })
-                        .FirstOrDefault();
+
+                stopwatch.Start();
+
+                Load load = sqlConnection.Query<Load>(
+                                    querySql,
+                                    new { runIdentifier })
+                                    .FirstOrDefault();
+
+                stopwatch.Stop();
+
+                TimeSpan elapsed = stopwatch.Elapsed;
+
+                this.loggerProvider.Info(
+                    $"Query executed with success, time elapsed: " +
+                    $"{elapsed}.");
+
                 return Task.FromResult(load);
             }
         }
 
         /// <summary>
-        /// .
+        /// Gets the collection of notifications for the status of any load.
         /// </summary>
-        /// <param name="status">..</param>
-        /// <returns>...</returns>
+        /// <param name="status">
+        /// The status value.
+        /// </param>
+        /// <returns>
+        /// An <see cref="Task"/> wrapping an collection of <see cref="LoadNotification"/>.
+        /// </returns>
         public Task<IEnumerable<LoadNotification>> GetLoadNotificationsForStatus(short status)
         {
             this.loggerProvider.Info($"Getting all notifications for status of {status}");
 
             string querySql = this.ExtractHandler("Retrieve_Raw_LoadNotification");
 
+            Stopwatch stopwatch = new Stopwatch();
             using (SqlConnection sqlConnection = new SqlConnection(this.rawDbConnectionString))
             {
                 this.loggerProvider.Debug($"Retrieving new Load record.");
+
+                stopwatch.Start();
+
                 var results = sqlConnection.Query<LoadNotification>(querySql, new { status });
+
+                stopwatch.Stop();
+
+                TimeSpan elapsed = stopwatch.Elapsed;
+
+                this.loggerProvider.Info(
+                    $"Query executed with success, time elapsed: " +
+                    $"{elapsed}.");
+
                 return Task.FromResult(results);
             }
         }
 
         /// <summary>
-        /// .
+        /// Gets the report template for the specified status of any load.
         /// </summary>
-        /// <param name="status">..</param>
-        /// <returns>...</returns>
+        /// <param name="status">
+        /// The status value.
+        /// </param>
+        /// <returns>
+        /// An <see cref="Task"/> wrapping an collection of <see cref="LoadNotificationTemplate"/>.
+        /// </returns>
         public Task<LoadNotificationTemplate> GetLoadTemplateForStatus(short status)
         {
             this.loggerProvider.Info($"Getting template for the load notification for status of {status}");
 
             string querySql = this.ExtractHandler("Retrieve_Raw_LoadNotificationTemplate");
 
+            Stopwatch stopwatch = new Stopwatch();
             using (SqlConnection sqlConnection = new SqlConnection(this.rawDbConnectionString))
             {
-                this.loggerProvider.Debug($"Retrieving new Load Notification Template record.");
-                var results = sqlConnection.Query<LoadNotificationTemplate>(querySql, new { status }).FirstOrDefault();
+                this.loggerProvider.Debug($"Retrieving new load notification template record.");
+
+                stopwatch.Start();
+
+                var results = sqlConnection.Query<LoadNotificationTemplate>(
+                                                querySql,
+                                                new { status })
+                                            .FirstOrDefault();
+
+                stopwatch.Stop();
+
+                TimeSpan elapsed = stopwatch.Elapsed;
+
+                this.loggerProvider.Info(
+                    $"Query executed with success, time elapsed: " +
+                    $"{elapsed}.");
+
                 return Task.FromResult(results);
             }
         }
 
         /// <summary>
-        /// .
+        /// Updates a <see cref="Load"/> of the specified date and time.
         /// </summary>
-        /// <param name="item">..</param>
-        /// <returns>...</returns>
+        /// <param name="item">
+        /// The new version of the <see cref="Load"/> item.
+        /// </param>
+        /// <returns>
+        /// A <see cref="Task"/> instance.
+        /// </returns>
         public async Task UpdateLoadAsync(Load item)
         {
             if (item == null)
@@ -179,34 +283,70 @@
 
             string udpateSql = this.ExtractHandler("Update_Raw_Load");
 
+            Stopwatch stopwatch = new Stopwatch();
             using (SqlConnection sqlConnection = new SqlConnection(this.rawDbConnectionString))
             {
                 this.loggerProvider.Debug($"Updating Load record.");
+
+                stopwatch.Start();
+
                 await sqlConnection.ExecuteAsync(udpateSql, item)
                     .ConfigureAwait(false);
+
+                stopwatch.Stop();
+
+                TimeSpan elapsed = stopwatch.Elapsed;
+
+                this.loggerProvider.Info(
+                    $"Update executed with success, time elapsed: " +
+                    $"{elapsed}.");
             }
         }
 
         /// <summary>
-        /// .
+        /// Updates the status of a <see cref="Load"/>.
         /// </summary>
-        /// <param name="runIdentifier">..</param>
-        /// <param name="status">...</param>
-        /// <returns>....</returns>
+        /// <param name="runIdentifier">
+        /// The identifier of the <see cref="Load"/>.
+        /// </param>
+        /// <param name="status">
+        /// The valof the new status.
+        /// </param>
+        /// <returns>
+        /// A <see cref="Task"/> instance.
+        /// </returns>
         public async Task UpdateLoadStatusAsync(DateTime runIdentifier, short status)
         {
             this.loggerProvider.Info($"Updating load at {runIdentifier:O} to {status}");
 
             var updateSql = this.ExtractHandler("Update_Raw_LoadStatus");
 
+            Stopwatch stopwatch = new Stopwatch();
             using (SqlConnection sqlConnection = new SqlConnection(this.rawDbConnectionString))
             {
                 this.loggerProvider.Debug($"Updating Load record status.");
 
                 var state = status.ToEnum<LoadStates>();
 
-                await sqlConnection.ExecuteAsync(updateSql, new { runIdentifier, status, reportTitle = $"Current step: {state}" })
+                stopwatch.Start();
+
+                await sqlConnection.ExecuteAsync(
+                    updateSql,
+                    new
+                    {
+                        runIdentifier,
+                        status,
+                        reportTitle = $"Current step: {state}",
+                    })
                         .ConfigureAwait(false);
+
+                stopwatch.Stop();
+
+                TimeSpan elapsed = stopwatch.Elapsed;
+
+                this.loggerProvider.Info(
+                    $"Update executed with success, time elapsed: " +
+                    $"{elapsed}.");
             }
         }
 

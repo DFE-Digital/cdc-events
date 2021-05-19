@@ -44,41 +44,65 @@
             CancellationToken cancellationToken);
 
         /// <summary>
-        /// .
+        /// Gets an instance of <see cref="Load"/>.
         /// </summary>
-        /// <param name="runIdentifier">..</param>
-        /// <param name="cancellationToken">....</param>
-        /// <returns>...</returns>
+        /// <param name="runIdentifier">
+        /// The instance identifier value.
+        /// </param>
+        /// <param name="cancellationToken">
+        /// The asynchronous <see cref="CancellationToken"/>.
+        /// </param>
+        /// <returns>
+        /// A <see cref="Task"/> wrapping the <see cref="Load"/> instance.
+        /// </returns>
         Task<Load> GetLoadAsync(
             DateTime runIdentifier,
             CancellationToken cancellationToken);
 
         /// <summary>
-        /// .
+        /// Uploads a complete instance of <see cref="Load"/>.
         /// </summary>
-        /// <param name="item">..</param>
-        /// <param name="cancellationToken">....</param>
-        /// <returns>...</returns>
+        /// <param name="item">
+        /// The changed <see cref="Load"/> instance.
+        /// </param>
+        /// <param name="cancellationToken">
+        /// The asynchronous <see cref="CancellationToken"/>.
+        /// </param>
+        /// <returns>
+        /// A <see cref="Task"/>.
+        /// </returns>
         Task UpdateLoadAsync(
             Load item,
             CancellationToken cancellationToken);
 
         /// <summary>
-        /// .
+        /// Gets the <see cref="LoadNotificationTemplate"/> for the specified status value.
         /// </summary>
-        /// <param name="status">..</param>
-        /// <param name="cancellationToken">...</param>
-        /// <returns>....</returns>
+        /// <param name="status">
+        /// The status value.
+        /// </param>
+        /// <param name="cancellationToken">
+        /// The asnychronous <see cref="CancellationToken"/>.
+        /// </param>
+        /// <returns>
+        /// A <see cref="Task"/> wrapping the <see cref="LoadNotificationTemplate"/>.
+        /// </returns>
         Task<LoadNotificationTemplate> GetLoadTemplateForStatus(
             short status,
             CancellationToken cancellationToken);
 
         /// <summary>
-        /// .
+        /// Get all <see cref="Attachment"/> instances deriving from the specfied <see cref="Load "/> date and time.
         /// </summary>
-        /// <param name="runIdentifier">..</param>
-        /// <param name="cancellationToken">...</param>
-        /// <returns>....</returns>
+        /// <param name="runIdentifier">
+        /// The date and time.
+        /// </param>
+        /// <param name="cancellationToken">
+        /// The asynchronous <see cref="CancellationToken"/>.
+        /// </param>
+        /// <returns>
+        /// A <see cref="Task"/> wrapping the collection of <see cref="Attachment"/>.
+        /// </returns>
         Task<IEnumerable<Attachment>> GetAttachments(DateTime runIdentifier, CancellationToken cancellationToken);
     }
 }

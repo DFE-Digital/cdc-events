@@ -1,7 +1,6 @@
 ﻿namespace Dfe.CdcEventApi.Infrastructure.SqlServer
 {
     using System;
-    using System.Collections.Generic;
     using System.Data;
     using System.Data.SqlClient;
     using System.Diagnostics;
@@ -122,66 +121,6 @@
             }
         }
 
-        /// <inheritdoc/>
-        public async Task<IEnumerable<dynamic>> RetrieveEntitiesAsync(
-            string dataHandlerIdentifier,
-            DateTime runIdentifier,
-            CancellationToken cancellationToken)
-        {
-            IEnumerable<dynamic> result = null;
-
-            // 1) Extract the data handler, via the identifier.
-            this.loggerProvider.Debug(
-                $"Extracting data handler with identifier " +
-                $"\"{dataHandlerIdentifier}\"...");
-
-            string handlerScript = this.ExtractHandler(dataHandlerIdentifier);
-            this.loggerProvider.Info(
-               $"Handler script for identifier \"{dataHandlerIdentifier}\" " +
-               $"extracted.");
-
-            // 2) Execute the SQL.
-            using (SqlConnection sqlConnection = new SqlConnection(this.rawDbConnectionString))
-            {
-                this.loggerProvider.Debug(
-                    $"Opening {nameof(sqlConnection)}...");
-
-                await sqlConnection.OpenAsync(cancellationToken)
-                    .ConfigureAwait(false);
-
-                this.loggerProvider.Info(
-                    $"{nameof(sqlConnection)} opened with success " +
-                    $"({nameof(sqlConnection.ClientConnectionId)}: " +
-                    $"{sqlConnection.ClientConnectionId}).");
-
-                Stopwatch stopwatch = new Stopwatch();
-                using (SqlCommand sqlCommand = this.InitGetSqlCommand(sqlConnection, handlerScript, runIdentifier))
-                {
-                    this.loggerProvider.Debug("Executing query...");
-
-                    stopwatch.Start();
-
-                    var reader = await sqlCommand.ExecuteReaderAsync(cancellationToken)
-                        .ConfigureAwait(false);
-
-                    if (reader != null)
-                    {
-                        result = DynamicSqlDataReader.Read(reader);
-                    }
-
-                    stopwatch.Stop();
-
-                    TimeSpan elapsed = stopwatch.Elapsed;
-
-                    this.loggerProvider.Info(
-                        $"Query executed with success, time elapsed: " +
-                        $"{elapsed}.");
-                }
-            }
-
-            return result;
-        }
-
         [SuppressMessage(
             "Microsoft.Security",
             "CA2100",
@@ -222,43 +161,6 @@
             toReturn.Parameters.Add(sqlParameter);
 
             sqlParameter = new SqlParameter(
-                "RunIdentifier",
-                runIdentifier)
-            {
-                DbType = DbType.DateTime,
-            };
-
-            toReturn.Parameters.Add(sqlParameter);
-
-            toReturn.CommandTimeout = DefaultCommandTimeout;
-
-            return toReturn;
-        }
-
-        [SuppressMessage(
-            "Microsoft.Security",
-            "CA2100",
-            Justification = "Does not contain any user input.")]
-        private SqlCommand InitGetSqlCommand(
-            SqlConnection sqlConnection,
-            string handlerScript,
-            DateTime runIdentifier)
-        {
-            SqlCommand toReturn = null;
-
-            CommandType commandType = CommandType.Text;
-
-            this.loggerProvider.Debug(
-                $"Preparing {nameof(SqlCommand)} with query " +
-                $"\"{handlerScript}\" and {nameof(commandType)} = " +
-                $"{commandType}...");
-
-            toReturn = new SqlCommand(handlerScript, sqlConnection)
-            {
-                CommandType = commandType,
-            };
-
-            SqlParameter sqlParameter = new SqlParameter(
                 "RunIdentifier",
                 runIdentifier)
             {

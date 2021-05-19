@@ -36,7 +36,9 @@
         /// <param name="loadProcessor">
         /// An instance of type <see cref="ILoggerProvider"/>.
         /// </param>
-        public LoadFunctionsBase(ILoadProcessor loadProcessor, ILoggerProvider loggerProvider)
+        public LoadFunctionsBase(
+            ILoadProcessor loadProcessor,
+            ILoggerProvider loggerProvider)
         {
             this.loggerProvider = loggerProvider;
             this.loadProcessor = loadProcessor;
@@ -53,7 +55,8 @@
         /// An instance of <see cref="CancellationToken" />.
         /// </param>
         /// <returns>
-        /// An instance of <see cref="HttpResponseMessage" />. The runIdentifier header is repopulated with the actually stored date and time.
+        /// An instance of <see cref="HttpResponseMessage" />.
+        /// The returned runIdentifier header is used to refresh the client with the actually stored date and time.
         /// </returns>
         protected async Task<HttpResponseMessage> StartLoad(
            HttpRequest httpRequest,
@@ -290,15 +293,18 @@
         }
 
         /// <summary>
-        /// .
+        /// Gets the resulting attachments for a load run.
         /// </summary>
-        /// <param name="httpRequest">..</param>
-        /// <param name="cancellationToken">...</param>
-        /// <returns>....</returns>
+        /// <param name="httpRequest">
+        /// The <see cref="HttpRequest"/> being processed.</param>
+        /// <param name="cancellationToken">
+        /// The asynchronous <see cref="CancellationToken"/>.
+        /// </param>
+        /// <returns>
+        /// A <see cref="Task"/> wrapping the <see cref="HttpRequestMessage"/>.
+        /// </returns>
         protected async Task<HttpResponseMessage> GetAttachments(HttpRequest httpRequest, CancellationToken cancellationToken)
         {
-            HttpResponseMessage toReturn = null;
-
             if (httpRequest == null)
             {
                 throw new ArgumentNullException(nameof(httpRequest));
@@ -309,14 +315,17 @@
             // extract the Header for the runIdentifier
             DateTime? runIdentifier = this.GetRunIdentifier(headerDictionary);
 
+            HttpResponseMessage toReturn;
             if (runIdentifier.HasValue)
             {
                 var attachtments = await this.loadProcessor.GetAttachments(
                                                                 runIdentifier.Value,
                                                                 cancellationToken).ConfigureAwait(false);
 
-                toReturn = new HttpResponseMessage(System.Net.HttpStatusCode.OK);
-                toReturn.Content = new StringContent(JsonConvert.SerializeObject(attachtments));
+                toReturn = new HttpResponseMessage(HttpStatusCode.OK)
+                {
+                    Content = new StringContent(JsonConvert.SerializeObject(attachtments)),
+                };
             }
             else
             {
@@ -325,7 +334,6 @@
 
             return toReturn;
         }
-
 
         private short? GetStatus(IHeaderDictionary headerDictionary)
         {

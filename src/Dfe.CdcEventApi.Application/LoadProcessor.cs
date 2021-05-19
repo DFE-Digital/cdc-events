@@ -9,12 +9,12 @@
     using Dfe.CdcEventApi.Domain.Models;
 
     /// <summary>
-    /// .
+    /// Implements <see cref="ILoadProcessor" />.
     /// </summary>
     public class LoadProcessor : ILoadProcessor
     {
-        private ILoadStorageAdapter loadStorageAdapter;
-        private ILoggerProvider loggerProvider;
+        private readonly ILoadStorageAdapter loadStorageAdapter;
+        private readonly ILoggerProvider loggerProvider;
 
         /// <summary>
         /// Initialises a new instance of the <see cref="LoadProcessor"/> class.
@@ -49,33 +49,48 @@
             DateTime runIdentifier,
             CancellationToken cancellationToken)
         {
+            this.loggerProvider.Debug($"Creating a new Load...");
             var loads = await this.loadStorageAdapter.CreateLoadAsync(runIdentifier)
                                 .ConfigureAwait(false);
             return loads;
         }
 
         /// <summary>
-        /// .
+        /// Get all <see cref="Attachment"/> instances deriving from the specfied <see cref="Load "/> date and time.
         /// </summary>
-        /// <param name="runIdentifier">..</param>
-        /// <param name="cancellationToken">...</param>
-        /// <returns>....</returns>
+        /// <param name="runIdentifier">
+        /// The date and time.
+        /// </param>
+        /// <param name="cancellationToken">
+        /// The asynchronous <see cref="CancellationToken"/>.
+        /// </param>
+        /// <returns>
+        /// A <see cref="Task"/> wrapping the collection of <see cref="Attachment"/>.
+        /// </returns>
         public async Task<IEnumerable<Attachment>> GetAttachments(DateTime runIdentifier, CancellationToken cancellationToken)
         {
+            this.loggerProvider.Debug($"Getting attachments to process...");
             var attachments = await this.loadStorageAdapter.GetAttachments(runIdentifier).ConfigureAwait(false);
             return attachments;
         }
 
         /// <summary>
-        /// .
+        /// Gets an instance of <see cref="Load"/>.
         /// </summary>
-        /// <param name="runIdentifier">..</param>
-        /// <param name="cancellationToken">...</param>
-        /// <returns>....</returns>
+        /// <param name="runIdentifier">
+        /// The instance identifier value.
+        /// </param>
+        /// <param name="cancellationToken">
+        /// The asynchronous <see cref="CancellationToken"/>.
+        /// </param>
+        /// <returns>
+        /// A <see cref="Task"/> wrapping the <see cref="Load"/> instance.
+        /// </returns>
         public async Task<Load> GetLoadAsync(
                 DateTime runIdentifier,
                 CancellationToken cancellationToken)
         {
+            this.loggerProvider.Debug($"Getting the Load data...");
             var load = await this.loadStorageAdapter.GetLoadAsync(runIdentifier)
                     .ConfigureAwait(false);
             return load;
@@ -91,42 +106,57 @@
         /// The asnychronous processing cancellation token.
         /// </param>
         /// <returns>
-        /// ....
+        /// A <see cref="Task"/> wrapping a collection of <see cref="LoadNotification"/>.
         /// </returns>
         public async Task<IEnumerable<LoadNotification>> GetLoadNotifications(
             short status,
             CancellationToken cancellationToken)
         {
+            this.loggerProvider.Debug($"Getting the load notifications to process...");
             return await this.loadStorageAdapter
                                  .GetLoadNotificationsForStatus(status)
                                  .ConfigureAwait(false);
         }
 
         /// <summary>
-        /// .
+        /// Gets the <see cref="LoadNotificationTemplate"/> for the specified status value.
         /// </summary>
-        /// <param name="status">..</param>
-        /// <param name="cancellationToken">...</param>
-        /// <returns>....</returns>
+        /// <param name="status">
+        /// The status value.
+        /// </param>
+        /// <param name="cancellationToken">
+        /// The asnychronous <see cref="CancellationToken"/>.
+        /// </param>
+        /// <returns>
+        /// A <see cref="Task"/> wrapping the <see cref="LoadNotificationTemplate"/>.
+        /// </returns>
         public async Task<LoadNotificationTemplate> GetLoadTemplateForStatus(
             short status,
             CancellationToken cancellationToken)
         {
+            this.loggerProvider.Debug($"Getting load status template...");
             return await this.loadStorageAdapter
                                 .GetLoadTemplateForStatus(status)
                                 .ConfigureAwait(false);
         }
 
         /// <summary>
-        /// .
+        /// Uploads a complete instance of <see cref="Load"/>.
         /// </summary>
-        /// <param name="item">..</param>
-        /// <param name="cancellationToken">...</param>
-        /// <returns>....</returns>
+        /// <param name="item">
+        /// The changed <see cref="Load"/> instance.
+        /// </param>
+        /// <param name="cancellationToken">
+        /// The asynchronous <see cref="CancellationToken"/>.
+        /// </param>
+        /// <returns>
+        /// A <see cref="Task"/>.
+        /// </returns>
         public async Task UpdateLoadAsync(
             Load item,
             CancellationToken cancellationToken)
         {
+            this.loggerProvider.Debug($"Updating the load...");
             await this.loadStorageAdapter
                         .UpdateLoadAsync(item)
                         .ConfigureAwait(false);
@@ -152,6 +182,7 @@
             short status,
             CancellationToken cancellationToken)
         {
+            this.loggerProvider.Debug($"Updating the lod status...");
             await this.loadStorageAdapter
                         .UpdateLoadStatusAsync(runIdentifier, status)
                         .ConfigureAwait(false);

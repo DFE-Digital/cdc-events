@@ -45,14 +45,14 @@ namespace Dfe.CdcEventApi.Application.UnitTests
             ExampleEntity[] exampleEntities = null;
             CancellationToken cancellationToken = CancellationToken.None;
 
-            Func<Task> processEntitiesAsync = () =>
+            Task processEntitiesAsync()
             {
                 // Act
                 return this.unit.CreateEntitiesAsync(
                     runIdentifier,
                     exampleEntities,
                     cancellationToken);
-            };
+            }
 
             // Assert
             await Assert.ThrowsExceptionAsync<ArgumentNullException>(
@@ -71,14 +71,14 @@ namespace Dfe.CdcEventApi.Application.UnitTests
                 };
             CancellationToken cancellationToken = CancellationToken.None;
 
-            Func<Task> processEntitiesAsync = () =>
+            Task processEntitiesAsync()
             {
                 // Act
                 return this.unit.CreateEntitiesAsync(
                     runIdentifier,
                     dataHandlerMissingEntities,
                     cancellationToken);
-            };
+            }
 
             // Assert
             await Assert.ThrowsExceptionAsync<MissingDataHandlerAttributeException>(
@@ -92,16 +92,15 @@ namespace Dfe.CdcEventApi.Application.UnitTests
             List<string> dataHandlerIdentifiers = new List<string>();
             List<XDocument> xDocuments = new List<XDocument>();
 
-            Action<string, DateTime, XDocument, CancellationToken> storeEntitiesAsync =
-                (dhi, ri, xd, ct) =>
-                {
-                    dataHandlerIdentifiers.Add(dhi);
-                    xDocuments.Add(xd);
-                };
+            void storeEntitiesAsync(string dhi, DateTime ri, XDocument xd, CancellationToken ct)
+            {
+                dataHandlerIdentifiers.Add(dhi);
+                xDocuments.Add(xd);
+            }
 
             this.mockEntityStorageAdapter
                 .Setup(x => x.StoreEntitiesAsync(It.IsAny<string>(), It.IsAny<DateTime>(), It.IsAny<XDocument>(), It.IsAny<CancellationToken>()))
-                .Callback(storeEntitiesAsync);
+                .Callback((Action<string, DateTime, XDocument, CancellationToken>)storeEntitiesAsync);
 
             string[] expectedDataHandlerIdentifiers = new string[] {
                 "ExampleDataHandler",
@@ -143,8 +142,6 @@ namespace Dfe.CdcEventApi.Application.UnitTests
             string filename)
             where TModelsBase : ModelsBase
         {
-            TModelsBase[] toReturn = null;
-
             Type type = typeof(EntityProcessorTests);
             Assembly assembly = type.Assembly;
 
@@ -154,15 +151,12 @@ namespace Dfe.CdcEventApi.Application.UnitTests
             string contentStr = null;
             using (Stream stream = assembly.GetManifestResourceStream(resourcePath))
             {
-                using (StreamReader streamReader = new StreamReader(stream))
-                {
-                    contentStr = streamReader.ReadToEnd();
-                }
+                using StreamReader streamReader = new StreamReader(stream);
+                contentStr = streamReader.ReadToEnd();
             }
 
-            toReturn = JsonConvert.DeserializeObject<TModelsBase[]>(
+            TModelsBase[] toReturn = JsonConvert.DeserializeObject<TModelsBase[]>(
                 contentStr);
-
             return toReturn;
         }
     }
