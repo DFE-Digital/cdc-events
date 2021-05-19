@@ -142,13 +142,13 @@
                     entityType,
                     attributeType) as DataHandlerAttribute;
 
-            if (dataHandlerAttribute == null)
+            if (dataHandlerAttribute is DataHandlerAttribute)
             {
-                throw new MissingDataHandlerAttributeException(entityType);
+                string toReturn = dataHandlerAttribute.Identifier;
+                return toReturn;
             }
 
-            string toReturn = dataHandlerAttribute.Identifier;
-            return toReturn;
+            throw new MissingDataHandlerAttributeException(entityType);
         }
 
         private async Task ProcessProperty(
