@@ -72,5 +72,13 @@
         Task<LoadNotificationTemplate> GetLoadTemplateForStatus(
             short status,
             CancellationToken cancellationToken);
+
+        /// <summary>
+        /// .
+        /// </summary>
+        /// <param name="runIdentifier">..</param>
+        /// <param name="cancellationToken">...</param>
+        /// <returns>....</returns>
+        Task<IEnumerable<Attachment>> GetAttachments(DateTime runIdentifier, CancellationToken cancellationToken);
     }
 }

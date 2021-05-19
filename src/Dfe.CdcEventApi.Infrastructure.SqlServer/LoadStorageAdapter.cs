@@ -52,7 +52,7 @@
 
             this.assembly = type.Assembly;
 
-            this.dataHandlersPath = $"{type.Namespace}.DataHandlers";
+            this.dataHandlersPath = $"{type.Namespace}.LoadHandlers";
 
             this.rawDbConnectionString =
                 entityStorageAdapterSettingsProvider.RawDbConnectionString;
@@ -84,6 +84,24 @@
                 IEnumerable<Load> loads = sqlConnection
                         .Query<Load>(querySql, new { runIdentifier });
                 return loads;
+            }
+        }
+
+        /// <summary>
+        /// .
+        /// </summary>
+        /// <param name="runIdentifier">..</param>
+        /// <returns>...</returns>
+        public Task<IEnumerable<Attachment>> GetAttachments(DateTime runIdentifier)
+        {
+            this.loggerProvider.Info($"Getting attachments from {runIdentifier:u}");
+
+            using (SqlConnection sqlConnection = new SqlConnection(this.rawDbConnectionString))
+            {
+                string querySql = this.ExtractHandler("Retrieve_Raw_Attachments");
+                this.loggerProvider.Debug($"Retrieving attachment records.");
+                var attachments = sqlConnection.Query<Attachment>(querySql, new { runIdentifier });
+                return Task.FromResult(attachments);
             }
         }
 

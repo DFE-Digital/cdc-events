@@ -60,6 +60,18 @@
         /// <param name="runIdentifier">..</param>
         /// <param name="cancellationToken">...</param>
         /// <returns>....</returns>
+        public async Task<IEnumerable<Attachment>> GetAttachments(DateTime runIdentifier, CancellationToken cancellationToken)
+        {
+            var attachments = await this.loadStorageAdapter.GetAttachments(runIdentifier).ConfigureAwait(false);
+            return attachments;
+        }
+
+        /// <summary>
+        /// .
+        /// </summary>
+        /// <param name="runIdentifier">..</param>
+        /// <param name="cancellationToken">...</param>
+        /// <returns>....</returns>
         public async Task<Load> GetLoadAsync(
                 DateTime runIdentifier,
                 CancellationToken cancellationToken)

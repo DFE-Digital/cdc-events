@@ -10,7 +10,7 @@
     using Microsoft.Azure.WebJobs.Extensions.Http;
 
     /// <summary>
-    /// Base class for the <c>Load</c> function.
+    /// Base class for the <see cref="Load"/> function.
     /// </summary>
     public class Load : LoadFunctionsBase
     {
@@ -47,73 +47,44 @@
         /// <returns>
         /// An instance of type <see cref="HttpResponseMessage" />.
         /// </returns>
-        [FunctionName("startload")]
-        public async Task<HttpResponseMessage> StartLoadAsync(
-            [HttpTrigger(AuthorizationLevel.Function, "POST")]
+        [FunctionName("load")]
+        public async Task<HttpResponseMessage> LoadAsync(
+            [HttpTrigger(AuthorizationLevel.Function, "POST", "PATCH", "PUT")]
             HttpRequest httpRequest,
             CancellationToken cancellationToken)
         {
-            HttpResponseMessage toReturn =
-                await this.StartLoad(
-                    httpRequest,
-                    cancellationToken)
-                .ConfigureAwait(false);
+            switch (httpRequest?.Method ?? "BAD")
+            {
+                case "POST":
+                    HttpResponseMessage postReturn =
+                                            await this.StartLoad(
+                                                httpRequest,
+                                                cancellationToken)
+                                            .ConfigureAwait(false);
 
-            return toReturn;
-        }
+                    return postReturn;
 
-        /// <summary>
-        /// Updates a load control record.
-        /// </summary>
-        /// <param name="httpRequest">
-        /// An instance of type <see cref="HttpRequest" />.
-        /// </param>
-        /// <param name="cancellationToken">
-        /// An instance of <see cref="CancellationToken" />.
-        /// </param>
-        /// <returns>
-        /// An instance of type <see cref="HttpResponseMessage" />.
-        /// </returns>
-        [FunctionName("updateload")]
-        public async Task<HttpResponseMessage> UpdateLoadAsync(
-            [HttpTrigger(AuthorizationLevel.Function, "PUT")]
-            HttpRequest httpRequest,
-            CancellationToken cancellationToken)
-        {
-            HttpResponseMessage toReturn =
-                await this.UpdateLoad(
-                    httpRequest,
-                    cancellationToken)
-                .ConfigureAwait(false);
+                case "PATCH":
 
-            return toReturn;
-        }
+                    HttpResponseMessage patchReturn =
+                                            await this.UpdateLoad(
+                                                httpRequest,
+                                                cancellationToken)
+                                            .ConfigureAwait(false);
 
-        /// <summary>
-        /// Finishes a load control record.
-        /// </summary>
-        /// <param name="httpRequest">
-        /// An instance of type <see cref="HttpRequest" />.
-        /// </param>
-        /// <param name="cancellationToken">
-        /// An instance of <see cref="CancellationToken" />.
-        /// </param>
-        /// <returns>
-        /// An instance of type <see cref="HttpResponseMessage" />.
-        /// </returns>
-        [FunctionName("finishload")]
-        public async Task<HttpResponseMessage> FinishLoadAsync(
-            [HttpTrigger(AuthorizationLevel.Function, "PUT")]
-            HttpRequest httpRequest,
-            CancellationToken cancellationToken)
-        {
-            HttpResponseMessage toReturn =
-                await this.FinishLoad(
-                    httpRequest,
-                    cancellationToken)
-                .ConfigureAwait(false);
+                    return patchReturn;
 
-            return toReturn;
+                case "PUT":
+                    HttpResponseMessage putReturn =
+                                            await this.FinishLoad(
+                                                httpRequest,
+                                                cancellationToken)
+                                            .ConfigureAwait(false);
+
+                    return putReturn;
+                default:
+                    return new HttpResponseMessage(System.Net.HttpStatusCode.BadRequest);
+            }
         }
     }
 }

@@ -11,7 +11,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dfe.CdcEventApi.FunctionApp
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dfe.CdcEventApi.Infrastructure.SqlServer", "Dfe.CdcEventApi.Infrastructure.SqlServer\Dfe.CdcEventApi.Infrastructure.SqlServer.csproj", "{2D169F53-38A2-4E09-BB9C-647BEAB19ABB}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dfe.CdcEventApi.Application.UnitTests", "Dfe.CdcEventApi.Application.UnitTests\Dfe.CdcEventApi.Application.UnitTests.csproj", "{3D16E4E4-41FB-4619-B9F0-A8DAE1A2A636}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dfe.CdcEventApi.Application.UnitTests", "Dfe.CdcEventApi.Application.UnitTests\Dfe.CdcEventApi.Application.UnitTests.csproj", "{3D16E4E4-41FB-4619-B9F0-A8DAE1A2A636}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

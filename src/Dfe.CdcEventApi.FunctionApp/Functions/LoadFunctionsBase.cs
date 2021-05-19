@@ -161,7 +161,7 @@
 
                     // Everything good? Return ok.
                     toReturn =
-                        new HttpResponseMessage(HttpStatusCode.OK);
+                        new HttpResponseMessage(HttpStatusCode.Accepted);
                 }
                 catch (MissingLoadHandlerFileException exception)
                 {
@@ -185,16 +185,16 @@
         }
 
         /// <summary>
-        /// Method to finish a load.
+        /// Method to finish a load and perform completion tasks.
         /// </summary>
         /// <param name="httpRequest">
-        /// .
+        /// the <see cref="HttpRequest"/> being processed.
         /// </param>
         /// <param name="cancellationToken">
-        /// ..
+        /// The asynchronsous processing <see cref="CancellationToken"/>.
         /// </param>
         /// <returns>
-        /// A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.
+        /// A <see cref="Task{HttpResponseMessage}"/> representing the result of the asynchronous operation.
         /// </returns>
         protected async Task<HttpResponseMessage> FinishLoad(
             HttpRequest httpRequest,
@@ -273,7 +273,6 @@
 
                 toReturn = new HttpResponseMessage(HttpStatusCode.Accepted)
                 {
-
                     // return the notification data to the caller.
                     Content = new StringContent(JsonConvert.SerializeObject(load)),
                 };
@@ -290,6 +289,42 @@
             return toReturn;
         }
 
+        /// <summary>
+        /// .
+        /// </summary>
+        /// <param name="httpRequest">..</param>
+        /// <param name="cancellationToken">...</param>
+        /// <returns>....</returns>
+        protected async Task<HttpResponseMessage> GetAttachments(HttpRequest httpRequest, CancellationToken cancellationToken)
+        {
+            HttpResponseMessage toReturn = null;
+
+            if (httpRequest == null)
+            {
+                throw new ArgumentNullException(nameof(httpRequest));
+            }
+
+            IHeaderDictionary headerDictionary = httpRequest.Headers;
+
+            // extract the Header for the runIdentifier
+            DateTime? runIdentifier = this.GetRunIdentifier(headerDictionary);
+
+            if (runIdentifier.HasValue)
+            {
+                var attachtments = await this.loadProcessor.GetAttachments(
+                                                                runIdentifier.Value,
+                                                                cancellationToken).ConfigureAwait(false);
+
+                toReturn = new HttpResponseMessage(System.Net.HttpStatusCode.OK);
+                toReturn.Content = new StringContent(JsonConvert.SerializeObject(attachtments));
+            }
+            else
+            {
+                toReturn = new HttpResponseMessage(HttpStatusCode.BadRequest);
+            }
+
+            return toReturn;
+        }
 
 
         private short? GetStatus(IHeaderDictionary headerDictionary)

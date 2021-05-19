@@ -52,5 +52,12 @@
         /// <param name="status">..</param>
         /// <returns>...</returns>
         Task<LoadNotificationTemplate> GetLoadTemplateForStatus(short status);
+
+        /// <summary>
+        /// .
+        /// </summary>
+        /// <param name="runIdentifier">...</param>
+        /// <returns>....</returns>
+        Task<IEnumerable<Attachment>> GetAttachments(DateTime runIdentifier);
     }
 }
