@@ -13,7 +13,7 @@
     /// <summary>
     /// Entry class for the <c>portfolios</c> function.
     /// </summary>
-    public class Portfolios : FunctionsBase
+    public class Portfolios : EntityFunctionsBase
     {
         /// <summary>
         /// Initialises a new instance of the <see cref="Portfolios" />
@@ -54,7 +54,7 @@
             CancellationToken cancellationToken)
         {
             HttpResponseMessage toReturn =
-                await this.RunAsync<Portfolio>(
+                await this.PostAsync<Portfolio>(
                     httpRequest,
                     cancellationToken)
                 .ConfigureAwait(false);

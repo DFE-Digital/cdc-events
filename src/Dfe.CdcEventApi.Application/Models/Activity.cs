@@ -5,7 +5,7 @@
     using Newtonsoft.Json;
 
     /// <summary>
-    /// Represents an individual <c>activities</c> entity.
+    /// Represents an individual <c>activity</c> entity.
     /// </summary>
     [DataHandler("Create_Raw_Activity")]
     public class Activity : ModelsBase

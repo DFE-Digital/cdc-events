@@ -13,7 +13,7 @@
     /// <summary>
     /// Entry class for the <c>blobs</c> function.
     /// </summary>
-    public class Blobs : FunctionsBase
+    public class Blobs : EntityFunctionsBase
     {
         /// <summary>
         /// Initialises a new instance of the <see cref="Blobs" /> class.
@@ -51,7 +51,7 @@
             CancellationToken cancellationToken)
         {
             HttpResponseMessage toReturn =
-                await this.RunAsync<Blob>(
+                await this.PostAsync<Blob>(
                     httpRequest,
                     cancellationToken)
                 .ConfigureAwait(false);

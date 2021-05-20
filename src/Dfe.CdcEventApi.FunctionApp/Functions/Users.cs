@@ -13,7 +13,7 @@
     /// <summary>
     /// Entry class for the <c>users</c> function.
     /// </summary>
-    public class Users : FunctionsBase
+    public class Users : EntityFunctionsBase
     {
         /// <summary>
         /// Initialises a new instance of the <see cref="Users" /> class.
@@ -53,7 +53,7 @@
             CancellationToken cancellationToken)
         {
             HttpResponseMessage toReturn =
-                await this.RunAsync<User>(
+                await this.PostAsync<User>(
                     httpRequest,
                     cancellationToken)
                 .ConfigureAwait(false);

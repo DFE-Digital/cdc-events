@@ -13,7 +13,7 @@
     /// <summary>
     /// Entry class for the <c>surveysections</c> function.
     /// </summary>
-    public class SurveySections : FunctionsBase
+    public class SurveySections : EntityFunctionsBase
     {
         /// <summary>
         /// Initialises a new instance of the <see cref="SurveySections" />
@@ -54,7 +54,7 @@
             CancellationToken cancellationToken)
         {
             HttpResponseMessage toReturn =
-                await this.RunAsync<SurveySection>(
+                await this.PostAsync<SurveySection>(
                     httpRequest,
                     cancellationToken)
                 .ConfigureAwait(false);

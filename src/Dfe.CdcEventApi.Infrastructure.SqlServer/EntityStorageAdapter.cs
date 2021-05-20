@@ -101,7 +101,7 @@
                     $"{sqlConnection.ClientConnectionId}).");
 
                 Stopwatch stopwatch = new Stopwatch();
-                using (SqlCommand sqlCommand = this.GetSqlCommand(sqlConnection, handlerScript, runIdentifier, xDocument))
+                using (SqlCommand sqlCommand = this.InitCreateSqlCommand(sqlConnection, handlerScript, runIdentifier, xDocument))
                 {
                     this.loggerProvider.Debug("Executing query...");
 
@@ -125,7 +125,7 @@
             "Microsoft.Security",
             "CA2100",
             Justification = "Does not contain any user input.")]
-        private SqlCommand GetSqlCommand(
+        private SqlCommand InitCreateSqlCommand(
             SqlConnection sqlConnection,
             string handlerScript,
             DateTime runIdentifier,

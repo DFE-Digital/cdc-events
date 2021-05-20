@@ -13,7 +13,7 @@
     /// <summary>
     /// Entry class for the <c>oncosts</c> function.
     /// </summary>
-    public class OnCosts : FunctionsBase
+    public class OnCosts : EntityFunctionsBase
     {
         /// <summary>
         /// Initialises a new instance of the <see cref="OnCosts" /> class.
@@ -53,7 +53,7 @@
             CancellationToken cancellationToken)
         {
             HttpResponseMessage toReturn =
-                await this.RunAsync<OnCost>(
+                await this.PostAsync<OnCost>(
                     httpRequest,
                     cancellationToken)
                 .ConfigureAwait(false);

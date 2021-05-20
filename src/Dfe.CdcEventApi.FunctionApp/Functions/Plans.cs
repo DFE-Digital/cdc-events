@@ -13,7 +13,7 @@
     /// <summary>
     /// Entry class for the <c>plans</c> function.
     /// </summary>
-    public class Plans : FunctionsBase
+    public class Plans : EntityFunctionsBase
     {
         /// <summary>
         /// Initialises a new instance of the <see cref="Plans" /> class.
@@ -53,7 +53,7 @@
             CancellationToken cancellationToken)
         {
             HttpResponseMessage toReturn =
-                await this.RunAsync<Plan>(
+                await this.PostAsync<Plan>(
                     httpRequest,
                     cancellationToken)
                 .ConfigureAwait(false);

@@ -13,7 +13,7 @@
     /// <summary>
     /// Entry class for the <c>activities</c> function.
     /// </summary>
-    public class Activities : FunctionsBase
+    public class Activities : EntityFunctionsBase
     {
         /// <summary>
         /// Initialises a new instance of the <see cref="Activities" />
@@ -54,7 +54,7 @@
             CancellationToken cancellationToken)
         {
             HttpResponseMessage toReturn =
-                await this.RunAsync<Activity>(
+                await this.PostAsync<Activity>(
                     httpRequest,
                     cancellationToken)
                 .ConfigureAwait(false);

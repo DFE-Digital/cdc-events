@@ -18,9 +18,9 @@
     using Newtonsoft.Json;
 
     /// <summary>
-    /// Abstract base class for all functions.
+    /// Abstract base class for all entity based functions.
     /// </summary>
-    public abstract class FunctionsBase
+    public abstract class EntityFunctionsBase
     {
         private const string HeaderNameRunIdentifier = "X-Run-Identifier";
 
@@ -28,7 +28,7 @@
         private readonly ILoggerProvider loggerProvider;
 
         /// <summary>
-        /// Initialises a new instance of the <see cref="FunctionsBase" />
+        /// Initialises a new instance of the <see cref="EntityFunctionsBase" />
         /// class.
         /// </summary>
         /// <param name="entityProcessor">
@@ -37,7 +37,7 @@
         /// <param name="loggerProvider">
         /// An instance of type <see cref="ILoggerProvider" />.
         /// </param>
-        public FunctionsBase(
+        public EntityFunctionsBase(
             IEntityProcessor entityProcessor,
             ILoggerProvider loggerProvider)
         {
@@ -60,7 +60,7 @@
         /// <returns>
         /// An instance of <see cref="HttpResponseMessage" />.
         /// </returns>
-        protected async Task<HttpResponseMessage> RunAsync<TModelsBase>(
+        protected async Task<HttpResponseMessage> PostAsync<TModelsBase>(
             HttpRequest httpRequest,
             CancellationToken cancellationToken)
             where TModelsBase : ModelsBase
@@ -137,7 +137,7 @@
 
                 try
                 {
-                    await this.entityProcessor.ProcessEntitiesAsync(
+                    await this.entityProcessor.CreateEntitiesAsync<TModelsBase>(
                         runIdentifier.Value,
                         modelsBases,
                         cancellationToken)

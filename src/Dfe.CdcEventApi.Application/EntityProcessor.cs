@@ -43,7 +43,7 @@
         }
 
         /// <inheritdoc />
-        public async Task ProcessEntitiesAsync<TModelsBase>(
+        public async Task CreateEntitiesAsync<TModelsBase>(
             DateTime runIdentifier,
             IEnumerable<TModelsBase> modelsBases,
             CancellationToken cancellationToken)
@@ -55,8 +55,13 @@
             }
 
             // 1) Figure out which embedded TSQL script to invoke from the
-            //    meta-data of TModels base.
+            //    meta-data of TModels base for this verb action.
             string identifier = ExtractDataHandlerIdentifier<TModelsBase>();
+
+            if (string.IsNullOrWhiteSpace(identifier))
+            {
+                throw new MissingDataHandlerAttributeException(typeof(TModelsBase));
+            }
 
             // 2) Prepare the main XDocument to be passed to the data-layer.
             XDocument xDocument = this.ConvertToXDocument(modelsBases);
@@ -70,9 +75,9 @@
                 .ConfigureAwait(false);
 
             // 4) Identify any sub-collection properties for DataHandler
-            //    identifiers.
+            //    identifiers for this verb action.
             Dictionary<PropertyInfo, string> propertiesToProcess =
-                ExtractPropertyInfosAndDataHanderIdentifiers<TModelsBase>();
+                ExtractPropertyInfosAndDataHanderIdentifier<TModelsBase>();
 
             this.loggerProvider.Debug(
                 $"This entity has {propertiesToProcess.Count} children to " +
@@ -92,7 +97,7 @@
             }
         }
 
-        private static Dictionary<PropertyInfo, string> ExtractPropertyInfosAndDataHanderIdentifiers<TModelsBase>()
+        private static Dictionary<PropertyInfo, string> ExtractPropertyInfosAndDataHanderIdentifier<TModelsBase>()
             where TModelsBase : ModelsBase
         {
             Dictionary<PropertyInfo, string> toReturn = null;
@@ -129,24 +134,21 @@
         private static string ExtractDataHandlerIdentifier<TModelsBase>()
             where TModelsBase : ModelsBase
         {
-            string toReturn = null;
-
             Type entityType = typeof(TModelsBase);
             Type attributeType = typeof(DataHandlerAttribute);
 
             DataHandlerAttribute dataHandlerAttribute =
-                (DataHandlerAttribute)Attribute.GetCustomAttribute(
+                Attribute.GetCustomAttribute(
                     entityType,
-                    attributeType);
+                    attributeType) as DataHandlerAttribute;
 
-            if (dataHandlerAttribute == null)
+            if (dataHandlerAttribute is DataHandlerAttribute)
             {
-                throw new MissingDataHandlerAttributeException(entityType);
+                string toReturn = dataHandlerAttribute.Identifier;
+                return toReturn;
             }
 
-            toReturn = dataHandlerAttribute.Identifier;
-
-            return toReturn;
+            throw new MissingDataHandlerAttributeException(entityType);
         }
 
         private async Task ProcessProperty(
@@ -243,7 +245,7 @@
 
                     foreach (KeyValuePair<string, JToken> keyValuePair in data)
                     {
-                        dataRow[keyValuePair.Key] = HttpUtility.HtmlEncode(keyValuePair.Value);
+                        dataRow[keyValuePair.Key] = keyValuePair.Value;
                     }
 
                     dataTable.Rows.Add(dataRow);

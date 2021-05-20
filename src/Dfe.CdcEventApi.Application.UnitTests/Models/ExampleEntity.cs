@@ -8,7 +8,7 @@
     [DataHandler("ExampleDataHandler")]
     public class ExampleEntity : ModelsBase
     {
-        [DataHandler("ExampleSubEntityCollectionDataHandler")]
+        [DataHandler("ExampleSubEntityDataHandler")]
         [JsonProperty("additional")]
         public IEnumerable<ExampleSubEntity> AdditionalData
         {

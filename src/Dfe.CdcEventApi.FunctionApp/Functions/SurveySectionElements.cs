@@ -13,7 +13,7 @@
     /// <summary>
     /// Entry class for the <c>surverysectionelements</c> function.
     /// </summary>
-    public class SurveySectionElements : FunctionsBase
+    public class SurveySectionElements : EntityFunctionsBase
     {
         /// <summary>
         /// Initialises a new instance of the
@@ -54,7 +54,7 @@
             CancellationToken cancellationToken)
         {
             HttpResponseMessage toReturn =
-                await this.RunAsync<SurveySectionElement>(
+                await this.PostAsync<SurveySectionElement>(
                     httpRequest,
                     cancellationToken)
                 .ConfigureAwait(false);

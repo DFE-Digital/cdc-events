@@ -33,15 +33,12 @@
 
         private static string BuildExceptionMessage(Type type)
         {
-            string toReturn = null;
-
             string typeStr = type.Name;
 
-            toReturn = string.Format(
-                CultureInfo.InvariantCulture,
-                Message,
-                typeStr);
-
+            string toReturn = string.Format(
+                                CultureInfo.InvariantCulture,
+                                Message,
+                                typeStr);
             return toReturn;
         }
     }
