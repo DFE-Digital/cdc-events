@@ -56,6 +56,30 @@
         }
       }
     },
+    "/attachments": {
+      "get": {
+        "summary": "Attachments retrieved",
+        "description": "Retrieves teh load runes attachments collection.",
+        "operationId": "attachmetns-get",
+        "parameters": [
+          {
+            "in": "header",
+            "type": "string",
+            "name": "Authorization",
+            "description": "Bearer token authorization.",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The request was accepted and processed."
+          },
+          "500": {
+            "description": "An unexpected error has occurred - please get in touch with us so we can check our logs!"
+          }
+        }
+      }
+    },
     "/blobs": {
       "post": {
         "summary": "Blobs Created",
