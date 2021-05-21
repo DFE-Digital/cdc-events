@@ -58,7 +58,7 @@
     },
     "/attachments": {
       "get": {
-        "summary": "Attachments retrieved",
+        "summary": "Attachments Retrieve",
         "description": "Retrieves teh load runes attachments collection.",
         "operationId": "attachmetns-get",
         "parameters": [
@@ -379,6 +379,74 @@
           }
         }
       }
+    },
+    "/load": {
+      "post": {
+        "summary": "Load Start",
+        "description": "Creates a load event record.",
+        "operationId": "load-start",
+        "parameters": [
+          {
+            "in": "header",
+            "type": "string",
+            "name": "Authorization",
+            "description": "Bearer token authorization.",
+            "required": true
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "The load event request was accepted and processed."
+          },
+          "500": {
+            "description": "An unexpected error has occurred - please get in touch with us so we can check our logs!"
+          }
+        }
+      },
+      "patch": {
+        "summary": "Load Update",
+        "description": "Modifies a load event record.",
+        "operationId": "load-update",
+        "parameters": [
+          {
+            "in": "header",
+            "type": "string",
+            "name": "Authorization",
+            "description": "Bearer token authorization.",
+            "required": true
+          }
+        ],
+        "responses": {
+          "202": {
+            "description": "The load event request was accepted and processed."
+          },
+          "500": {
+            "description": "An unexpected error has occurred - please get in touch with us so we can check our logs!"
+          }
+        }
+      },
+      "put": {
+        "summary": "Load Finish",
+        "description": "Completes a load event record.",
+        "operationId": "load-finish",
+        "parameters": [
+          {
+            "in": "header",
+            "type": "string",
+            "name": "Authorization",
+            "description": "Bearer token authorization.",
+            "required": true
+          }
+        ],
+        "responses": {
+          "202": {
+            "description": "The load event request was accepted and processed."
+          },
+          "500": {
+            "description": "An unexpected error has occurred - please get in touch with us so we can check our logs!"
+          }
+        }
+      }
     }
   }
-}
+} 
