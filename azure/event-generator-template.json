@@ -1,807 +1,903 @@
 {
-    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
-    "contentVersion": "1.0.0.0",
-    "parameters": {
-        "workflows_s153d01_cdcaeg_la_01_name": {
-            "defaultValue": "s153d01-cdcaeg-la-01",
-            "type": "String"
-        }
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "serviceIdentifier": {
+      "type": "string",
+      "minLength": 4,
+      "maxLength": 4
     },
-    "variables": {},
-    "resources": [
-        {
-            "type": "Microsoft.Logic/workflows",
-            "apiVersion": "2017-07-01",
-            "name": "[parameters('workflows_s153d01_cdcaeg_la_01_name')]",
-            "location": "westeurope",
-            "tags": {
-                "Parent Business": "Shared IT core services",
-                "Portfolio": "Digital and Technology",
-                "Product": "CDC Service",
-                "Service": "CDC Service",
-                "Service Line": "Condition Data Collection",
-                "Service Offering": "CDC service",
-                "app": "cdcaeg",
-                "environment": ""
+    "environment": {
+      "type": "string",
+      "defaultValue": "d",
+      "allowedValues": [
+        "d",
+        "t",
+        "p"
+      ]
+    },
+    "environmentName": {
+      "type": "string",
+      "defaultValue": "DEV",
+      "allowedValues": [
+        "DEV",
+        "TEST",
+        "OAT",
+        "PROD"
+      ]
+    },
+    "environmentInstance": {
+      "type": "string",
+      "minLength": 2,
+      "maxLength": 2,
+      "defaultValue": "01"
+    },
+    "sharedResourcesAppName": {
+      "type": "string",
+      "defaultValue": "common"
+    },
+    "eapimPublicIpAddress": {
+      "type": "string"
+    },
+    "keyVaultInstance": {
+      "type": "string",
+      "minLength": 2,
+      "maxLength": 2,
+      "defaultValue": "01"
+    },
+    "keyVaultSecretNameCdcEventsSubscriptionKey": {
+      "type": "string",
+      "defaultValue": "cdc-events-subscription-key"
+    },
+    "keyVaultSecretNameKycloudApiPassword": {
+      "type": "string",
+      "defaultValue": "kycloud-api-password"
+    },
+    "keyVaultSecretNameKycloudApiToken": {
+      "type": "string",
+      "defaultValue": "kycloud-api-token"
+    },
+    "keyVaultSecretNameCdcEventsTokenRequestPayload": {
+      "type": "string",
+      "defaultValue": "cdc-events-token-request-payload"
+    },
+    "cdcEventsApiBaseUri": {
+      "type": "string"
+    },
+    "kycloudApiBaseUri": {
+      "type": "string"
+    },
+    "kycloudApiEmail": {
+      "type": "string"
+    },
+    "loginEndpoint": {
+      "type": "string",
+      "defaultValue": "user/login"
+    },
+    "dataPathPrefix": {
+      "type": "string",
+      "defaultValue": "data"
+    },
+    "internalOAuthTokenEndpoint": {
+      "type": "string"
+    },
+    "appName": {
+      "type": "string",
+      "defaultValue": "cdcaeg"
+    },
+    "appInstance": {
+      "type": "string",
+      "defaultValue": "01"
+    }
+  },
+  "variables": {
+    "singleQuote": "'",
+    "namePrefix": "[concat(parameters('serviceIdentifier'), parameters('environment'), parameters('environmentInstance'))]",
+    "sharedResourceGroupName": "[concat(variables('namePrefix'), '-', parameters('sharedResourcesAppName'))]",
+    "keyVaultName": "[concat(variables('namePrefix'), '-kv-', parameters('keyVaultInstance'))]",
+    "logicAppName": "[concat(variables('namePrefix'), '-', parameters('appName'), '-la-', parameters('appInstance'))]",
+    "logicAppId": "[resourceId('Microsoft.Logic/workflows/', variables('logicAppName'))]",
+    "keyVaultSecretCdcEventsSubscriptionKey": "[resourceId(variables('sharedResourceGroupName'), 'Microsoft.KeyVault/vaults/secrets', variables('keyVaultName'), parameters('keyVaultSecretNameCdcEventsSubscriptionKey'))]",
+    "keyVaultSecretKycloudApiPassword": "[resourceId(variables('sharedResourceGroupName'), 'Microsoft.KeyVault/vaults/secrets', variables('keyVaultName'), parameters('keyVaultSecretNameKycloudApiPassword'))]",
+    "keyVaultSecretKycloudApiToken": "[resourceId(variables('sharedResourceGroupName'), 'Microsoft.KeyVault/vaults/secrets', variables('keyVaultName'), parameters('keyVaultSecretNameKycloudApiToken'))]",
+    "keyVaultSecretCdcEventsTokenRequestPayload": "[resourceId(variables('sharedResourceGroupName'), 'Microsoft.KeyVault/vaults/secrets', variables('keyVaultName'), parameters('keyVaultSecretNameCdcEventsTokenRequestPayload'))]",
+    "loginUri": "[concat(parameters('kycloudApiBaseUri'), '/', parameters('loginEndpoint'))]",
+    "dataPathUri": "[concat(parameters('kycloudApiBaseUri'), '/', parameters('dataPathPrefix'))]"
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Logic/workflows",
+      "apiVersion": "2017-07-01",
+      "name": "[parameters('workflows_s153d01_cdcaeg_la_01_name')]",
+      "location": "westeurope",
+      "tags": {
+        "Parent Business": "Shared IT core services",
+        "Portfolio": "Digital and Technology",
+        "Product": "CDC Service",
+        "Service": "CDC Service",
+        "Service Line": "Condition Data Collection",
+        "Service Offering": "CDC service",
+        "app": "cdcaeg",
+        "environment": ""
+      },
+      "identity": {
+        "principalId": "5a692c2d-82d1-46c0-9d3e-f302129b1a0f",
+        "tenantId": "9c7d9dd3-840c-4b3f-818e-552865082e16",
+        "type": "SystemAssigned"
+      },
+      "properties": {
+        "state": "Enabled",
+        "definition": {
+          "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+          "contentVersion": "1.0.0.0",
+          "parameters": {
+            "ApiEntitiesToPull": {
+              "defaultValue": [
+                "sites",
+                "surveysectionelements",
+                "portfolios",
+                "users",
+                "deleted",
+                "surveylots",
+                "activities",
+                "actuals",
+                "oncosts",
+                "plans",
+                "spends",
+                "surveysections",
+                "surveys"
+              ],
+              "type": "Array"
             },
-            "identity": {
-                "principalId": "5a692c2d-82d1-46c0-9d3e-f302129b1a0f",
-                "tenantId": "9c7d9dd3-840c-4b3f-818e-552865082e16",
-                "type": "SystemAssigned"
-            },
-            "properties": {
-                "state": "Enabled",
-                "definition": {
-                    "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
-                    "contentVersion": "1.0.0.0",
-                    "parameters": {
-                        "ApiEntitiesToPull": {
-                            "defaultValue": [
-                                "sites",
-                                "surveysectionelements",
-                                "portfolios",
-                                "users",
-                                "deleted",
-                                "surveylots",
-                                "activities",
-                                "actuals",
-                                "oncosts",
-                                "plans",
-                                "spends",
-                                "surveysections",
-                                "surveys"
-                            ],
-                            "type": "Array"
-                        },
-                        "KycloudApiEmail": {
-                            "defaultValue": "eapim.support@education.gov.uk",
-                            "type": "String"
-                        }
-                    },
-                    "triggers": {
-                        "Recurrence": {
-                            "recurrence": {
-                                "frequency": "Day",
-                                "interval": 1,
-                                "schedule": {
-                                    "hours": [
-                                        "16"
-                                    ]
-                                }
-                            },
-                            "type": "Recurrence"
-                        }
-                    },
-                    "actions": {
-                        "Finish_load": {
-                            "runAfter": {
-                                "Set_runStatus_to_Succeeded": [
-                                    "Succeeded"
-                                ]
-                            },
-                            "type": "Http",
-                            "inputs": {
-                                "headers": {
-                                    "Authorization": "Bearer @{body('Parse_CDC_Events_OAuth_Token')?['access_token']}",
-                                    "Content-Type": "application/json",
-                                    "Ocp-Apim-Subscription-Key": "@body('Parse_cdc-events-subscription-key')?['value']",
-                                    "X-Run-Identifier": "@variables('nowDateTime')",
-                                    "X-RunStatus": "@{variables('runStatus')}"
-                                },
-                                "method": "PUT",
-                                "uri": "https://dev-api-customerengagement.platform.education.gov.uk/v1/cdc-events/load"
-                            }
-                        },
-                        "For_each_ApiEntitiesToPull": {
-                            "foreach": "@parameters('ApiEntitiesToPull')",
-                            "actions": {
-                                "Loop_through_pages": {
-                                    "actions": {
-                                        "Check_results_for_entities": {
-                                            "actions": {
-                                                "Push_to_CDC_events_API_endpoint": {
-                                                    "runAfter": {},
-                                                    "type": "Http",
-                                                    "inputs": {
-                                                        "body": "@body('Parse_entity_page')?['Infos']",
-                                                        "headers": {
-                                                            "Authorization": "Bearer @{body('Parse_CDC_Events_OAuth_Token')?['access_token']}",
-                                                            "Content-Type": "application/octet-stream",
-                                                            "Ocp-Apim-Subscription-Key": "@body('Parse_cdc-events-subscription-key')?['value']",
-                                                            "X-Page": "@{variables('currentPage')}",
-                                                            "X-Run-Identifier": "@variables('nowDateTime')"
-                                                        },
-                                                        "method": "POST",
-                                                        "retryPolicy": {
-                                                            "type": "none"
-                                                        },
-                                                        "uri": "https://dev-api-customerengagement.platform.education.gov.uk/v1/cdc-events/@{items('For_each_ApiEntitiesToPull')}"
-                                                    }
-                                                }
-                                            },
-                                            "runAfter": {
-                                                "Increment_variable": [
-                                                    "Succeeded"
-                                                ]
-                                            },
-                                            "else": {
-                                                "actions": {
-                                                    "Set_continuePaging_=_false": {
-                                                        "runAfter": {},
-                                                        "type": "SetVariable",
-                                                        "inputs": {
-                                                            "name": "continuePaging",
-                                                            "value": false
-                                                        }
-                                                    }
-                                                }
-                                            },
-                                            "expression": {
-                                                "and": [
-                                                    {
-                                                        "greater": [
-                                                            "@length(body('Parse_entity_page')['Infos'])",
-                                                            0
-                                                        ]
-                                                    }
-                                                ]
-                                            },
-                                            "type": "If"
-                                        },
-                                        "Increment_variable": {
-                                            "runAfter": {
-                                                "Parse_entity_page": [
-                                                    "Succeeded"
-                                                ]
-                                            },
-                                            "type": "IncrementVariable",
-                                            "inputs": {
-                                                "name": "currentPage",
-                                                "value": 1
-                                            }
-                                        },
-                                        "Parse_entity_page": {
-                                            "runAfter": {
-                                                "Pull_entity_page": [
-                                                    "Succeeded"
-                                                ]
-                                            },
-                                            "type": "ParseJson",
-                                            "inputs": {
-                                                "content": "@body('Pull_entity_page')",
-                                                "schema": {
-                                                    "properties": {
-                                                        "Infos": {
-                                                            "items": {
-                                                                "type": "object"
-                                                            },
-                                                            "type": "array"
-                                                        },
-                                                        "Success": {
-                                                            "type": "boolean"
-                                                        }
-                                                    },
-                                                    "type": "object"
-                                                }
-                                            }
-                                        },
-                                        "Pull_entity_page": {
-                                            "runAfter": {},
-                                            "type": "Http",
-                                            "inputs": {
-                                                "headers": {
-                                                    "Accept": "application/json"
-                                                },
-                                                "method": "GET",
-                                                "queries": {
-                                                    "Page": "@{variables('currentPage')}",
-                                                    "PageSize": "1000",
-                                                    "SessionId": "@body('Parse_sessionId')?['SessionId']",
-                                                    "UpdatedSince": "@variables('sinceDateTime')",
-                                                    "format": "json",
-                                                    "jsconfig": "dh:iso8601"
-                                                },
-                                                "retryPolicy": {
-                                                    "type": "none"
-                                                },
-                                                "uri": "https://uatcdc2.kykloud.com/api/data/@{items('For_each_ApiEntitiesToPull')}"
-                                            }
-                                        }
-                                    },
-                                    "runAfter": {
-                                        "Set_currentPage_=_1": [
-                                            "Succeeded"
-                                        ]
-                                    },
-                                    "expression": "@equals(variables('continuePaging'), false)",
-                                    "limit": {
-                                        "count": 5000,
-                                        "timeout": "PT1H"
-                                    },
-                                    "type": "Until"
-                                },
-                                "Set_continuePaging_=_true": {
-                                    "runAfter": {},
-                                    "type": "SetVariable",
-                                    "inputs": {
-                                        "name": "continuePaging",
-                                        "value": true
-                                    }
-                                },
-                                "Set_currentPage_=_1": {
-                                    "runAfter": {
-                                        "Set_continuePaging_=_true": [
-                                            "Succeeded"
-                                        ]
-                                    },
-                                    "type": "SetVariable",
-                                    "inputs": {
-                                        "name": "currentPage",
-                                        "value": 1
-                                    }
-                                }
-                            },
-                            "runAfter": {
-                                "Initialise_currentPage": [
-                                    "Succeeded"
-                                ]
-                            },
-                            "type": "Foreach",
-                            "runtimeConfiguration": {
-                                "concurrency": {
-                                    "repetitions": 1
-                                }
-                            }
-                        },
-                        "Get_Attachments": {
-                            "runAfter": {
-                                "Update_load_status_to_Attachments": [
-                                    "Succeeded"
-                                ]
-                            },
-                            "type": "Http",
-                            "inputs": {
-                                "headers": {
-                                    "Content-Type": "application/json"
-                                },
-                                "method": "GET",
-                                "uri": "https://dev-api-customerengagement.platform.education.gov.uk/v1/cdc-events/attachments"
-                            }
-                        },
-                        "Get_and_Parse_Secrets_from_KeyVault": {
-                            "actions": {
-                                "Get_cdc-events-subscription-key": {
-                                    "runAfter": {
-                                        "Parse_kycloud-api-password": [
-                                            "Succeeded"
-                                        ]
-                                    },
-                                    "type": "Http",
-                                    "inputs": {
-                                        "authentication": {
-                                            "audience": "https://vault.azure.net",
-                                            "type": "ManagedServiceIdentity"
-                                        },
-                                        "method": "GET",
-                                        "uri": "https://s153d01-kv-01.vault.azure.net/secrets/cdc-events-subscription-key/9fd022fecaac4ff2a7c3c6adb980a428?api-version=2016-10-01"
-                                    }
-                                },
-                                "Get_cdc-events-token-request-payload": {
-                                    "runAfter": {
-                                        "Parse_cdc-events-subscription-key": [
-                                            "Succeeded"
-                                        ]
-                                    },
-                                    "type": "Http",
-                                    "inputs": {
-                                        "authentication": {
-                                            "audience": "https://vault.azure.net",
-                                            "type": "ManagedServiceIdentity"
-                                        },
-                                        "method": "GET",
-                                        "uri": "https://s153d01-kv-01.vault.azure.net/secrets/cdc-events-token-request-payload/d53b247212ea4367961ec3ebecbc98ee?api-version=2016-10-01"
-                                    }
-                                },
-                                "Get_kycloud-api-password_from_KeyVault": {
-                                    "runAfter": {
-                                        "Parse_kycloud-api-token": [
-                                            "Succeeded"
-                                        ]
-                                    },
-                                    "type": "Http",
-                                    "inputs": {
-                                        "authentication": {
-                                            "audience": "https://vault.azure.net",
-                                            "type": "ManagedServiceIdentity"
-                                        },
-                                        "method": "GET",
-                                        "uri": "https://s153d01-kv-01.vault.azure.net/secrets/kycloud-api-password/fbecc50e32e243379e76941dc37085b7?api-version=2016-10-01"
-                                    }
-                                },
-                                "Get_kycloud-api-token_from_KeyVault": {
-                                    "runAfter": {},
-                                    "type": "Http",
-                                    "inputs": {
-                                        "authentication": {
-                                            "audience": "https://vault.azure.net",
-                                            "type": "ManagedServiceIdentity"
-                                        },
-                                        "method": "GET",
-                                        "uri": "https://s153d01-kv-01.vault.azure.net/secrets/kycloud-api-token/e2bac005ae6a4486827dfebdabadb7d8?api-version=2016-10-01"
-                                    }
-                                },
-                                "Parse_cdc-events-subscription-key": {
-                                    "runAfter": {
-                                        "Get_cdc-events-subscription-key": [
-                                            "Succeeded"
-                                        ]
-                                    },
-                                    "type": "ParseJson",
-                                    "inputs": {
-                                        "content": "@body('Get_cdc-events-subscription-key')",
-                                        "schema": {
-                                            "properties": {
-                                                "value": {
-                                                    "type": "string"
-                                                }
-                                            },
-                                            "type": "object"
-                                        }
-                                    }
-                                },
-                                "Parse_cdc-events-token-request-payload": {
-                                    "runAfter": {
-                                        "Get_cdc-events-token-request-payload": [
-                                            "Succeeded"
-                                        ]
-                                    },
-                                    "type": "ParseJson",
-                                    "inputs": {
-                                        "content": "@body('Get_cdc-events-token-request-payload')",
-                                        "schema": {
-                                            "properties": {
-                                                "value": {
-                                                    "type": "string"
-                                                }
-                                            },
-                                            "type": "object"
-                                        }
-                                    }
-                                },
-                                "Parse_kycloud-api-password": {
-                                    "runAfter": {
-                                        "Get_kycloud-api-password_from_KeyVault": [
-                                            "Succeeded"
-                                        ]
-                                    },
-                                    "type": "ParseJson",
-                                    "inputs": {
-                                        "content": "@body('Get_kycloud-api-password_from_KeyVault')",
-                                        "schema": {
-                                            "properties": {
-                                                "value": {
-                                                    "type": "string"
-                                                }
-                                            },
-                                            "type": "object"
-                                        }
-                                    }
-                                },
-                                "Parse_kycloud-api-token": {
-                                    "runAfter": {
-                                        "Get_kycloud-api-token_from_KeyVault": [
-                                            "Succeeded"
-                                        ]
-                                    },
-                                    "type": "ParseJson",
-                                    "inputs": {
-                                        "content": "@body('Get_kycloud-api-token_from_KeyVault')",
-                                        "schema": {
-                                            "properties": {
-                                                "value": {
-                                                    "type": "string"
-                                                }
-                                            },
-                                            "type": "object"
-                                        }
-                                    }
-                                }
-                            },
-                            "runAfter": {},
-                            "type": "Scope"
-                        },
-                        "Get_sessionId": {
-                            "actions": {
-                                "Check_if_logging_in_was_a_success": {
-                                    "actions": {
-                                        "Login_was_a_success_-_continuing_with_execution": {
-                                            "actions": {},
-                                            "runAfter": {},
-                                            "type": "Scope"
-                                        }
-                                    },
-                                    "runAfter": {
-                                        "Parse_sessionId": [
-                                            "Succeeded"
-                                        ]
-                                    },
-                                    "else": {
-                                        "actions": {
-                                            "Terminate_-_couldn't_log_in,_for_whatever_reason": {
-                                                "runAfter": {},
-                                                "type": "Terminate",
-                                                "inputs": {
-                                                    "runStatus": "Failed"
-                                                }
-                                            }
-                                        }
-                                    },
-                                    "expression": {
-                                        "and": [
-                                            {
-                                                "equals": [
-                                                    "@body('Parse_sessionId')?['Success']",
-                                                    true
-                                                ]
-                                            }
-                                        ]
-                                    },
-                                    "type": "If"
-                                },
-                                "Get_sessionId_from_login_endpoint": {
-                                    "runAfter": {},
-                                    "type": "Http",
-                                    "inputs": {
-                                        "headers": {
-                                            "Accept": "application/json"
-                                        },
-                                        "method": "POST",
-                                        "queries": {
-                                            "ApiToken": "@body('Parse_kycloud-api-token')?['value']",
-                                            "Email": "@parameters('KycloudApiEmail')",
-                                            "Password": "@body('Parse_kycloud-api-password')?['value']"
-                                        },
-                                        "uri": "https://uatcdc2.kykloud.com/api/user/login"
-                                    }
-                                },
-                                "Parse_sessionId": {
-                                    "runAfter": {
-                                        "Get_sessionId_from_login_endpoint": [
-                                            "Succeeded"
-                                        ]
-                                    },
-                                    "type": "ParseJson",
-                                    "inputs": {
-                                        "content": "@body('Get_sessionId_from_login_endpoint')",
-                                        "schema": {
-                                            "properties": {
-                                                "SessionId": {
-                                                    "type": "string"
-                                                },
-                                                "Success": {
-                                                    "type": "boolean"
-                                                }
-                                            },
-                                            "type": "object"
-                                        }
-                                    }
-                                }
-                            },
-                            "runAfter": {
-                                "Update_load_status_to_Login": [
-                                    "Succeeded"
-                                ]
-                            },
-                            "type": "Scope"
-                        },
-                        "Initialise_continuePaging": {
-                            "runAfter": {
-                                "Initialise_parentId": [
-                                    "Succeeded"
-                                ]
-                            },
-                            "type": "InitializeVariable",
-                            "inputs": {
-                                "variables": [
-                                    {
-                                        "name": "continuePaging",
-                                        "type": "boolean"
-                                    }
-                                ]
-                            }
-                        },
-                        "Initialise_currentPage": {
-                            "runAfter": {
-                                "Initialise_continuePaging": [
-                                    "Succeeded"
-                                ]
-                            },
-                            "type": "InitializeVariable",
-                            "inputs": {
-                                "variables": [
-                                    {
-                                        "name": "currentPage",
-                                        "type": "integer"
-                                    }
-                                ]
-                            }
-                        },
-                        "Initialise_nowDateTime": {
-                            "runAfter": {
-                                "Obtain_CDC_Events_OAuth_Token": [
-                                    "Succeeded"
-                                ]
-                            },
-                            "type": "InitializeVariable",
-                            "inputs": {
-                                "variables": [
-                                    {
-                                        "name": "nowDateTime",
-                                        "type": "string",
-                                        "value": "@{utcNow()}"
-                                    }
-                                ]
-                            }
-                        },
-                        "Initialise_parentId": {
-                            "runAfter": {
-                                "Update_load_Status_to_Entities": [
-                                    "Succeeded"
-                                ]
-                            },
-                            "type": "InitializeVariable",
-                            "inputs": {
-                                "variables": [
-                                    {
-                                        "name": "parentId",
-                                        "type": "string"
-                                    }
-                                ]
-                            }
-                        },
-                        "Initialize_runStatus_to_Initialising": {
-                            "runAfter": {
-                                "Start_load_as_Initialising": [
-                                    "Succeeded"
-                                ]
-                            },
-                            "type": "InitializeVariable",
-                            "inputs": {
-                                "variables": [
-                                    {
-                                        "name": "runStatus",
-                                        "type": "integer",
-                                        "value": 1
-                                    }
-                                ]
-                            }
-                        },
-                        "Initialize_sinceDateTime": {
-                            "runAfter": {
-                                "Reset_nowDateTime": [
-                                    "Succeeded"
-                                ]
-                            },
-                            "type": "InitializeVariable",
-                            "inputs": {
-                                "variables": [
-                                    {
-                                        "name": "sinceDateTime",
-                                        "type": "string",
-                                        "value": "@{outputs('Start_load_as_Initialising')?['headers']?['X-Run-Since']}"
-                                    }
-                                ]
-                            }
-                        },
-                        "Obtain_CDC_Events_OAuth_Token": {
-                            "actions": {
-                                "Get_CDC_Events_OAuth_Token": {
-                                    "runAfter": {},
-                                    "type": "Http",
-                                    "inputs": {
-                                        "body": "@body('Parse_cdc-events-token-request-payload')?['value']",
-                                        "headers": {
-                                            "Content-Type": "application/x-www-form-urlencoded"
-                                        },
-                                        "method": "POST",
-                                        "uri": "https://login.microsoftonline.com/9c7d9dd3-840c-4b3f-818e-552865082e16/oauth2/token"
-                                    }
-                                },
-                                "Parse_CDC_Events_OAuth_Token": {
-                                    "runAfter": {
-                                        "Get_CDC_Events_OAuth_Token": [
-                                            "Succeeded"
-                                        ]
-                                    },
-                                    "type": "ParseJson",
-                                    "inputs": {
-                                        "content": "@body('Get_CDC_Events_OAuth_Token')",
-                                        "schema": {
-                                            "properties": {
-                                                "access_token": {
-                                                    "type": "string"
-                                                }
-                                            },
-                                            "type": "object"
-                                        }
-                                    }
-                                }
-                            },
-                            "runAfter": {
-                                "Get_and_Parse_Secrets_from_KeyVault": [
-                                    "Succeeded"
-                                ]
-                            },
-                            "type": "Scope"
-                        },
-                        "Reset_nowDateTime": {
-                            "runAfter": {
-                                "Initialize_runStatus_to_Initialising": [
-                                    "Succeeded"
-                                ]
-                            },
-                            "type": "SetVariable",
-                            "inputs": {
-                                "name": "nowDateTime",
-                                "value": "@{outputs('Start_load_as_Initialising')?['headers']?['X-Run-Identifier']}"
-                            }
-                        },
-                        "Set_runStatus_Login": {
-                            "runAfter": {
-                                "Update_load_status_to_Preparing": [
-                                    "Succeeded"
-                                ]
-                            },
-                            "type": "SetVariable",
-                            "inputs": {
-                                "name": "runStatus",
-                                "value": 4
-                            }
-                        },
-                        "Set_runStatus_to_Attachments": {
-                            "runAfter": {
-                                "For_each_ApiEntitiesToPull": [
-                                    "Succeeded"
-                                ]
-                            },
-                            "type": "SetVariable",
-                            "inputs": {
-                                "name": "runStatus",
-                                "value": 16
-                            }
-                        },
-                        "Set_runStatus_to_Entities": {
-                            "runAfter": {
-                                "Get_sessionId": [
-                                    "Succeeded"
-                                ]
-                            },
-                            "type": "SetVariable",
-                            "inputs": {
-                                "name": "runStatus",
-                                "value": 8
-                            }
-                        },
-                        "Set_runStatus_to_Preparing": {
-                            "runAfter": {
-                                "Initialize_sinceDateTime": [
-                                    "Succeeded"
-                                ]
-                            },
-                            "type": "SetVariable",
-                            "inputs": {
-                                "name": "runStatus",
-                                "value": 2
-                            }
-                        },
-                        "Set_runStatus_to_Succeeded": {
-                            "runAfter": {
-                                "Get_Attachments": [
-                                    "Succeeded"
-                                ]
-                            },
-                            "type": "SetVariable",
-                            "inputs": {
-                                "name": "runStatus",
-                                "value": 32
-                            }
-                        },
-                        "Start_load_as_Initialising": {
-                            "runAfter": {
-                                "Initialise_nowDateTime": [
-                                    "Succeeded"
-                                ]
-                            },
-                            "type": "Http",
-                            "inputs": {
-                                "headers": {
-                                    "Authorization": "Bearer @{body('Parse_CDC_Events_OAuth_Token')?['access_token']}",
-                                    "Content-Type": "application/json",
-                                    "Ocp-Apim-Subscription-Key": "@body('Parse_cdc-events-subscription-key')?['value']",
-                                    "X-Run-Identifier": "@variables('nowDateTime')"
-                                },
-                                "method": "POST",
-                                "uri": "https://dev-api-customerengagement.platform.education.gov.uk/v1/cdc-events/load"
-                            }
-                        },
-                        "Update_load_Status_to_Entities": {
-                            "runAfter": {
-                                "Set_runStatus_to_Entities": [
-                                    "Succeeded"
-                                ]
-                            },
-                            "type": "Http",
-                            "inputs": {
-                                "headers": {
-                                    "Content-Type": "application/json",
-                                    "X-Run-Identifier": "@variables('nowDateTime')",
-                                    "X-RunStatus": "@{variables('runStatus')}"
-                                },
-                                "method": "PATCH",
-                                "uri": "https://dev-api-customerengagement.platform.education.gov.uk/v1/cdc-events/load"
-                            }
-                        },
-                        "Update_load_status_to_Attachments": {
-                            "runAfter": {
-                                "Set_runStatus_to_Attachments": [
-                                    "Succeeded"
-                                ]
-                            },
-                            "type": "Http",
-                            "inputs": {
-                                "headers": {
-                                    "Authorization": "Bearer @{body('Parse_CDC_Events_OAuth_Token')?['access_token']}",
-                                    "Content-Type": "application/json",
-                                    "Ocp-Apim-Subscription-Key": "@body('Parse_cdc-events-subscription-key')?['value']",
-                                    "X-Run-Identifier": "@variables('nowDateTime')",
-                                    "X-RunStatus": "@{variables('runStatus')}"
-                                },
-                                "method": "PATCH",
-                                "uri": "https://dev-api-customerengagement.platform.education.gov.uk/v1/cdc-events/load"
-                            }
-                        },
-                        "Update_load_status_to_Login": {
-                            "runAfter": {
-                                "Set_runStatus_Login": [
-                                    "Succeeded"
-                                ]
-                            },
-                            "type": "Http",
-                            "inputs": {
-                                "headers": {
-                                    "Authorization": "Bearer @{body('Parse_CDC_Events_OAuth_Token')?['access_token']}",
-                                    "Content-Type": "application/json",
-                                    "Ocp-Apim-Subscription-Key": "@body('Parse_cdc-events-subscription-key')?['value']",
-                                    "X-Run-Identifier": "@variables('nowDateTime')",
-                                    "X-RunStatus": "@{variables('runStatus')}"
-                                },
-                                "method": "PATCH",
-                                "uri": "https://dev-api-customerengagement.platform.education.gov.uk/v1/cdc-events/load"
-                            }
-                        },
-                        "Update_load_status_to_Preparing": {
-                            "runAfter": {
-                                "Set_runStatus_to_Preparing": [
-                                    "Succeeded"
-                                ]
-                            },
-                            "type": "Http",
-                            "inputs": {
-                                "headers": {
-                                    "Authorization": "Bearer @{body('Parse_CDC_Events_OAuth_Token')?['access_token']}",
-                                    "Content-Type": "application/json",
-                                    "Ocp-Apim-Subscription-Key": "@body('Parse_cdc-events-subscription-key')?['value']",
-                                    "X-Run-Identifier": "@variables('nowDateTime')",
-                                    "X-RunStatus": "@{variables('runStatus')}"
-                                },
-                                "method": "PATCH",
-                                "uri": "https://dev-api-customerengagement.platform.education.gov.uk/v1/cdc-events/load"
-                            }
-                        }
-                    }
-                },
-                "parameters": {}
+            "KycloudApiEmail": {
+              "defaultValue": "eapim.support@education.gov.uk",
+              "type": "String"
             }
-        }
-    ]
+          },
+          "triggers": {
+            "Recurrence": {
+              "recurrence": {
+                "frequency": "Day",
+                "interval": 1,
+                "schedule": {
+                  "hours": [
+                    "16"
+                  ]
+                }
+              },
+              "type": "Recurrence"
+            }
+          },
+          "actions": {
+            "Finish_load": {
+              "runAfter": {
+                "Set_runStatus_to_Succeeded": [
+                  "Succeeded"
+                ]
+              },
+              "type": "Http",
+              "inputs": {
+                "headers": {
+                  "Authorization": "Bearer @{body('Parse_CDC_Events_OAuth_Token')?['access_token']}",
+                  "Content-Type": "application/json",
+                  "Ocp-Apim-Subscription-Key": "@body('Parse_cdc-events-subscription-key')?['value']",
+                  "X-Run-Identifier": "@variables('nowDateTime')",
+                  "X-RunStatus": "@{variables('runStatus')}"
+                },
+                "method": "PUT",
+                "uri": "https://dev-api-customerengagement.platform.education.gov.uk/v1/cdc-events/load"
+              }
+            },
+            "For_each_ApiEntitiesToPull": {
+              "foreach": "@parameters('ApiEntitiesToPull')",
+              "actions": {
+                "Loop_through_pages": {
+                  "actions": {
+                    "Check_results_for_entities": {
+                      "actions": {
+                        "Push_to_CDC_events_API_endpoint": {
+                          "runAfter": {},
+                          "type": "Http",
+                          "inputs": {
+                            "body": "@body('Parse_entity_page')?['Infos']",
+                            "headers": {
+                              "Authorization": "Bearer @{body('Parse_CDC_Events_OAuth_Token')?['access_token']}",
+                              "Content-Type": "application/octet-stream",
+                              "Ocp-Apim-Subscription-Key": "@body('Parse_cdc-events-subscription-key')?['value']",
+                              "X-Page": "@{variables('currentPage')}",
+                              "X-Run-Identifier": "@variables('nowDateTime')"
+                            },
+                            "method": "POST",
+                            "retryPolicy": {
+                              "type": "none"
+                            },
+                            "uri": "https://dev-api-customerengagement.platform.education.gov.uk/v1/cdc-events/@{items('For_each_ApiEntitiesToPull')}"
+                          }
+                        }
+                      },
+                      "runAfter": {
+                        "Increment_variable": [
+                          "Succeeded"
+                        ]
+                      },
+                      "else": {
+                        "actions": {
+                          "Set_continuePaging_=_false": {
+                            "runAfter": {},
+                            "type": "SetVariable",
+                            "inputs": {
+                              "name": "continuePaging",
+                              "value": false
+                            }
+                          }
+                        }
+                      },
+                      "expression": {
+                        "and": [
+                          {
+                            "greater": [
+                              "@length(body('Parse_entity_page')['Infos'])",
+                              0
+                            ]
+                          }
+                        ]
+                      },
+                      "type": "If"
+                    },
+                    "Increment_variable": {
+                      "runAfter": {
+                        "Parse_entity_page": [
+                          "Succeeded"
+                        ]
+                      },
+                      "type": "IncrementVariable",
+                      "inputs": {
+                        "name": "currentPage",
+                        "value": 1
+                      }
+                    },
+                    "Parse_entity_page": {
+                      "runAfter": {
+                        "Pull_entity_page": [
+                          "Succeeded"
+                        ]
+                      },
+                      "type": "ParseJson",
+                      "inputs": {
+                        "content": "@body('Pull_entity_page')",
+                        "schema": {
+                          "properties": {
+                            "Infos": {
+                              "items": {
+                                "type": "object"
+                              },
+                              "type": "array"
+                            },
+                            "Success": {
+                              "type": "boolean"
+                            }
+                          },
+                          "type": "object"
+                        }
+                      }
+                    },
+                    "Pull_entity_page": {
+                      "runAfter": {},
+                      "type": "Http",
+                      "inputs": {
+                        "headers": {
+                          "Accept": "application/json"
+                        },
+                        "method": "GET",
+                        "queries": {
+                          "Page": "@{variables('currentPage')}",
+                          "PageSize": "1000",
+                          "SessionId": "@body('Parse_sessionId')?['SessionId']",
+                          "UpdatedSince": "@variables('sinceDateTime')",
+                          "format": "json",
+                          "jsconfig": "dh:iso8601"
+                        },
+                        "retryPolicy": {
+                          "type": "none"
+                        },
+                        "uri": "https://uatcdc2.kykloud.com/api/data/@{items('For_each_ApiEntitiesToPull')}"
+                      }
+                    }
+                  },
+                  "runAfter": {
+                    "Set_currentPage_=_1": [
+                      "Succeeded"
+                    ]
+                  },
+                  "expression": "@equals(variables('continuePaging'), false)",
+                  "limit": {
+                    "count": 5000,
+                    "timeout": "PT1H"
+                  },
+                  "type": "Until"
+                },
+                "Set_continuePaging_=_true": {
+                  "runAfter": {},
+                  "type": "SetVariable",
+                  "inputs": {
+                    "name": "continuePaging",
+                    "value": true
+                  }
+                },
+                "Set_currentPage_=_1": {
+                  "runAfter": {
+                    "Set_continuePaging_=_true": [
+                      "Succeeded"
+                    ]
+                  },
+                  "type": "SetVariable",
+                  "inputs": {
+                    "name": "currentPage",
+                    "value": 1
+                  }
+                }
+              },
+              "runAfter": {
+                "Initialise_currentPage": [
+                  "Succeeded"
+                ]
+              },
+              "type": "Foreach",
+              "runtimeConfiguration": {
+                "concurrency": {
+                  "repetitions": 1
+                }
+              }
+            },
+            "Get_Attachments": {
+              "runAfter": {
+                "Update_load_status_to_Attachments": [
+                  "Succeeded"
+                ]
+              },
+              "type": "Http",
+              "inputs": {
+                "headers": {
+                  "Content-Type": "application/json"
+                },
+                "method": "GET",
+                "uri": "https://dev-api-customerengagement.platform.education.gov.uk/v1/cdc-events/attachments"
+              }
+            },
+            "Get_and_Parse_Secrets_from_KeyVault": {
+              "actions": {
+                "Get_cdc-events-subscription-key": {
+                  "runAfter": {
+                    "Parse_kycloud-api-password": [
+                      "Succeeded"
+                    ]
+                  },
+                  "type": "Http",
+                  "inputs": {
+                    "authentication": {
+                      "audience": "https://vault.azure.net",
+                      "type": "ManagedServiceIdentity"
+                    },
+                    "method": "GET",
+                    "uri": "https://s153d01-kv-01.vault.azure.net/secrets/cdc-events-subscription-key/9fd022fecaac4ff2a7c3c6adb980a428?api-version=2016-10-01"
+                  }
+                },
+                "Get_cdc-events-token-request-payload": {
+                  "runAfter": {
+                    "Parse_cdc-events-subscription-key": [
+                      "Succeeded"
+                    ]
+                  },
+                  "type": "Http",
+                  "inputs": {
+                    "authentication": {
+                      "audience": "https://vault.azure.net",
+                      "type": "ManagedServiceIdentity"
+                    },
+                    "method": "GET",
+                    "uri": "https://s153d01-kv-01.vault.azure.net/secrets/cdc-events-token-request-payload/d53b247212ea4367961ec3ebecbc98ee?api-version=2016-10-01"
+                  }
+                },
+                "Get_kycloud-api-password_from_KeyVault": {
+                  "runAfter": {
+                    "Parse_kycloud-api-token": [
+                      "Succeeded"
+                    ]
+                  },
+                  "type": "Http",
+                  "inputs": {
+                    "authentication": {
+                      "audience": "https://vault.azure.net",
+                      "type": "ManagedServiceIdentity"
+                    },
+                    "method": "GET",
+                    "uri": "https://s153d01-kv-01.vault.azure.net/secrets/kycloud-api-password/fbecc50e32e243379e76941dc37085b7?api-version=2016-10-01"
+                  }
+                },
+                "Get_kycloud-api-token_from_KeyVault": {
+                  "runAfter": {},
+                  "type": "Http",
+                  "inputs": {
+                    "authentication": {
+                      "audience": "https://vault.azure.net",
+                      "type": "ManagedServiceIdentity"
+                    },
+                    "method": "GET",
+                    "uri": "https://s153d01-kv-01.vault.azure.net/secrets/kycloud-api-token/e2bac005ae6a4486827dfebdabadb7d8?api-version=2016-10-01"
+                  }
+                },
+                "Parse_cdc-events-subscription-key": {
+                  "runAfter": {
+                    "Get_cdc-events-subscription-key": [
+                      "Succeeded"
+                    ]
+                  },
+                  "type": "ParseJson",
+                  "inputs": {
+                    "content": "@body('Get_cdc-events-subscription-key')",
+                    "schema": {
+                      "properties": {
+                        "value": {
+                          "type": "string"
+                        }
+                      },
+                      "type": "object"
+                    }
+                  }
+                },
+                "Parse_cdc-events-token-request-payload": {
+                  "runAfter": {
+                    "Get_cdc-events-token-request-payload": [
+                      "Succeeded"
+                    ]
+                  },
+                  "type": "ParseJson",
+                  "inputs": {
+                    "content": "@body('Get_cdc-events-token-request-payload')",
+                    "schema": {
+                      "properties": {
+                        "value": {
+                          "type": "string"
+                        }
+                      },
+                      "type": "object"
+                    }
+                  }
+                },
+                "Parse_kycloud-api-password": {
+                  "runAfter": {
+                    "Get_kycloud-api-password_from_KeyVault": [
+                      "Succeeded"
+                    ]
+                  },
+                  "type": "ParseJson",
+                  "inputs": {
+                    "content": "@body('Get_kycloud-api-password_from_KeyVault')",
+                    "schema": {
+                      "properties": {
+                        "value": {
+                          "type": "string"
+                        }
+                      },
+                      "type": "object"
+                    }
+                  }
+                },
+                "Parse_kycloud-api-token": {
+                  "runAfter": {
+                    "Get_kycloud-api-token_from_KeyVault": [
+                      "Succeeded"
+                    ]
+                  },
+                  "type": "ParseJson",
+                  "inputs": {
+                    "content": "@body('Get_kycloud-api-token_from_KeyVault')",
+                    "schema": {
+                      "properties": {
+                        "value": {
+                          "type": "string"
+                        }
+                      },
+                      "type": "object"
+                    }
+                  }
+                }
+              },
+              "runAfter": {},
+              "type": "Scope"
+            },
+            "Get_sessionId": {
+              "actions": {
+                "Check_if_logging_in_was_a_success": {
+                  "actions": {
+                    "Login_was_a_success_-_continuing_with_execution": {
+                      "actions": {},
+                      "runAfter": {},
+                      "type": "Scope"
+                    }
+                  },
+                  "runAfter": {
+                    "Parse_sessionId": [
+                      "Succeeded"
+                    ]
+                  },
+                  "else": {
+                    "actions": {
+                      "Terminate_-_couldn't_log_in,_for_whatever_reason": {
+                        "runAfter": {},
+                        "type": "Terminate",
+                        "inputs": {
+                          "runStatus": "Failed"
+                        }
+                      }
+                    }
+                  },
+                  "expression": {
+                    "and": [
+                      {
+                        "equals": [
+                          "@body('Parse_sessionId')?['Success']",
+                          true
+                        ]
+                      }
+                    ]
+                  },
+                  "type": "If"
+                },
+                "Get_sessionId_from_login_endpoint": {
+                  "runAfter": {},
+                  "type": "Http",
+                  "inputs": {
+                    "headers": {
+                      "Accept": "application/json"
+                    },
+                    "method": "POST",
+                    "queries": {
+                      "ApiToken": "@body('Parse_kycloud-api-token')?['value']",
+                      "Email": "@parameters('KycloudApiEmail')",
+                      "Password": "@body('Parse_kycloud-api-password')?['value']"
+                    },
+                    "uri": "https://uatcdc2.kykloud.com/api/user/login"
+                  }
+                },
+                "Parse_sessionId": {
+                  "runAfter": {
+                    "Get_sessionId_from_login_endpoint": [
+                      "Succeeded"
+                    ]
+                  },
+                  "type": "ParseJson",
+                  "inputs": {
+                    "content": "@body('Get_sessionId_from_login_endpoint')",
+                    "schema": {
+                      "properties": {
+                        "SessionId": {
+                          "type": "string"
+                        },
+                        "Success": {
+                          "type": "boolean"
+                        }
+                      },
+                      "type": "object"
+                    }
+                  }
+                }
+              },
+              "runAfter": {
+                "Update_load_status_to_Login": [
+                  "Succeeded"
+                ]
+              },
+              "type": "Scope"
+            },
+            "Initialise_continuePaging": {
+              "runAfter": {
+                "Initialise_parentId": [
+                  "Succeeded"
+                ]
+              },
+              "type": "InitializeVariable",
+              "inputs": {
+                "variables": [
+                  {
+                    "name": "continuePaging",
+                    "type": "boolean"
+                  }
+                ]
+              }
+            },
+            "Initialise_currentPage": {
+              "runAfter": {
+                "Initialise_continuePaging": [
+                  "Succeeded"
+                ]
+              },
+              "type": "InitializeVariable",
+              "inputs": {
+                "variables": [
+                  {
+                    "name": "currentPage",
+                    "type": "integer"
+                  }
+                ]
+              }
+            },
+            "Initialise_nowDateTime": {
+              "runAfter": {
+                "Obtain_CDC_Events_OAuth_Token": [
+                  "Succeeded"
+                ]
+              },
+              "type": "InitializeVariable",
+              "inputs": {
+                "variables": [
+                  {
+                    "name": "nowDateTime",
+                    "type": "string",
+                    "value": "@{utcNow()}"
+                  }
+                ]
+              }
+            },
+            "Initialise_parentId": {
+              "runAfter": {
+                "Update_load_Status_to_Entities": [
+                  "Succeeded"
+                ]
+              },
+              "type": "InitializeVariable",
+              "inputs": {
+                "variables": [
+                  {
+                    "name": "parentId",
+                    "type": "string"
+                  }
+                ]
+              }
+            },
+            "Initialize_runStatus_to_Initialising": {
+              "runAfter": {
+                "Start_load_as_Initialising": [
+                  "Succeeded"
+                ]
+              },
+              "type": "InitializeVariable",
+              "inputs": {
+                "variables": [
+                  {
+                    "name": "runStatus",
+                    "type": "integer",
+                    "value": 1
+                  }
+                ]
+              }
+            },
+            "Initialize_sinceDateTime": {
+              "runAfter": {
+                "Reset_nowDateTime": [
+                  "Succeeded"
+                ]
+              },
+              "type": "InitializeVariable",
+              "inputs": {
+                "variables": [
+                  {
+                    "name": "sinceDateTime",
+                    "type": "string",
+                    "value": "@{outputs('Start_load_as_Initialising')?['headers']?['X-Run-Since']}"
+                  }
+                ]
+              }
+            },
+            "Obtain_CDC_Events_OAuth_Token": {
+              "actions": {
+                "Get_CDC_Events_OAuth_Token": {
+                  "runAfter": {},
+                  "type": "Http",
+                  "inputs": {
+                    "body": "@body('Parse_cdc-events-token-request-payload')?['value']",
+                    "headers": {
+                      "Content-Type": "application/x-www-form-urlencoded"
+                    },
+                    "method": "POST",
+                    "uri": "https://login.microsoftonline.com/9c7d9dd3-840c-4b3f-818e-552865082e16/oauth2/token"
+                  }
+                },
+                "Parse_CDC_Events_OAuth_Token": {
+                  "runAfter": {
+                    "Get_CDC_Events_OAuth_Token": [
+                      "Succeeded"
+                    ]
+                  },
+                  "type": "ParseJson",
+                  "inputs": {
+                    "content": "@body('Get_CDC_Events_OAuth_Token')",
+                    "schema": {
+                      "properties": {
+                        "access_token": {
+                          "type": "string"
+                        }
+                      },
+                      "type": "object"
+                    }
+                  }
+                }
+              },
+              "runAfter": {
+                "Get_and_Parse_Secrets_from_KeyVault": [
+                  "Succeeded"
+                ]
+              },
+              "type": "Scope"
+            },
+            "Reset_nowDateTime": {
+              "runAfter": {
+                "Initialize_runStatus_to_Initialising": [
+                  "Succeeded"
+                ]
+              },
+              "type": "SetVariable",
+              "inputs": {
+                "name": "nowDateTime",
+                "value": "@{outputs('Start_load_as_Initialising')?['headers']?['X-Run-Identifier']}"
+              }
+            },
+            "Set_runStatus_Login": {
+              "runAfter": {
+                "Update_load_status_to_Preparing": [
+                  "Succeeded"
+                ]
+              },
+              "type": "SetVariable",
+              "inputs": {
+                "name": "runStatus",
+                "value": 4
+              }
+            },
+            "Set_runStatus_to_Attachments": {
+              "runAfter": {
+                "For_each_ApiEntitiesToPull": [
+                  "Succeeded"
+                ]
+              },
+              "type": "SetVariable",
+              "inputs": {
+                "name": "runStatus",
+                "value": 16
+              }
+            },
+            "Set_runStatus_to_Entities": {
+              "runAfter": {
+                "Get_sessionId": [
+                  "Succeeded"
+                ]
+              },
+              "type": "SetVariable",
+              "inputs": {
+                "name": "runStatus",
+                "value": 8
+              }
+            },
+            "Set_runStatus_to_Preparing": {
+              "runAfter": {
+                "Initialize_sinceDateTime": [
+                  "Succeeded"
+                ]
+              },
+              "type": "SetVariable",
+              "inputs": {
+                "name": "runStatus",
+                "value": 2
+              }
+            },
+            "Set_runStatus_to_Succeeded": {
+              "runAfter": {
+                "Get_Attachments": [
+                  "Succeeded"
+                ]
+              },
+              "type": "SetVariable",
+              "inputs": {
+                "name": "runStatus",
+                "value": 32
+              }
+            },
+            "Start_load_as_Initialising": {
+              "runAfter": {
+                "Initialise_nowDateTime": [
+                  "Succeeded"
+                ]
+              },
+              "type": "Http",
+              "inputs": {
+                "headers": {
+                  "Authorization": "Bearer @{body('Parse_CDC_Events_OAuth_Token')?['access_token']}",
+                  "Content-Type": "application/json",
+                  "Ocp-Apim-Subscription-Key": "@body('Parse_cdc-events-subscription-key')?['value']",
+                  "X-Run-Identifier": "@variables('nowDateTime')"
+                },
+                "method": "POST",
+                "uri": "https://dev-api-customerengagement.platform.education.gov.uk/v1/cdc-events/load"
+              }
+            },
+            "Update_load_Status_to_Entities": {
+              "runAfter": {
+                "Set_runStatus_to_Entities": [
+                  "Succeeded"
+                ]
+              },
+              "type": "Http",
+              "inputs": {
+                "headers": {
+                  "Content-Type": "application/json",
+                  "X-Run-Identifier": "@variables('nowDateTime')",
+                  "X-RunStatus": "@{variables('runStatus')}"
+                },
+                "method": "PATCH",
+                "uri": "https://dev-api-customerengagement.platform.education.gov.uk/v1/cdc-events/load"
+              }
+            },
+            "Update_load_status_to_Attachments": {
+              "runAfter": {
+                "Set_runStatus_to_Attachments": [
+                  "Succeeded"
+                ]
+              },
+              "type": "Http",
+              "inputs": {
+                "headers": {
+                  "Authorization": "Bearer @{body('Parse_CDC_Events_OAuth_Token')?['access_token']}",
+                  "Content-Type": "application/json",
+                  "Ocp-Apim-Subscription-Key": "@body('Parse_cdc-events-subscription-key')?['value']",
+                  "X-Run-Identifier": "@variables('nowDateTime')",
+                  "X-RunStatus": "@{variables('runStatus')}"
+                },
+                "method": "PATCH",
+                "uri": "https://dev-api-customerengagement.platform.education.gov.uk/v1/cdc-events/load"
+              }
+            },
+            "Update_load_status_to_Login": {
+              "runAfter": {
+                "Set_runStatus_Login": [
+                  "Succeeded"
+                ]
+              },
+              "type": "Http",
+              "inputs": {
+                "headers": {
+                  "Authorization": "Bearer @{body('Parse_CDC_Events_OAuth_Token')?['access_token']}",
+                  "Content-Type": "application/json",
+                  "Ocp-Apim-Subscription-Key": "@body('Parse_cdc-events-subscription-key')?['value']",
+                  "X-Run-Identifier": "@variables('nowDateTime')",
+                  "X-RunStatus": "@{variables('runStatus')}"
+                },
+                "method": "PATCH",
+                "uri": "https://dev-api-customerengagement.platform.education.gov.uk/v1/cdc-events/load"
+              }
+            },
+            "Update_load_status_to_Preparing": {
+              "runAfter": {
+                "Set_runStatus_to_Preparing": [
+                  "Succeeded"
+                ]
+              },
+              "type": "Http",
+              "inputs": {
+                "headers": {
+                  "Authorization": "Bearer @{body('Parse_CDC_Events_OAuth_Token')?['access_token']}",
+                  "Content-Type": "application/json",
+                  "Ocp-Apim-Subscription-Key": "@body('Parse_cdc-events-subscription-key')?['value']",
+                  "X-Run-Identifier": "@variables('nowDateTime')",
+                  "X-RunStatus": "@{variables('runStatus')}"
+                },
+                "method": "PATCH",
+                "uri": "https://dev-api-customerengagement.platform.education.gov.uk/v1/cdc-events/load"
+              }
+            }
+          }
+        },
+        "parameters": {}
+      }
+    }
+  ]
 }
