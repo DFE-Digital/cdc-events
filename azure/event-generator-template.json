@@ -2,9 +2,9 @@
   "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
   "contentVersion": "1.0.0.0",
   "parameters": {
-    "workflows_s153d01_cdcaeg_la_01_name": {
-      "defaultValue": "s153d01-cdcaeg-la-01",
-      "type": "String"
+      "workflows_s153d01_cdcaeg_la_01_name": {
+        "defaultValue": "s153d01-cdcaeg-la-01",
+        "type": "String"
       },
       "serviceIdentifier": {
         "type": "string",
