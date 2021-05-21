@@ -32,30 +32,6 @@
         }
       }
     },
-    "/attachments": {
-      "get": {
-        "summary": "Get Attachments",
-        "description": "Gets recieved attachment collection.",
-        "operationId": "attachments-get",
-        "parameters": [
-          {
-            "in": "header",
-            "type": "string",
-            "name": "Authorization",
-            "description": "Bearer token authorization.",
-            "required": true
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "The event data was received."
-          },
-          "500": {
-            "description": "An unexpected error has occurred - please get in touch with us so we can check our logs!"
-          }
-        }
-      }
-    },
     "/actuals": {
       "post": {
         "summary": "Actuals Created",
@@ -151,74 +127,6 @@
           }
         }
       }
-    },
-    "/load": {
-      "post": {
-        "summary": "Load Created",
-        "description": "Starts a load event record.",
-        "operationId": "load-created",
-        "parameters": [
-          {
-            "in": "header",
-            "type": "string",
-            "name": "Authorization",
-            "description": "Bearer token authorization.",
-            "required": true
-          }
-        ],
-        "responses": {
-          "201": {
-            "description": "The load  data request was accepted and processed."
-          },
-          "500": {
-            "description": "An unexpected error has occurred - please get in touch with us so we can check our logs!"
-          }
-        }
-      },
-	  "patch": {
-        "summary": "Load Updated",
-        "description": "Updates a load event record.",
-        "operationId": "load-updated",
-        "parameters": [
-          {
-            "in": "header",
-            "type": "string",
-            "name": "Authorization",
-            "description": "Bearer token authorization.",
-            "required": true
-          }
-        ],
-        "responses": {
-          "202": {
-            "description": "The load  data request was accepted and processed."
-          },
-          "500": {
-            "description": "An unexpected error has occurred - please get in touch with us so we can check our logs!"
-          }
-        }
-      },
-	  "put": {
-        "summary": "Load Finished",
-        "description": "Finishes a load event record.",
-        "operationId": "load-finished",
-        "parameters": [
-          {
-            "in": "header",
-            "type": "string",
-            "name": "Authorization",
-            "description": "Bearer token authorization.",
-            "required": true
-          }
-        ],
-        "responses": {
-          "202": {
-            "description": "The load data request was accepted and processed."
-          },
-          "500": {
-            "description": "An unexpected error has occurred - please get in touch with us so we can check our logs!"
-          }
-        }
-      },
     },
     "/plans": {
       "post": {
