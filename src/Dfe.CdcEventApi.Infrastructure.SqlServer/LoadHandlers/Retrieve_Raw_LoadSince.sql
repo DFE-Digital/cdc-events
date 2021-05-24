@@ -8,7 +8,7 @@ SELECT
 FROM
 	[dbo].[Raw_Load]
 WHERE 
-	 [Load_DateTime]  = @RunIdentifier
+	 [Load_DateTime]  BETWEEN DATEADD(ms,-5, @RunIdentifier) AND DATEADD(ms,5, @RunIdentifier)
 UNION
 SELECT 
 	load.[Load_DateTime] AS [Load_DateTime],
@@ -26,7 +26,7 @@ INNER JOIN
 		 FROM
 			[dbo].[Raw_Load] 
 		WHERE 
-			[Load_DateTime] < @RunIdentifier
+			[Load_DateTime] < DATEADD(ms,-5, @RunIdentifier)
 		GROUP BY 
 			[Status]
 		HAVING
