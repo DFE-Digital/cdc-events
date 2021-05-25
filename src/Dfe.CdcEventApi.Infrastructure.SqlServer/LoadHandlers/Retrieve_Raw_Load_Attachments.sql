@@ -11,7 +11,6 @@ SELECT [SiteName]
       ,[ParentObjectId]
       ,[BlobData]
       ,[URL]
-      ,[EntityStatus]
       ,[Load_DateTime]
       ,[Upload_DateTime]
  FROM 
