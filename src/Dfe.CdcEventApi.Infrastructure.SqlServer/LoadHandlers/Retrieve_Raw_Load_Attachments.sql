@@ -17,3 +17,5 @@ SELECT [SiteName]
 	[dbo].[Raw_Load_Attachments]
  WHERE
 	[Load_DateTime] = @RunIdentifier
+ ORDER BY
+    [BlobKey]
