@@ -1,9 +1,9 @@
 <policies>
-  
+
   <inbound>
-    
+
     <base />
-    
+
     <set-header name="X-Functions-Key" exists-action="skip">
       <value>{{cdcea-function-app-key}}</value>
     </set-header>
@@ -12,18 +12,41 @@
       <value>application/json</value>
     </set-header>
 
+    <choose>
+      <when condition="@(context.Request.Method == "POST=""")">
+        <set-variable name="bodySize" value="@(context.Request.Headers["Content-Length="""][0])" />
+        <choose>
+          <when condition="@(int.Parse(context.Variables.GetValueOrDefault"
+            <string>
+              ("bodySize"))<=5242880)">
+              <!--let it pass through by doing nothing-->
+            </when>
+          <otherwise>
+            <return-response>
+              <set-status code="413" reason="Payload Too Large" />
+              <set-body>
+                @{
+                return "Maximum allowed size for the POST requests is 5242880 bytes (5 MB). This request has size of "+ context.Variables.GetValueOrDefault<string>("bodySize") +" bytes";
+							} 
+						</set-body>
+            </return-response>
+          </otherwise>
+        </choose>
+      </when>
+    </choose>
+
   </inbound>
-  
+
   <backend>
     <base />
   </backend>
-  
+
   <outbound>
     <base />
   </outbound>
-  
+
   <on-error>
     <base />
   </on-error>
-  
+
 </policies>
