@@ -58,6 +58,8 @@
             serviceCollection
                 .AddScoped<IEntityProcessor, EntityProcessor>();
             serviceCollection
+                .AddScoped<IBlobProcessor, BlobProcessor>();
+            serviceCollection
                 .AddScoped<ILoadProcessor, LoadProcessor>();
         }
 

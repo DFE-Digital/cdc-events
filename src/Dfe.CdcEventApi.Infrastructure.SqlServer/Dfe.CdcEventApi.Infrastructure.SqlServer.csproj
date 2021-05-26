@@ -82,7 +82,7 @@
     <EmbeddedResource Include="DataHandlers\Create_Raw_Activity_Field.sql" />
     <EmbeddedResource Include="DataHandlers\Create_Raw_Actual.sql" />
     <EmbeddedResource Include="DataHandlers\Create_Raw_Actual_Field.sql" />
-    <EmbeddedResource Include="DataHandlers\Create_Raw_Blob.sql" />
+    <EmbeddedResource Include="LoadHandlers\Create_Raw_Blob.sql" />
     <EmbeddedResource Include="DataHandlers\Create_Raw_Deleted.sql" />
     <EmbeddedResource Include="DataHandlers\Create_Raw_Oncost.sql" />
     <EmbeddedResource Include="DataHandlers\Create_Raw_Oncost_Field.sql" />

@@ -306,10 +306,19 @@
               "actions": {
                 "Create_blob": {
                   "inputs": {
-                    "body": "@variables('blobToStore')",
+                    "body": [
+                      {
+                        "BlobData": "@body('Get_blob')",
+                        "BlobKey": "@items('For_each_attachment')['BlobKey']",
+                        "MimeType": "@items('For_each_attachment')['MimeType']",
+                        "ParentObjectId": "@items('For_each_attachment')['ParentObjectId']",
+                        "ParentObjectType": "@items('For_each_attachment')['ParentObjectType']",
+                        "RunIdentifier": "@variables('nowDateTime')"
+                      }
+                    ],
                     "headers": {
                       "Authorization": "Bearer @{body('Parse_CDC_Events_OAuth_Token')?['access_token']}",
-                      "Content-Type": "application/json",
+                      "Content-Type": "application/octet-stream",
                       "Ocp-Apim-Subscription-Key": "@body('Parse_cdc-events-subscription-key')?['value']",
                       "X-Run-Identifier": "@variables('nowDateTime')"
                     },
@@ -317,7 +326,7 @@
                     "uri": "https://dev-api-customerengagement.platform.education.gov.uk/v1/cdc-events/blobs"
                   },
                   "runAfter": {
-                    "Set_variable_2": [
+                    "Get_blob": [
                       "Succeeded"
                     ]
                   },
@@ -327,20 +336,6 @@
                     }
                   },
                   "type": "Http"
-                },
-                "Delay": {
-                  "inputs": {
-                    "interval": {
-                      "count": 2,
-                      "unit": "Second"
-                    }
-                  },
-                  "runAfter": {
-                    "Set_variable": [
-                      "Succeeded"
-                    ]
-                  },
-                  "type": "Wait"
                 },
                 "Get_blob": {
                   "inputs": {
@@ -357,55 +352,11 @@
                   },
                   "runAfter": {},
                   "type": "Http"
-                },
-                "Set_blob_to_write_using_body": {
-                  "inputs": {
-                    "name": "blobToStore",
-                    "value": [
-                      {
-                        "BlobData": "@body('Get_blob')",
-                        "BlobKey": "@items('For_each_attachment')['BlobKey']",
-                        "MimeType": "@items('For_each_attachment')['MimeType']",
-                        "ParentObjectId": "@items('For_each_attachment')['ParentObjectId']",
-                        "ParentObjectType": "@items('For_each_attachment')['ParentObjectType']"
-                      }
-                    ]
-                  },
-                  "runAfter": {
-                    "Get_blob": [
-                      "Succeeded"
-                    ]
-                  },
-                  "type": "SetVariable"
-                },
-                "Set_variable": {
-                  "inputs": {
-                    "name": "nowIs",
-                    "value": "@{utcNow()}"
-                  },
-                  "runAfter": {
-                    "Set_blob_to_write_using_body": [
-                      "Succeeded"
-                    ]
-                  },
-                  "type": "SetVariable"
-                },
-                "Set_variable_2": {
-                  "inputs": {
-                    "name": "nowIs",
-                    "value": "@{utcNow()}"
-                  },
-                  "runAfter": {
-                    "Delay": [
-                      "Succeeded"
-                    ]
-                  },
-                  "type": "SetVariable"
                 }
               },
               "foreach": "@body('Parse_Attachments_JSON')",
               "runAfter": {
-                "Initialize_variable": [
+                "Parse_Attachments_JSON": [
                   "Succeeded"
                 ]
               },
@@ -417,7 +368,7 @@
                   "Authorization": "Bearer @{body('Parse_CDC_Events_OAuth_Token')?['access_token']}",
                   "Content-Type": "application/json",
                   "Ocp-Apim-Subscription-Key": "@body('Parse_cdc-events-subscription-key')?['value']",
-                  "X-Run-Identifier": "2021-05-24 08:39:05.130"
+                  "X-Run-Identifier": "@variables('nowDateTime')"
                 },
                 "method": "GET",
                 "uri": "https://dev-api-customerengagement.platform.education.gov.uk/v1/cdc-events/attachments"
@@ -720,23 +671,6 @@
               },
               "type": "InitializeVariable"
             },
-            "Initialize_blob_to_store": {
-              "inputs": {
-                "variables": [
-                  {
-                    "name": "blobToStore",
-                    "type": "array",
-                    "value": []
-                  }
-                ]
-              },
-              "runAfter": {
-                "Parse_Attachments_JSON": [
-                  "Succeeded"
-                ]
-              },
-              "type": "InitializeVariable"
-            },
             "Initialize_runStatus_to_Initialising": {
               "inputs": {
                 "variables": [
@@ -766,23 +700,6 @@
               },
               "runAfter": {
                 "Reset_nowDateTime": [
-                  "Succeeded"
-                ]
-              },
-              "type": "InitializeVariable"
-            },
-            "Initialize_variable": {
-              "inputs": {
-                "variables": [
-                  {
-                    "name": "nowIs",
-                    "type": "string",
-                    "value": "Start"
-                  }
-                ]
-              },
-              "runAfter": {
-                "Initialize_blob_to_store": [
                   "Succeeded"
                 ]
               },

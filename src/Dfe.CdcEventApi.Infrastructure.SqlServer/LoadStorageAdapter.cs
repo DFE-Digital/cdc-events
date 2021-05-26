@@ -61,6 +61,57 @@
         }
 
         /// <summary>
+        /// Creates many <see cref="Blob"/> records.
+        /// </summary>
+        /// <param name="runIdentifier">
+        /// The run identifier start date time value.
+        /// </param>
+        /// <param name="blobs">
+        /// A collection of <see cref="Blob"/>.
+        /// </param>
+        /// <returns>
+        /// An <see cref="Task"/>.</returns>
+        public async Task CreateBlobsAsync(DateTime runIdentifier, IEnumerable<Blob> blobs)
+        {
+            this.loggerProvider.Info($"Starting a load at {runIdentifier:O}");
+
+            Stopwatch stopwatch = new Stopwatch();
+            using (SqlConnection sqlConnection = new SqlConnection(this.rawDbConnectionString))
+            {
+                var insertSql = this.ExtractHandler("Create_Raw_Blob");
+                this.loggerProvider.Debug($"Creating Blob records.");
+
+                stopwatch.Start();
+
+                await sqlConnection
+                        .ExecuteAsync(insertSql, blobs)
+                        .ConfigureAwait(false);
+
+                stopwatch.Stop();
+
+                TimeSpan elapsed = stopwatch.Elapsed;
+
+                this.loggerProvider.Info(
+                    $"Insert executed with success, time elapsed: " +
+                    $"{elapsed}.");
+
+                this.loggerProvider.Debug($"Retrieving this current and last successful load records.");
+
+                string querySql = this.ExtractHandler("Retrieve_Raw_LoadSince");
+
+                stopwatch.Restart();
+
+                stopwatch.Stop();
+
+                elapsed = stopwatch.Elapsed;
+
+                this.loggerProvider.Info(
+                    $"Query executed with success, time elapsed: " +
+                    $"{elapsed}.");
+            }
+        }
+
+        /// <summary>
         /// Starts the load by creating and returning a new <see cref="Load"/> model.
         /// </summary>
         /// <param name="runIdentifier">

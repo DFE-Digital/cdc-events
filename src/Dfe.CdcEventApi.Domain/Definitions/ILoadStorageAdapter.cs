@@ -89,5 +89,13 @@
         /// An <see cref="Task"/> wrapping an collection of <see cref="Attachment"/> of the run.
         /// </returns>
         Task<IEnumerable<Attachment>> GetAttachments(DateTime runIdentifier);
+
+        /// <summary>
+        /// Creats new <see cref="Blob"/> records.
+        /// </summary>
+        /// <param name="runIdentifier">The load run identifier.</param>
+        /// <param name="blobs">The collection of <see cref="Blob"/> entities.</param>
+        /// <returns>An <see cref="Task"/>.</returns>
+        Task CreateBlobsAsync(DateTime runIdentifier, IEnumerable<Blob> blobs);
     }
 }
