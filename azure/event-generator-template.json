@@ -121,6 +121,34 @@
         "definition": {
           "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
           "actions": {
+            "Check_Attachments_Finished_OK": {
+              "actions": {
+                "Set_runStatus_to_Succeeded": {
+                  "inputs": {
+                    "name": "runStatus",
+                    "value": 32
+                  },
+                  "runAfter": {},
+                  "type": "SetVariable"
+                }
+              },
+              "expression": {
+                "and": [
+                  {
+                    "equals": [
+                      "@variables('continueAttachments')",
+                      true
+                    ]
+                  }
+                ]
+              },
+              "runAfter": {
+                "For_each_attachment": [
+                  "Succeeded"
+                ]
+              },
+              "type": "If"
+            },
             "Finish_load": {
               "inputs": {
                 "headers": {
@@ -134,7 +162,7 @@
                 "uri": "https://dev-api-customerengagement.platform.education.gov.uk/v1/cdc-events/load"
               },
               "runAfter": {
-                "Set_runStatus_to_Succeeded": [
+                "Check_Attachments_Finished_OK": [
                   "Succeeded"
                 ]
               },
@@ -303,6 +331,37 @@
             },
             "For_each_attachment": {
               "actions": {
+                "Check_BLOB_created": {
+                  "actions": {},
+                  "else": {
+                    "actions": {
+                      "Set_continueAttachments_as_FALSE_to_CDC": {
+                        "inputs": {
+                          "name": "continueAttachments",
+                          "value": false
+                        },
+                        "runAfter": {},
+                        "type": "SetVariable"
+                      }
+                    }
+                  },
+                  "expression": {
+                    "and": [
+                      {
+                        "equals": [
+                          "@outputs('Create_blob')['statusCode']",
+                          202
+                        ]
+                      }
+                    ]
+                  },
+                  "runAfter": {
+                    "Create_blob": [
+                      "Succeeded"
+                    ]
+                  },
+                  "type": "If"
+                },
                 "Create_blob": {
                   "inputs": {
                     "body": [
@@ -324,7 +383,7 @@
                     "uri": "https://dev-api-customerengagement.platform.education.gov.uk/v1/cdc-events/blobs"
                   },
                   "runAfter": {
-                    "Get_blob": [
+                    "While_Continue_Attachments": [
                       "Succeeded"
                     ]
                   },
@@ -335,26 +394,143 @@
                   },
                   "type": "Http"
                 },
-                "Get_blob": {
-                  "inputs": {
-                    "headers": {
-                      "Accept": "*/*"
+                "While_Continue_Attachments": {
+                  "actions": {
+                    "Get_blob": {
+                      "inputs": {
+                        "headers": {
+                          "Accept": "*/*"
+                        },
+                        "method": "GET",
+                        "queries": {
+                          "AsAtachment": "true",
+                          "BlobKey": "@items('For_each_attachment')['BlobKey']",
+                          "SessionId": "@variables('AttachmentsSessionId')"
+                        },
+                        "uri": "https://uatcdc2.kykloud.com/api/data/blobs"
+                      },
+                      "runAfter": {},
+                      "type": "Http"
                     },
-                    "method": "GET",
-                    "queries": {
-                      "AsAtachment": "true",
-                      "BlobKey": "@items('For_each_attachment')['BlobKey']",
-                      "SessionId": "@body('Parse_sessionId')?['SessionId']"
-                    },
-                    "uri": "https://uatcdc2.kykloud.com/api/data/blobs"
+                    "If_BLOB_was_recieved": {
+                      "actions": {},
+                      "else": {
+                        "actions": {
+                          "Check_unauathorised": {
+                            "actions": {
+                              "Parse_relogin_after_401": {
+                                "inputs": {
+                                  "content": "@body('Re_login_after_401')",
+                                  "schema": {
+                                    "properties": {
+                                      "SessionId": {
+                                        "type": "string"
+                                      },
+                                      "Success": {
+                                        "type": "boolean"
+                                      }
+                                    },
+                                    "type": "object"
+                                  }
+                                },
+                                "runAfter": {
+                                  "Re_login_after_401": [
+                                    "Succeeded"
+                                  ]
+                                },
+                                "type": "ParseJson"
+                              },
+                              "Re_login_after_401": {
+                                "inputs": {
+                                  "headers": {
+                                    "Accept": "application/json"
+                                  },
+                                  "method": "POST",
+                                  "queries": {
+                                    "ApiToken": "@body('Parse_kycloud-api-token')?['value']",
+                                    "Email": "@parameters('KycloudApiEmail')",
+                                    "Password": "@body('Parse_kycloud-api-password')?['value']"
+                                  },
+                                  "uri": "https://uatcdc2.kykloud.com/api/user/login"
+                                },
+                                "runAfter": {},
+                                "type": "Http"
+                              },
+                              "Set_AttachementsSessionId_after_relogin_after_401": {
+                                "inputs": {
+                                  "name": "AttachmentsSessionId",
+                                  "value": "@body('Parse_relogin_after_401')?['SessionId']"
+                                },
+                                "runAfter": {
+                                  "Parse_relogin_after_401": [
+                                    "Succeeded"
+                                  ]
+                                },
+                                "type": "SetVariable"
+                              }
+                            },
+                            "else": {
+                              "actions": {
+                                "Set_continueAttachments_false_from_kykloud": {
+                                  "inputs": {
+                                    "name": "continueAttachments",
+                                    "value": false
+                                  },
+                                  "runAfter": {},
+                                  "type": "SetVariable"
+                                }
+                              }
+                            },
+                            "expression": {
+                              "and": [
+                                {
+                                  "equals": [
+                                    "@outputs('Get_blob')['statusCode']",
+                                    401
+                                  ]
+                                }
+                              ]
+                            },
+                            "runAfter": {},
+                            "type": "If"
+                          }
+                        }
+                      },
+                      "expression": {
+                        "and": [
+                          {
+                            "equals": [
+                              "@outputs('Get_blob')['statusCode']",
+                              200
+                            ]
+                          }
+                        ]
+                      },
+                      "runAfter": {
+                        "Get_blob": [
+                          "Succeeded"
+                        ]
+                      },
+                      "type": "If"
+                    }
+                  },
+                  "expression": {
+                    "and": [
+                      {
+                        "equals": [
+                          "@variables('continueAttachments')",
+                          true
+                        ]
+                      }
+                    ]
                   },
                   "runAfter": {},
-                  "type": "Http"
+                  "type": "If"
                 }
               },
               "foreach": "@body('Parse_Attachments_JSON')",
               "runAfter": {
-                "Parse_Attachments_JSON": [
+                "Get_a_fresh_sessionId": [
                   "Succeeded"
                 ]
               },
@@ -377,6 +553,126 @@
                 ]
               },
               "type": "Http"
+            },
+            "Get_a_fresh_sessionId": {
+              "actions": {
+                "Condition": {
+                  "actions": {
+                    "Check_relogin": {
+                      "actions": {
+                        "Set_AttachmentsSessionId": {
+                          "inputs": {
+                            "name": "AttachmentsSessionId",
+                            "value": "@body('Parse_relogin')?['SessionId']"
+                          },
+                          "runAfter": {},
+                          "type": "SetVariable"
+                        }
+                      },
+                      "else": {
+                        "actions": {
+                          "Relogin_Failed": {
+                            "inputs": {
+                              "runError": {
+                                "message": "Failed to re login"
+                              },
+                              "runStatus": "Failed"
+                            },
+                            "runAfter": {},
+                            "type": "Terminate"
+                          }
+                        }
+                      },
+                      "expression": {
+                        "and": [
+                          {
+                            "equals": [
+                              "@body('Parse_relogin')?['Success']",
+                              true
+                            ]
+                          }
+                        ]
+                      },
+                      "runAfter": {
+                        "Parse_relogin": [
+                          "Succeeded"
+                        ]
+                      },
+                      "type": "If"
+                    },
+                    "Parse_relogin": {
+                      "inputs": {
+                        "content": "@body('Relogin')",
+                        "schema": {
+                          "properties": {
+                            "SessionId": {
+                              "type": "string"
+                            },
+                            "Success": {
+                              "type": "boolean"
+                            }
+                          },
+                          "type": "object"
+                        }
+                      },
+                      "runAfter": {},
+                      "type": "ParseJson"
+                    }
+                  },
+                  "else": {
+                    "actions": {
+                      "Terminate": {
+                        "inputs": {
+                          "runError": {
+                            "message": "Failed KyKloud login"
+                          },
+                          "runStatus": "Failed"
+                        },
+                        "runAfter": {},
+                        "type": "Terminate"
+                      }
+                    }
+                  },
+                  "expression": {
+                    "and": [
+                      {
+                        "equals": [
+                          "@outputs('Relogin')['statusCode']",
+                          200
+                        ]
+                      }
+                    ]
+                  },
+                  "runAfter": {
+                    "Relogin": [
+                      "Succeeded"
+                    ]
+                  },
+                  "type": "If"
+                },
+                "Relogin": {
+                  "inputs": {
+                    "headers": {
+                      "Accept": "application/json"
+                    },
+                    "method": "POST",
+                    "queries": {
+                      "ApiToken": "@body('Parse_kycloud-api-token')?['value']",
+                      "Email": "@parameters('KycloudApiEmail')",
+                      "Password": "@body('Parse_kycloud-api-password')?['value']"
+                    },
+                    "uri": "https://uatcdc2.kykloud.com/api/user/login"
+                  },
+                  "runAfter": {},
+                  "type": "Http"
+                }
+              },
+              "runAfter": {
+                "Initialize_AttachmentSessionId": [
+                  "Succeeded"
+                ]
+              },
+              "type": "Scope"
             },
             "Get_and_Parse_Secrets_from_KeyVault": {
               "actions": {
@@ -669,6 +965,39 @@
               },
               "type": "InitializeVariable"
             },
+            "Initialize_AttachmentSessionId": {
+              "inputs": {
+                "variables": [
+                  {
+                    "name": "AttachmentsSessionId",
+                    "type": "string"
+                  }
+                ]
+              },
+              "runAfter": {
+                "Initialize_variable_reloginCount": [
+                  "Succeeded"
+                ]
+              },
+              "type": "InitializeVariable"
+            },
+            "Initialize_attachments_OK": {
+              "inputs": {
+                "variables": [
+                  {
+                    "name": "continueAttachments",
+                    "type": "boolean",
+                    "value": true
+                  }
+                ]
+              },
+              "runAfter": {
+                "Parse_Attachments_JSON": [
+                  "Succeeded"
+                ]
+              },
+              "type": "InitializeVariable"
+            },
             "Initialize_runStatus_to_Initialising": {
               "inputs": {
                 "variables": [
@@ -698,6 +1027,23 @@
               },
               "runAfter": {
                 "Reset_nowDateTime": [
+                  "Succeeded"
+                ]
+              },
+              "type": "InitializeVariable"
+            },
+            "Initialize_variable_reloginCount": {
+              "inputs": {
+                "variables": [
+                  {
+                    "name": "reloginCount",
+                    "type": "integer",
+                    "value": 0
+                  }
+                ]
+              },
+              "runAfter": {
+                "Initialize_attachments_OK": [
                   "Succeeded"
                 ]
               },
@@ -874,18 +1220,6 @@
               },
               "runAfter": {
                 "Initialize_sinceDateTime": [
-                  "Succeeded"
-                ]
-              },
-              "type": "SetVariable"
-            },
-            "Set_runStatus_to_Succeeded": {
-              "inputs": {
-                "name": "runStatus",
-                "value": 32
-              },
-              "runAfter": {
-                "For_each_attachment": [
                   "Succeeded"
                 ]
               },
