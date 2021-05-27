@@ -8,7 +8,6 @@
     using System.Reflection;
     using System.Threading;
     using System.Threading.Tasks;
-    using System.Web;
     using System.Xml.Linq;
     using Dfe.CdcEventApi.Application.Definitions;
     using Dfe.CdcEventApi.Application.Exceptions;

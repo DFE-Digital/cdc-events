@@ -49,6 +49,7 @@
   <ItemGroup>
 
     <!-- Microsoft -->
+    <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
     <PackageReference Include="System.Data.SqlClient" Version="4.8.2" />
 
     <!-- Other -->
@@ -82,7 +83,7 @@
     <EmbeddedResource Include="DataHandlers\Create_Raw_Activity_Field.sql" />
     <EmbeddedResource Include="DataHandlers\Create_Raw_Actual.sql" />
     <EmbeddedResource Include="DataHandlers\Create_Raw_Actual_Field.sql" />
-    <EmbeddedResource Include="DataHandlers\Create_Raw_Blob.sql" />
+    <EmbeddedResource Include="LoadHandlers\Create_Raw_Blob.sql" />
     <EmbeddedResource Include="DataHandlers\Create_Raw_Deleted.sql" />
     <EmbeddedResource Include="DataHandlers\Create_Raw_Oncost.sql" />
     <EmbeddedResource Include="DataHandlers\Create_Raw_Oncost_Field.sql" />
@@ -113,6 +114,10 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Dfe.CdcEventApi.Domain\Dfe.CdcEventApi.Domain.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Models\" />
   </ItemGroup>
   
   <PropertyGroup>

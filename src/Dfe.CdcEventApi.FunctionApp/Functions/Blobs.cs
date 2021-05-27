@@ -6,6 +6,7 @@
     using Dfe.CdcEventApi.Application.Definitions;
     using Dfe.CdcEventApi.Application.Models;
     using Dfe.CdcEventApi.Domain.Definitions;
+    using Dfe.CdcEventApi.Domain.Models;
     using Microsoft.AspNetCore.Http;
     using Microsoft.Azure.WebJobs;
     using Microsoft.Azure.WebJobs.Extensions.Http;
@@ -13,21 +14,21 @@
     /// <summary>
     /// Entry class for the <c>blobs</c> function.
     /// </summary>
-    public class Blobs : EntityFunctionsBase
+    public class Blobs : BlobsFunctionBase
     {
         /// <summary>
         /// Initialises a new instance of the <see cref="Blobs" /> class.
         /// </summary>
-        /// <param name="entityProcessor">
-        /// An instance of type <see cref="IEntityProcessor" />.
+        /// <param name="blobProcessor">
+        /// An instance of type <see cref="IBlobProcessor" />.
         /// </param>
         /// <param name="loggerProvider">
         /// An instance of type <see cref="ILoggerProvider" />.
         /// </param>
         public Blobs(
-            IEntityProcessor entityProcessor,
+            IBlobProcessor blobProcessor,
             ILoggerProvider loggerProvider)
-            : base(entityProcessor, loggerProvider)
+            : base(blobProcessor, loggerProvider)
         {
             // Nothing for now.
         }
@@ -51,7 +52,7 @@
             CancellationToken cancellationToken)
         {
             HttpResponseMessage toReturn =
-                await this.PostAsync<Blob>(
+                await this.PostAsync(
                     httpRequest,
                     cancellationToken)
                 .ConfigureAwait(false);
