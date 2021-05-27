@@ -29,10 +29,5 @@
         /// Gets or sets the parent object identifier.
         /// </summary>
         public string ParentObjectId { get; set; }
-
-        /// <summary>
-        /// Gets or sets the Run Identifier date time stamp.
-        /// </summary>
-        public string RunIdentifier { get; set; }
     }
 }

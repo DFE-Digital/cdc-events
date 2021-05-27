@@ -1,5 +1,7 @@
 ﻿namespace Dfe.CdcEventApi.Domain.Models
 {
+    using System;
+
     /// <summary>
     /// Represents an individual <c>blob</c> entity.
     /// </summary>
@@ -34,6 +36,6 @@
         /// <summary>
         /// Gets or sets the Run Identifier date time stamp.
         /// </summary>
-        public string RunIdentifier { get; set; }
+        public DateTime RunIdentifier { get; set; }
     }
 }

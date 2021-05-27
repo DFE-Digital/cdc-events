@@ -84,7 +84,7 @@
 
             this.loggerProvider.Info($"Converting blob records to storage blob records.");
 
-            var storageBlobs = await this.blobConvertor.Convert(blobs).ConfigureAwait(false);
+            var storageBlobs = await this.blobConvertor.Convert(blobs, runIdentifier).ConfigureAwait(false);
 
             Stopwatch stopwatch = new Stopwatch();
             using (SqlConnection sqlConnection = new SqlConnection(this.rawDbConnectionString))
