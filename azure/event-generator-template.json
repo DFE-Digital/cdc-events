@@ -1,6 +1,5 @@
 {
   "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
-  "contentVersion": "1.0.0.0",
   "parameters": {
     "serviceIdentifier": {
       "type": "string",
@@ -1037,5 +1036,6 @@
       "value": "[reference(variables('logicAppId'), '2019-05-01', 'Full').identity.principalId]",
       "type": "string"
     }
-  }
+  },
+  "contentVersion": "1.0.0.0"
 }
