@@ -68,6 +68,8 @@
             serviceCollection
                 .AddScoped<IEntityStorageAdapter, EntityStorageAdapter>();
             serviceCollection
+                   .AddScoped<IBlobConvertor, BlobConvertor>();
+            serviceCollection
                 .AddScoped<ILoadStorageAdapter, LoadStorageAdapter>();
         }
 

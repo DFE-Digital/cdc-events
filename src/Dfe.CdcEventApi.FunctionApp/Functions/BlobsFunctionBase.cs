@@ -114,7 +114,6 @@
             {
                 try
                 {
-
                     string body = await httpRequest.ReadAsStringAsync()
                     .ConfigureAwait(false);
 
@@ -175,18 +174,6 @@
                         $"{HttpStatusCode.NotImplemented}. Message: " +
                         $"{missingDataHandlerFileException.Message}",
                         missingDataHandlerFileException);
-                }
-                catch (Exception ex)
-                {
-                    toReturn = new HttpResponseMessage(
-                       HttpStatusCode.BadRequest);
-
-                    this.loggerProvider.Error(
-                        $"A {ex.GetType().Name} was " +
-                        $"thrown, returning " +
-                        $"{HttpStatusCode.BadRequest}. Message: " +
-                        $"{ex.Message}",
-                        ex);
                 }
             }
             else

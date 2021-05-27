@@ -4,6 +4,6 @@ SELECT
     @BlobKey ,
     @ParentObjectType ,
     @ParentObjectId ,
-    @BlobContent,
+    @BlobData,
     @MimeType ,
     @RunIdentifier

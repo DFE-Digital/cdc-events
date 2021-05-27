@@ -50,7 +50,8 @@
                 throw new ArgumentNullException(nameof(models));
             }
 
-            // Invoke the data-layer with the script and the DataTable.
+            this.loggerProvider.Info($"{nameof(BlobProcessor)} Processing blobs.");
+
             await this.loadStorageAdapter.CreateBlobsAsync(
                 runIdentifier,
                 models)

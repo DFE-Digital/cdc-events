@@ -26,6 +26,7 @@
         private readonly Assembly assembly;
         private readonly string loadHandlersPath;
         private readonly string rawDbConnectionString;
+        private readonly IBlobConvertor blobConvertor;
 
         /// <summary>
         /// Initialises a new instance of the
@@ -35,11 +36,15 @@
         /// An instance of type
         /// <see cref="IEntityStorageAdapterSettingsProvider" />.
         /// </param>
+        /// <param name="blobConvertor">
+        /// An instance of <see cref="IBlobConvertor"/>.
+        /// </param>
         /// <param name="loggerProvider">
         /// An instance of type <see cref="ILoggerProvider" />.
         /// </param>
         public LoadStorageAdapter(
             IEntityStorageAdapterSettingsProvider entityStorageAdapterSettingsProvider,
+            IBlobConvertor blobConvertor,
             ILoggerProvider loggerProvider)
         {
             if (entityStorageAdapterSettingsProvider == null)
@@ -47,6 +52,8 @@
                 throw new ArgumentNullException(
                     nameof(entityStorageAdapterSettingsProvider));
             }
+
+            this.blobConvertor = blobConvertor ?? throw new ArgumentNullException(nameof(blobConvertor));
 
             this.loggerProvider = loggerProvider;
 
@@ -61,7 +68,7 @@
         }
 
         /// <summary>
-        /// Creates many <see cref="Blob"/> records.
+        /// Creates many <see cref="StorageBlob"/> records.
         /// </summary>
         /// <param name="runIdentifier">
         /// The run identifier start date time value.
@@ -73,37 +80,27 @@
         /// An <see cref="Task"/>.</returns>
         public async Task CreateBlobsAsync(DateTime runIdentifier, IEnumerable<Blob> blobs)
         {
-            this.loggerProvider.Info($"Starting a load at {runIdentifier:O}");
+            this.loggerProvider.Info($"Starting a blob load at {runIdentifier:O}");
+
+            this.loggerProvider.Info($"Converting blob records to storage blob records.");
+
+            var storageBlobs = await this.blobConvertor.Convert(blobs).ConfigureAwait(false);
 
             Stopwatch stopwatch = new Stopwatch();
             using (SqlConnection sqlConnection = new SqlConnection(this.rawDbConnectionString))
             {
                 var insertSql = this.ExtractHandler("Create_Raw_Blob");
-                this.loggerProvider.Debug($"Creating Blob records.");
+                this.loggerProvider.Debug($"Creating Storage Blob records.");
 
                 stopwatch.Start();
 
                 await sqlConnection
-                        .ExecuteAsync(insertSql, blobs)
+                        .ExecuteAsync(insertSql, storageBlobs)
                         .ConfigureAwait(false);
 
                 stopwatch.Stop();
 
                 TimeSpan elapsed = stopwatch.Elapsed;
-
-                this.loggerProvider.Info(
-                    $"Insert executed with success, time elapsed: " +
-                    $"{elapsed}.");
-
-                this.loggerProvider.Debug($"Retrieving this current and last successful load records.");
-
-                string querySql = this.ExtractHandler("Retrieve_Raw_LoadSince");
-
-                stopwatch.Restart();
-
-                stopwatch.Stop();
-
-                elapsed = stopwatch.Elapsed;
 
                 this.loggerProvider.Info(
                     $"Query executed with success, time elapsed: " +

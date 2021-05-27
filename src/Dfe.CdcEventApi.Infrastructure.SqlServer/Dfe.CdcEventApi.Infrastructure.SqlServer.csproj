@@ -49,6 +49,7 @@
   <ItemGroup>
 
     <!-- Microsoft -->
+    <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
     <PackageReference Include="System.Data.SqlClient" Version="4.8.2" />
 
     <!-- Other -->
@@ -113,6 +114,10 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Dfe.CdcEventApi.Domain\Dfe.CdcEventApi.Domain.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Models\" />
   </ItemGroup>
   
   <PropertyGroup>

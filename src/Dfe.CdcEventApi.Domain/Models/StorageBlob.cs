@@ -3,7 +3,7 @@
     /// <summary>
     /// Represents an individual <c>blob</c> entity.
     /// </summary>
-    public class Blob : LoadBase
+    public class StorageBlob : LoadBase
     {
         /// <summary>
         /// Gets or sets the mime type.
@@ -16,9 +16,10 @@
         public string BlobKey { get; set; }
 
         /// <summary>
-        /// Gets or sets the incoming blob data.
+        /// Gets or sets the stored blob data.
         /// </summary>
-        public dynamic BlobData { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1819:Properties should not return arrays", Justification = "Its necessary to store binary data in the table")]
+        public byte[] BlobData { get; set; } = System.Array.Empty<byte>();
 
         /// <summary>
         /// Gets or sets the pernt object type name.
