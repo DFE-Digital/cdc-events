@@ -311,8 +311,7 @@
                         "BlobKey": "@items('For_each_attachment')['BlobKey']",
                         "MimeType": "@items('For_each_attachment')['MimeType']",
                         "ParentObjectId": "@items('For_each_attachment')['ParentObjectId']",
-                        "ParentObjectType": "@items('For_each_attachment')['ParentObjectType']",
-                        "RunIdentifier": "@variables('nowDateTime')"
+                        "ParentObjectType": "@items('For_each_attachment')['ParentObjectType']"
                       }
                     ],
                     "headers": {

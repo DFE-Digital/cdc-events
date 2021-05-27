@@ -1,5 +1,6 @@
 ﻿namespace Dfe.CdcEventApi.Infrastructure.SqlServer
 {
+    using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
@@ -16,8 +17,11 @@
         /// Converts a collection of <see cref="Blob"/> to a collection of<see cref="StorageBlob"/>.
         /// </summary>
         /// <param name="blobs">The collection of <see cref="Blob"/>.</param>
+        /// <param name="runIdentifier">The run date and time.</param>
         /// <returns>An instance of <see cref="Task"/> wrapping a collection of <see cref="StorageBlob"/>.</returns>
-        public Task<IEnumerable<StorageBlob>> Convert(IEnumerable<Blob> blobs)
+        public Task<IEnumerable<StorageBlob>> Convert(
+            IEnumerable<Blob> blobs,
+            DateTime runIdentifier)
         {
             var results = new List<StorageBlob>();
 
@@ -34,7 +38,7 @@
                     MimeType = blob.MimeType,
                     ParentObjectId = blob.ParentObjectId,
                     ParentObjectType = blob.ParentObjectType,
-                    RunIdentifier = blob.RunIdentifier,
+                    RunIdentifier = runIdentifier,
                 };
 
                 if (blob.BlobData != null)
