@@ -1,6 +1,7 @@
 SELECT 
 	[Load_DateTime],
 	[Finish_DateTime],
+	[Count],
 	[Status],
 	[ReportTitle],
 	[ReportBody],
@@ -13,6 +14,7 @@ UNION
 SELECT 
 	load.[Load_DateTime] AS [Load_DateTime],
 	load.[Finish_DateTime] AS [Finish_DateTime],
+	load.[Count],
 	load.[Status] AS [Status],
 	load.[ReportTitle] AS [ReportTitle],
 	load.[ReportBody] AS [ReportBody],
@@ -27,8 +29,10 @@ INNER JOIN
 			[dbo].[Raw_Load] 
 		WHERE 
 			[Load_DateTime] < DATEADD(ms,-5, @RunIdentifier)
+		AND 
+			[Count] != 0
 		GROUP BY 
-			[Status]
+			[Status], [Count]
 		HAVING
 			[Status] = 32
 	) latest

@@ -97,5 +97,16 @@
         /// <param name="blobs">The collection of <see cref="Blob"/> entities.</param>
         /// <returns>An <see cref="Task"/>.</returns>
         Task CreateBlobsAsync(DateTime runIdentifier, IEnumerable<Blob> blobs);
+
+        /// <summary>
+        /// Gets the loaded row count for the run.
+        /// </summary>
+        /// <param name="runIdentifier">
+        /// The date and time.
+        /// </param>
+        /// <returns>
+        /// A <see cref="Task"/> wrapping an <see cref="int"/>.
+        /// </returns>
+        Task<int> GetLoadCountAsync(DateTime runIdentifier);
     }
 }

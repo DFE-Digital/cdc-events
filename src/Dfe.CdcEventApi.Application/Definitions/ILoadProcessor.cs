@@ -104,5 +104,19 @@
         /// A <see cref="Task"/> wrapping the collection of <see cref="Attachment"/>.
         /// </returns>
         Task<IEnumerable<Attachment>> GetAttachments(DateTime runIdentifier, CancellationToken cancellationToken);
+
+        /// <summary>
+        /// Gets the loaded row count for the run.
+        /// </summary>
+        /// <param name="runIdentifier">
+        /// The date and time.
+        /// </param>
+        /// <param name="cancellationToken">
+        /// The asynchronous <see cref="CancellationToken"/>.
+        /// </param>
+        /// <returns>
+        /// A <see cref="Task"/> wrapping an <see cref="int"/>.
+        /// </returns>
+        Task<int> GetLoadCountAsync(DateTime runIdentifier, CancellationToken cancellationToken);
     }
 }
