@@ -367,6 +367,7 @@
             this.loggerProvider.Info($"Updating a load from {item.Load_DateTime:O}");
 
             string udpateSql = this.ExtractHandler("Update_Raw_Load");
+            SqlMapper.AddTypeMap(typeof(DateTime), System.Data.DbType.DateTime);
 
             Stopwatch stopwatch = new Stopwatch();
             using (SqlConnection sqlConnection = new SqlConnection(this.rawDbConnectionString))
