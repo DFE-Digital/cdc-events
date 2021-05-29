@@ -1094,68 +1094,30 @@
               "inputs": {
                 "content": "@body('Get_Attachments')",
                 "schema": {
+                  "type": "array",
                   "items": {
+                    "type": "object",
                     "properties": {
-                      "BlobData": {},
                       "BlobKey": {
-                        "type": "string"
-                      },
-                      "BlobSubFolderNAme": {
-                        "type": "string"
-                      },
-                      "Description": {
-                        "type": "string"
-                      },
-                      "EntityStatus": {},
-                      "ID": {},
-                      "Load_DateTime": {
                         "type": "string"
                       },
                       "MimeType": {
                         "type": "string"
                       },
-                      "Name": {
+                      "ParentObjectType": {
                         "type": "string"
                       },
                       "ParentObjectId": {
                         "type": "string"
-                      },
-                      "ParentObjectType": {
-                        "type": "string"
-                      },
-                      "SiteId": {
-                        "type": "string"
-                      },
-                      "SiteName": {
-                        "type": "string"
-                      },
-                      "SurveyId": {
-                        "type": "string"
-                      },
-                      "Upload_DateTime": {},
-                      "Url": {}
+                      }
                     },
                     "required": [
-                      "SiteName",
-                      "SiteId",
-                      "Name",
-                      "BlobSubFolderNAme",
-                      "SurveyId",
-                      "Description",
-                      "MimeType",
-                      "ID",
                       "BlobKey",
+                      "MimeType",
                       "ParentObjectType",
-                      "ParentObjectId",
-                      "BlobData",
-                      "Url",
-                      "EntityStatus",
-                      "Load_DateTime",
-                      "Upload_DateTime"
-                    ],
-                    "type": "object"
-                  },
-                  "type": "array"
+                      "ParentObjectId"
+                    ]
+                  }
                 }
               },
               "runAfter": {
