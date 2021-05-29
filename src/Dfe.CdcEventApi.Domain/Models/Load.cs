@@ -1,7 +1,6 @@
 ﻿namespace Dfe.CdcEventApi.Domain.Models
 {
     using System;
-    using Dfe.CdcEventApi.Application.Definitions;
 
     /// <summary>
     /// Represents the LoadControl entity.
@@ -19,10 +18,20 @@
         }
 
         /// <summary>
+        /// Gets or sets the Since Date Time.
+        /// </summary>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Naming", "CA1707:Identifiers should not contain underscores", Justification = "This is a DTO")]
+        public DateTime? Since_DateTime
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
         /// Gets or sets the Finish time.
         /// </summary>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Naming", "CA1707:Identifiers should not contain underscores", Justification = "This is a DTO")]
-        public DateTime Finish_DateTime
+        public DateTime? Finish_DateTime
         {
             get;
             set;

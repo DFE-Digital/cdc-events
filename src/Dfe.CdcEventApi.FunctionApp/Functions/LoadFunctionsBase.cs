@@ -94,10 +94,17 @@
                         HeaderNameRunIdentifier,
                         $"{loads.First().Load_DateTime:O}");
 
+                    var sinceDateTime = (loads.LastOrDefault()?.Load_DateTime ?? this.dafaultSinceDate).AddMilliseconds(1);
+
+                    var currentLoad = loads.First();
+                    currentLoad.Since_DateTime = sinceDateTime;
+                    await this.loadProcessor.UpdateLoadAsync(
+                                currentLoad,
+                                cancellationToken).ConfigureAwait(false);
+
                     // also return the previous run time
-                    toReturn.Headers.Add(
-                        HeaderNameSince,
-                        $"{(loads.LastOrDefault()?.Load_DateTime ?? this.dafaultSinceDate).AddMilliseconds(1):O}");
+                    toReturn.Headers.Add(HeaderNameSince, $"{sinceDateTime:O}");
+
                 }
                 catch (MissingLoadHandlerFileException exception)
                 {
