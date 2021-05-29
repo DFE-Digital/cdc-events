@@ -29,6 +29,15 @@
         }
 
         /// <summary>
+        /// Gets or sets the load count.
+        /// </summary>
+        public int Count
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
         /// Gets or sets the load status.
         /// </summary>
         public LoadStates Status

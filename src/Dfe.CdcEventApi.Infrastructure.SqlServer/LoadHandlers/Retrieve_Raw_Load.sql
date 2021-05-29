@@ -1,6 +1,7 @@
 SELECT 
 	[Load_DateTime],
 	[Finish_DateTime],
+	[Count],
 	[Status] ,
 	[ReportTitle],
 	[ReportBody] ,

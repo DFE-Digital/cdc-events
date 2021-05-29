@@ -237,6 +237,43 @@
         }
 
         /// <summary>
+        /// Gets the loaded row count for the run.
+        /// </summary>
+        /// <param name="runIdentifier">
+        /// The date and time.
+        /// </param>
+        /// <returns>
+        /// A <see cref="Task"/> representing the asynchronous operation.
+        /// </returns>
+        public Task<int> GetLoadCountAsync(DateTime runIdentifier)
+        {
+            this.loggerProvider.Info($"Getting the count of loaded rows for {runIdentifier}");
+
+            string querySql = this.ExtractHandler("Retrieve_Raw_LoadCount");
+
+            Stopwatch stopwatch = new Stopwatch();
+            using (SqlConnection sqlConnection = new SqlConnection(this.rawDbConnectionString))
+            {
+                this.loggerProvider.Debug($"Retrieving Load count.");
+
+                stopwatch.Start();
+
+                var results = sqlConnection.Query<int>(querySql, new { runIdentifier })
+                                                .FirstOrDefault();
+
+                stopwatch.Stop();
+
+                TimeSpan elapsed = stopwatch.Elapsed;
+
+                this.loggerProvider.Info(
+                    $"Query executed with success, time elapsed: " +
+                    $"{elapsed}.");
+
+                return Task.FromResult(results);
+            }
+        }
+
+        /// <summary>
         /// Gets the collection of notifications for the status of any load.
         /// </summary>
         /// <param name="status">

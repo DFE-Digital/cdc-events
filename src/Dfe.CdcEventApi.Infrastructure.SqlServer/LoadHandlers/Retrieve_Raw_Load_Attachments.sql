@@ -9,13 +9,14 @@ SELECT [SiteName]
       ,[BlobKey]
       ,[ParentObjectType]
       ,[ParentObjectId]
-      ,[BlobData]
+      ,[ParentObjectLoadDateTime]
+      ,NULL AS [BlobData]
       ,[URL]
       ,[Load_DateTime]
       ,[Upload_DateTime]
  FROM 
 	[dbo].[Raw_Load_Attachments]
  WHERE
-	[Load_DateTime] = @RunIdentifier
+	[ParentObjectLoadDateTime] = @RunIdentifier
  ORDER BY
     [BlobKey]

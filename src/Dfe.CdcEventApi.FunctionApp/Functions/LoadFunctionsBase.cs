@@ -255,7 +255,7 @@
                     if (template.IncludeRowStats)
                     {
                         // nothing yet.
-                        // var statistics = await this.loadProcessor.GetLoadStatistics(runIdentifier, cancellationToken).ConfigureAwait(false);
+                        // var statistics = await this.loadProcessor.GetLoadStatisticsAsync(runIdentifier, cancellationToken).ConfigureAwait(false);
                     }
                 }
 
@@ -279,6 +279,15 @@
                     // return the notification data to the caller.
                     Content = new StringContent(JsonConvert.SerializeObject(load)),
                 };
+
+                if (state == LoadStates.Suceeeded)
+                {
+                    var count = await this.loadProcessor.GetLoadCountAsync(
+                        runIdentifier.Value,
+                        cancellationToken)
+                        .ConfigureAwait(false);
+                    load.Count = count;
+                }
 
                 // finally update the load record back to its complete state with report and audience.
                 await this.loadProcessor.UpdateLoadAsync(load, cancellationToken)

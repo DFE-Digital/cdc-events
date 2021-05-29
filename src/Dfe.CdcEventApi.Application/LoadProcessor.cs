@@ -97,6 +97,26 @@
         }
 
         /// <summary>
+        /// Gets the loaded row count for the run.
+        /// </summary>
+        /// <param name="runIdentifier">
+        /// The date and time.
+        /// </param>
+        /// <param name="cancellationToken">
+        /// The asynchronous <see cref="CancellationToken"/>.
+        /// </param>
+        /// <returns>
+        /// A <see cref="Task"/> wrapping an <see cref="int"/>.
+        /// </returns>
+        public async Task<int> GetLoadCountAsync(DateTime runIdentifier, CancellationToken cancellationToken)
+        {
+            this.loggerProvider.Debug($"Getting the load row count...");
+            return await this.loadStorageAdapter
+                                 .GetLoadCountAsync(runIdentifier)
+                                 .ConfigureAwait(false);
+        }
+
+        /// <summary>
         /// Retrieves all the required <see cref="LoadNotification"/> entities for the specified run status value.
         /// </summary>
         /// <param name="status">

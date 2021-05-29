@@ -1,6 +1,7 @@
 SELECT 
 	[Load_DateTime],
 	[Finish_DateTime],
+	[Count],
 	[Status],
 	[ReportTitle],
 	[ReportBody],
@@ -9,29 +10,25 @@ FROM
 	[dbo].[Raw_Load]
 WHERE 
 	 [Load_DateTime]  BETWEEN DATEADD(ms,-5, @RunIdentifier) AND DATEADD(ms,5, @RunIdentifier)
-UNION
+OR
+	[Load_DateTime] = 
+( 
+
 SELECT 
-	load.[Load_DateTime] AS [Load_DateTime],
-	load.[Finish_DateTime] AS [Finish_DateTime],
-	load.[Status] AS [Status],
-	load.[ReportTitle] AS [ReportTitle],
-	load.[ReportBody] AS [ReportBody],
-	load.[ReportedTo] AS [ReportedTo]
-FROM
-	[dbo].[Raw_Load] load
-INNER JOIN 
-	 (
-		 SELECT 
-			MAX( [Load_DateTime] ) AS [Load_DateTime], [Status]
+		TOP 1 [Load_DateTime] 
 		 FROM
 			[dbo].[Raw_Load] 
 		WHERE 
 			[Load_DateTime] < DATEADD(ms,-5, @RunIdentifier)
+		AND 
+			[Count] != 0
 		GROUP BY 
-			[Status]
+			[Load_DateTime], [Status], [Count]
 		HAVING
 			[Status] = 32
-	) latest
-ON load.[Load_DateTime] = latest.[Load_DateTime]
+		ORDER BY
+			[Load_DateTime] DESC
+	) 
+
 ORDER BY
 	[Load_DateTime] DESC
