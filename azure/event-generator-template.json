@@ -380,7 +380,7 @@
                       "X-Run-Identifier": "@variables('nowDateTime')"
                     },
                     "method": "POST",
-                    "uri": "[concat(parameters('cdcEventsApiBaseUri'), '/@{items(', variables('singleQuote'), 'blobs', variables('singleQuote'), ')}')]"
+                    "uri": "[concat(parameters('cdcEventsApiBaseUri'), '/blobs')]"
                   },
                   "runAfter": {
                     "While_Continue_Attachments": [
@@ -407,7 +407,7 @@
                           "BlobKey": "@items('For_each_attachment')['BlobKey']",
                           "SessionId": "@variables('AttachmentsSessionId')"
                         },
-                        "uri": "[concat(variables('dataPathUri'), '/@{items(', variables('singleQuote'), 'blobs', variables('singleQuote'), ')}')]"
+                        "uri": "[concat(parameters('cdcEventsApiBaseUri'), '/blobs')]"
                       },
                       "runAfter": {},
                       "type": "Http"
@@ -545,7 +545,7 @@
                   "X-Run-Identifier": "@variables('nowDateTime')"
                 },
                 "method": "GET",
-                "uri": "[concat(parameters('cdcEventsApiBaseUri'), '/@{items(', variables('singleQuote'), 'attachments', variables('singleQuote'), ')}')]"
+                "uri": "[concat(parameters('cdcEventsApiBaseUri'), '/attachments')]"
               },
               "runAfter": {
                 "Update_load_status_to_Attachments": [
