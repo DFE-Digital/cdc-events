@@ -159,7 +159,7 @@
                   "X-Run-Status": "@{variables('runStatus')}"
                 },
                 "method": "PUT",
-                "uri": "[concat(parameters('cdcEventsApiBaseUri'), '/@{items(', variables('singleQuote'), 'load', variables('singleQuote'), ')}')]"
+                "uri": "[concat(parameters('cdcEventsApiBaseUri'), '/load')]"
               },
               "runAfter": {
                 "Check_Attachments_Finished_OK": [
@@ -1194,7 +1194,7 @@
                   "X-Run-Identifier": "@variables('nowDateTime')"
                 },
                 "method": "POST",
-                "uri": "[concat(variables('dataPathUri'), '/@{items(', variables('singleQuote'), 'load', variables('singleQuote'), ')}')]"
+                "uri": "[concat(parameters('cdcEventsApiBaseUri'), '/load')]"
               },
               "runAfter": {
                 "Initialise_nowDateTime": [
@@ -1213,7 +1213,7 @@
                   "X-Run-Status": "@{variables('runStatus')}"
                 },
                 "method": "PATCH",
-                "uri": "[concat(variables('dataPathUri'), '/@{items(', variables('singleQuote'), 'load', variables('singleQuote'), ')}')]"
+                "uri": "[concat(parameters('cdcEventsApiBaseUri'), '/load')]"
               },
               "runAfter": {
                 "Set_runStatus_to_Entities": [
@@ -1232,7 +1232,7 @@
                   "X-Run-Status": "@{variables('runStatus')}"
                 },
                 "method": "PATCH",
-                "uri": "[concat(variables('dataPathUri'), '/@{items(', variables('singleQuote'), 'load', variables('singleQuote'), ')}')]"
+                "uri": "[concat(parameters('cdcEventsApiBaseUri'), '/load')]"
               },
               "runAfter": {
                 "Set_runStatus_to_Attachments": [
@@ -1251,7 +1251,7 @@
                   "X-Run-Status": "@{variables('runStatus')}"
                 },
                 "method": "PATCH",
-                "uri": "[concat(variables('dataPathUri'), '/@{items(', variables('singleQuote'), 'load', variables('singleQuote'), ')}')]"
+                "uri": "[concat(parameters('cdcEventsApiBaseUri'), '/load')]"
               },
               "runAfter": {
                 "Set_runStatus_Login": [
@@ -1270,7 +1270,7 @@
                   "X-Run-Status": "@{variables('runStatus')}"
                 },
                 "method": "PATCH",
-                "uri": "[concat(variables('dataPathUri'), '/@{items(', variables('singleQuote'), 'load', variables('singleQuote'), ')}')]"
+                "uri": "[concat(parameters('cdcEventsApiBaseUri'), '/load')]"
               },
               "runAfter": {
                 "Set_runStatus_to_Preparing": [
