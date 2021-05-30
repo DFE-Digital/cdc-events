@@ -1,5 +1,6 @@
 {
   "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
   "parameters": {
     "serviceIdentifier": {
       "type": "string",
@@ -120,6 +121,45 @@
         "state": "Enabled",
         "definition": {
           "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+          "contentVersion": "1.0.0.0",
+          "parameters": {
+            "ApiEntitiesToPull": {
+              "defaultValue": [
+                "sites",
+                "surveysectionelements",
+                "portfolios",
+                "users",
+                "deleted",
+                "surveylots",
+                "activities",
+                "actuals",
+                "oncosts",
+                "plans",
+                "spends",
+                "surveysections",
+                "surveys"
+              ],
+              "type": "Array"
+            },
+            "KycloudApiEmail": {
+              "defaultValue": "eapim.support@education.gov.uk",
+              "type": "String"
+            }
+          },
+          "triggers": {
+            "Recurrence": {
+              "recurrence": {
+                "frequency": "Day",
+                "interval": 1,
+                "schedule": {
+                  "hours": [
+                    "23"
+                  ]
+                }
+              },
+              "type": "Recurrence"
+            }
+          },
           "actions": {
             "Check_Attachments_Finished_OK": {
               "actions": {
@@ -159,7 +199,7 @@
                   "X-Run-Status": "@{variables('runStatus')}"
                 },
                 "method": "PUT",
-                "uri": "https://dev-api-customerengagement.platform.education.gov.uk/v1/cdc-events/load"
+                "uri": "[concat(parameters('cdcEventsApiBaseUri'), '/@{items(', variables('singleQuote'), 'For_each_ApiEntitiesToPull', variables('singleQuote'), ')}')]"
               },
               "runAfter": {
                 "Check_Attachments_Finished_OK": [
@@ -188,7 +228,7 @@
                             "retryPolicy": {
                               "type": "none"
                             },
-                            "uri": "https://dev-api-customerengagement.platform.education.gov.uk/v1/cdc-events/@{items('For_each_ApiEntitiesToPull')}"
+                            "uri": "[concat(parameters('cdcEventsApiBaseUri'), '/@{items(', variables('singleQuote'), 'For_each_ApiEntitiesToPull', variables('singleQuote'), ')}')]"
                           },
                           "runAfter": {},
                           "type": "Http"
@@ -277,7 +317,7 @@
                         "retryPolicy": {
                           "type": "none"
                         },
-                        "uri": "https://uatcdc2.kykloud.com/api/data/@{items('For_each_ApiEntitiesToPull')}"
+                        "uri": "[concat(variables('dataPathUri'), '/@{items(', variables('singleQuote'), 'For_each_ApiEntitiesToPull', variables('singleQuote'), ')}')]"
                       },
                       "runAfter": {},
                       "type": "Http"
@@ -380,7 +420,7 @@
                       "X-Run-Identifier": "@variables('nowDateTime')"
                     },
                     "method": "POST",
-                    "uri": "https://dev-api-customerengagement.platform.education.gov.uk/v1/cdc-events/blobs"
+                    "uri": "[concat(parameters('cdcEventsApiBaseUri'), '/@{items(', variables('singleQuote'), 'blobs', variables('singleQuote'), ')}')]"
                   },
                   "runAfter": {
                     "While_Continue_Attachments": [
@@ -407,7 +447,7 @@
                           "BlobKey": "@items('For_each_attachment')['BlobKey']",
                           "SessionId": "@variables('AttachmentsSessionId')"
                         },
-                        "uri": "https://uatcdc2.kykloud.com/api/data/blobs"
+                        "uri": "[concat(variables('dataPathUri'), '/@{items(', variables('singleQuote'), 'blobs', variables('singleQuote'), ')}')]"
                       },
                       "runAfter": {},
                       "type": "Http"
@@ -451,7 +491,7 @@
                                     "Email": "@parameters('KycloudApiEmail')",
                                     "Password": "@body('Parse_kycloud-api-password')?['value']"
                                   },
-                                  "uri": "https://uatcdc2.kykloud.com/api/user/login"
+                                  "uri": "[variables('loginUri')]"
                                 },
                                 "runAfter": {},
                                 "type": "Http"
@@ -545,7 +585,7 @@
                   "X-Run-Identifier": "@variables('nowDateTime')"
                 },
                 "method": "GET",
-                "uri": "https://dev-api-customerengagement.platform.education.gov.uk/v1/cdc-events/attachments"
+                "uri": "[concat(parameters('cdcEventsApiBaseUri'), '/@{items(', variables('singleQuote'), 'attachments', variables('singleQuote'), ')}')]"
               },
               "runAfter": {
                 "Update_load_status_to_Attachments": [
@@ -661,7 +701,7 @@
                       "Email": "@parameters('KycloudApiEmail')",
                       "Password": "@body('Parse_kycloud-api-password')?['value']"
                     },
-                    "uri": "https://uatcdc2.kykloud.com/api/user/login"
+                    "uri": "[variables('loginUri')]"
                   },
                   "runAfter": {},
                   "type": "Http"
@@ -683,7 +723,7 @@
                       "type": "ManagedServiceIdentity"
                     },
                     "method": "GET",
-                    "uri": "https://s153d01-kv-01.vault.azure.net/secrets/cdc-events-subscription-key/9fd022fecaac4ff2a7c3c6adb980a428?api-version=2016-10-01"
+                    "uri": "[concat(reference(variables('keyVaultSecretKycloudApiToken'), '2019-09-01').secretUriWithVersion, '?api-version=2016-10-01')]"
                   },
                   "runAfter": {
                     "Parse_kycloud-api-password": [
@@ -699,7 +739,7 @@
                       "type": "ManagedServiceIdentity"
                     },
                     "method": "GET",
-                    "uri": "https://s153d01-kv-01.vault.azure.net/secrets/cdc-events-token-request-payload/d53b247212ea4367961ec3ebecbc98ee?api-version=2016-10-01"
+                    "uri": "[concat(reference(variables('keyVaultSecretCdcEventsTokenRequestPayload'), '2019-09-01').secretUriWithVersion, '?api-version=2016-10-01')]"
                   },
                   "runAfter": {
                     "Parse_cdc-events-subscription-key": [
@@ -715,7 +755,7 @@
                       "type": "ManagedServiceIdentity"
                     },
                     "method": "GET",
-                    "uri": "https://s153d01-kv-01.vault.azure.net/secrets/kycloud-api-password/fbecc50e32e243379e76941dc37085b7?api-version=2016-10-01"
+                    "uri": "[concat(reference(variables('keyVaultSecretKycloudApiPassword'), '2019-09-01').secretUriWithVersion, '?api-version=2016-10-01')]"
                   },
                   "runAfter": {
                     "Parse_kycloud-api-token": [
@@ -731,7 +771,7 @@
                       "type": "ManagedServiceIdentity"
                     },
                     "method": "GET",
-                    "uri": "https://s153d01-kv-01.vault.azure.net/secrets/kycloud-api-token/e2bac005ae6a4486827dfebdabadb7d8?api-version=2016-10-01"
+                    "uri": "[concat(reference(variables('keyVaultSecretKycloudApiToken'), '2019-09-01').secretUriWithVersion, '?api-version=2016-10-01')]"
                   },
                   "runAfter": {},
                   "type": "Http"
@@ -865,7 +905,7 @@
                       "Email": "@parameters('KycloudApiEmail')",
                       "Password": "@body('Parse_kycloud-api-password')?['value']"
                     },
-                    "uri": "https://uatcdc2.kykloud.com/api/user/login"
+                    "uri": "[variables('loginUri')]"
                   },
                   "runAfter": {},
                   "type": "Http"
@@ -1058,7 +1098,7 @@
                       "Content-Type": "application/x-www-form-urlencoded"
                     },
                     "method": "POST",
-                    "uri": "https://login.microsoftonline.com/9c7d9dd3-840c-4b3f-818e-552865082e16/oauth2/token"
+                    "uri": "[parameters('internalOAuthTokenEndpoint')]"
                   },
                   "runAfter": {},
                   "type": "Http"
@@ -1196,7 +1236,7 @@
                   "X-Run-Identifier": "@variables('nowDateTime')"
                 },
                 "method": "POST",
-                "uri": "https://dev-api-customerengagement.platform.education.gov.uk/v1/cdc-events/load"
+                "uri": "[concat(variables('dataPathUri'), '/@{items(', variables('singleQuote'), 'load', variables('singleQuote'), ')}')]"
               },
               "runAfter": {
                 "Initialise_nowDateTime": [
@@ -1215,7 +1255,7 @@
                   "X-Run-Status": "@{variables('runStatus')}"
                 },
                 "method": "PATCH",
-                "uri": "https://dev-api-customerengagement.platform.education.gov.uk/v1/cdc-events/load"
+                "uri": "[concat(variables('dataPathUri'), '/@{items(', variables('singleQuote'), 'load', variables('singleQuote'), ')}')]"
               },
               "runAfter": {
                 "Set_runStatus_to_Entities": [
@@ -1234,7 +1274,7 @@
                   "X-Run-Status": "@{variables('runStatus')}"
                 },
                 "method": "PATCH",
-                "uri": "https://dev-api-customerengagement.platform.education.gov.uk/v1/cdc-events/load"
+                "uri": "[concat(variables('dataPathUri'), '/@{items(', variables('singleQuote'), 'load', variables('singleQuote'), ')}')]"
               },
               "runAfter": {
                 "Set_runStatus_to_Attachments": [
@@ -1253,7 +1293,7 @@
                   "X-Run-Status": "@{variables('runStatus')}"
                 },
                 "method": "PATCH",
-                "uri": "https://dev-api-customerengagement.platform.education.gov.uk/v1/cdc-events/load"
+                "uri": "[concat(variables('dataPathUri'), '/@{items(', variables('singleQuote'), 'load', variables('singleQuote'), ')}')]"
               },
               "runAfter": {
                 "Set_runStatus_Login": [
@@ -1272,7 +1312,7 @@
                   "X-Run-Status": "@{variables('runStatus')}"
                 },
                 "method": "PATCH",
-                "uri": "https://dev-api-customerengagement.platform.education.gov.uk/v1/cdc-events/load"
+                "uri": "[concat(variables('dataPathUri'), '/@{items(', variables('singleQuote'), 'load', variables('singleQuote'), ')}')]"
               },
               "runAfter": {
                 "Set_runStatus_to_Preparing": [
@@ -1281,48 +1321,18 @@
               },
               "type": "Http"
             }
-          },
-          "contentVersion": "1.0.0.0",
-          "parameters": {
-            "ApiEntitiesToPull": {
-              "defaultValue": [
-                "sites",
-                "surveysectionelements",
-                "portfolios",
-                "users",
-                "deleted",
-                "surveylots",
-                "activities",
-                "actuals",
-                "oncosts",
-                "plans",
-                "spends",
-                "surveysections",
-                "surveys"
-              ],
-              "type": "Array"
-            },
-            "KycloudApiEmail": {
-              "defaultValue": "eapim.support@education.gov.uk",
-              "type": "String"
-            }
-          },
-          "triggers": {
-            "Recurrence": {
-              "recurrence": {
-                "frequency": "Day",
-                "interval": 1,
-                "schedule": {
-                  "hours": [
-                    "16"
-                  ]
-                }
-              },
-              "type": "Recurrence"
-            }
           }
         },
         "parameters": {}
+      },
+      "accessControl": {
+        "triggers": {
+          "allowedCallerIpAddresses": [
+            {
+              "addressRange": "[concat(parameters('eapimPublicIpAddress'), '/32')]"
+            }
+          ]
+        }
       }
     }
   ],
@@ -1331,6 +1341,5 @@
       "value": "[reference(variables('logicAppId'), '2019-05-01', 'Full').identity.principalId]",
       "type": "string"
     }
-  },
-  "contentVersion": "1.0.0.0"
+  }
 }
