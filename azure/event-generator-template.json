@@ -407,7 +407,7 @@
                           "BlobKey": "@items('For_each_attachment')['BlobKey']",
                           "SessionId": "@variables('AttachmentsSessionId')"
                         },
-                        "uri": "[concat(parameters('cdcEventsApiBaseUri'), '/blobs')]"
+                        "uri": "[concat(variables('dataPathUri'), '/blobs')]"
                       },
                       "runAfter": {},
                       "type": "Http"
