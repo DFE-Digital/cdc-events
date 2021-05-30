@@ -1324,15 +1324,6 @@
           }
         },
         "parameters": {}
-      },
-      "accessControl": {
-        "triggers": {
-          "allowedCallerIpAddresses": [
-            {
-              "addressRange": "[concat(parameters('eapimPublicIpAddress'), '/32')]"
-            }
-          ]
-        }
       }
     }
   ],
