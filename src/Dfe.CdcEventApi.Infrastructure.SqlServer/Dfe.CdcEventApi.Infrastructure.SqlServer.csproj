@@ -6,6 +6,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Models\**" />
+    <EmbeddedResource Remove="Models\**" />
+    <None Remove="Models\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <None Remove="DataHandlers\Create_Raw_Activity.sql" />
     <None Remove="DataHandlers\Create_Raw_Activity_Field.sql" />
     <None Remove="DataHandlers\Create_Raw_Actual.sql" />
@@ -116,10 +122,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Dfe.CdcEventApi.Domain\Dfe.CdcEventApi.Domain.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Models\" />
   </ItemGroup>
   
   <PropertyGroup>
