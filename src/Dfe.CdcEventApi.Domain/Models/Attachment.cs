@@ -5,25 +5,19 @@
     /// </summary>
     public class Attachment
     {
-
         /// <summary>
         /// Gets or sets a value for the blob key.
         /// </summary>
         public string BlobKey { get; set; }
 
         /// <summary>
-        /// Gets or sets a mime type.
+        /// Gets or sets a value for the folder.
         /// </summary>
-        public string MimeType { get; set; }
+        public string Folder { get; set; }
 
         /// <summary>
-        /// Gets or sets a value for the parent object type.
+        /// Gets or sets a value for the Extension.
         /// </summary>
-        public string ParentObjectType { get; set; }
-
-        /// <summary>
-        /// Gets or sets a value for the parent object id.
-        /// </summary>
-        public string ParentObjectId { get; set; }
+        public string Extension { get; set; }
     }
 }

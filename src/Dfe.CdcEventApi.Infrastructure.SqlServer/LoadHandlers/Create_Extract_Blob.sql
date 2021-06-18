@@ -1,14 +1,8 @@
 INSERT INTO [etl].[Blob]
-    ([BlobKey], 
-        [ParentObjectType], 
-        [ParentObjectId], 
-        [BlobData], 
-        [MimeType], 
-        [Load_DateTime])
+           ([Blobkey]
+           ,[Path]
+           ,[Obtained])
 SELECT
     @BlobKey ,
-    @ParentObjectType ,
-    @ParentObjectId ,
-    @BlobData,
-    @MimeType ,
+    @Path,
     @RunIdentifier

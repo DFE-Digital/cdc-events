@@ -6,28 +6,13 @@
     public class Blob : LoadBase
     {
         /// <summary>
-        /// Gets or sets the mime type.
-        /// </summary>
-        public string MimeType { get; set; }
-
-        /// <summary>
         /// Gets or sets the blob key.
         /// </summary>
         public string BlobKey { get; set; }
 
         /// <summary>
-        /// Gets or sets the incoming blob data.
+        /// Gets or sets the path.
         /// </summary>
-        public dynamic BlobData { get; set; }
-
-        /// <summary>
-        /// Gets or sets the pernt object type name.
-        /// </summary>
-        public string ParentObjectType { get; set; }
-
-        /// <summary>
-        /// Gets or sets the parent object identifier.
-        /// </summary>
-        public string ParentObjectId { get; set; }
+        public string Path { get; set; }
     }
 }

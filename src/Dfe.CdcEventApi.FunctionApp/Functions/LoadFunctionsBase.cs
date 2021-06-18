@@ -296,9 +296,14 @@
                     load.Count = count;
                 }
 
-                // finally update the load record back to its complete state with report and audience.
+                // update the load record back to its complete state with report and audience.
                 await this.loadProcessor.UpdateLoadAsync(load, cancellationToken)
                         .ConfigureAwait(false);
+
+                // as its a good load, extract the data into the etl data model
+                await this.loadProcessor.ExecuteExtract(runIdentifier.Value, cancellationToken)
+                        .ConfigureAwait(false);
+
             }
             else
             {

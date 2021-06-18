@@ -69,6 +69,13 @@
         Task UpdateLoadAsync(Load item);
 
         /// <summary>
+        /// Executes the extract process.
+        /// </summary>
+        /// <param name="runIdentifier">The load run identifier.</param>
+        /// <returns>An <see cref="Task"/>.</returns>
+        Task ExecuteExtract(DateTime runIdentifier);
+
+        /// <summary>
         /// Gets the report template for the specified status of any load.
         /// </summary>
         /// <param name="status">

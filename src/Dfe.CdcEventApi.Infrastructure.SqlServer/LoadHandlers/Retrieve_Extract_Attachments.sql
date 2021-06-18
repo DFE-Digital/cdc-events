@@ -1,20 +1,5 @@
-SELECT [SiteUniqueId]
-      ,[Entity]
-      ,[EntityUniqueId]
-      ,[Blobkey]
-      ,[MimeType]
-      ,[URL]
-      ,[Path]
+SELECT [Blobkey]
       ,[Folder]
       ,[Extension]
-      ,[Date Created]
-      ,[Date Last Modified]
-      ,[Obtained]
- FROM 
-     [etl].[EXTRACT-Attachments]
- WHERE
-    [URL] IS NULL
-OR
-	[Date Created] > [Obtained]
-OR 
-   [Date Last Modified] > [Obtained]
+  FROM [etl].[Extract-Attachments]
+WHERE [URL] IS NULL OR (COALESCE([Date Last Modified], [Date Created]) > [Obtained])
