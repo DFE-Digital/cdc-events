@@ -8,6 +8,6 @@ SELECT
 	[ReportBody] ,
 	[ReportedTo] 
 FROM 
-	[dbo].[Raw_Load] 
+	[raw].[Load] 
 WHERE 
 	[Load_DateTime] = @runIdentifier

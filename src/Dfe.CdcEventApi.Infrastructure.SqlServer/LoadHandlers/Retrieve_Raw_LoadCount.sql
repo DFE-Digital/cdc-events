@@ -1,3 +1,3 @@
 SELECT [Count]
-  FROM [dbo].[Raw_LoadCount]
+  FROM [raw].[LOAD-Count]
 WHERE Load_DateTime = @RunIdentifier

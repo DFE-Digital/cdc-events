@@ -1,4 +1,4 @@
-UPDATE [dbo].[Raw_Load]
+UPDATE [raw].[Load]
    SET 
        [Status] = @Status,
        [ReportTitle] = @ReportTitle

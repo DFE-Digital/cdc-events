@@ -1,4 +1,4 @@
-INSERT INTO [Raw_Survey]
+INSERT INTO [raw].[Survey]
     ([Name], [bk_SurveyLotId], [SurveyLotName], [bk_SiteId], [SiteName], [IsComplete], [bk_SurveyorId], [SurveyorEmail], [StartDate], [AccessTime], [EndDate], [IsApproved], [bk_ApprovedById], [ApprovedByEmail], [Latitude], [Longitude], [SurveyVersion], [ref_MandateName], [ref_MandateBlobKey], [bk_MandateId], [sk_Id], [bk_Id], [bk_TenantId], [target_Date], [source_DateCreated], [source_DateLastModified], [EntityStatus], [Load_DateTime])
 SELECT
     Tbl.Col.value('Name[1]', 'nvarchar(max)') AS [Name],

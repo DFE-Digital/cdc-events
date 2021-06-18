@@ -1,4 +1,4 @@
-INSERT INTO [Raw_Deleted]
+INSERT INTO [raw].[Deleted]
     ([EntityType], [sk_Id], [bk_Id], [bk_TenantId], [target_Date], [source_DateCreated], [source_DateLastModified], [EntityStatus], [Load_DateTime])
 SELECT
     Tbl.Col.value('EntityType[1]', 'nvarchar(max)') AS [EntityType],

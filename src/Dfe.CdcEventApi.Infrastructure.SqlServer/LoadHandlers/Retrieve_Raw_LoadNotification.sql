@@ -5,7 +5,7 @@ SELECT
 	notify.[Group],
 	notify.[Email]
 FROM
-	[dbo].[Raw_LoadNotification] notify
+	[raw].[LoadNotification] notify
 WHERE 
 	 notify.[Active]  = 1
 AND

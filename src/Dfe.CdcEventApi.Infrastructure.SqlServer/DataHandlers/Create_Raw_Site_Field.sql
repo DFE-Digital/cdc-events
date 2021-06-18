@@ -1,4 +1,4 @@
-INSERT INTO [Raw_Site_Field]
+INSERT INTO [raw].[Site_Field]
     ([bk_SiteId], [CustomFieldType], [Value], [Name], [SortOrder], [ExternalReference], [sk_Id], [bk_Id], [bk_TenantId], [target_Date], [source_DateCreated], [source_DateLastModified], [EntityStatus], [Load_DateTime])
 SELECT
     Tbl.Col.value('bk_SiteId[1]', 'nvarchar(40)') AS [bk_SiteId],

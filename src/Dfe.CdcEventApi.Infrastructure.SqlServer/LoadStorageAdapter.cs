@@ -89,7 +89,7 @@
             Stopwatch stopwatch = new Stopwatch();
             using (SqlConnection sqlConnection = new SqlConnection(this.rawDbConnectionString))
             {
-                var insertSql = this.ExtractHandler("Create_Raw_Blob");
+                var insertSql = this.ExtractHandler("Create_Extract_Blob");
                 this.loggerProvider.Debug($"Creating Storage Blob records.");
 
                 stopwatch.Start();
@@ -179,7 +179,7 @@
             Stopwatch stopwatch = new Stopwatch();
             using (SqlConnection sqlConnection = new SqlConnection(this.rawDbConnectionString))
             {
-                string querySql = this.ExtractHandler("Retrieve_Raw_Load_Attachments");
+                string querySql = this.ExtractHandler("Retrieve_Extract_Attachments");
                 this.loggerProvider.Debug($"Retrieving attachment records.");
 
                 stopwatch.Start();

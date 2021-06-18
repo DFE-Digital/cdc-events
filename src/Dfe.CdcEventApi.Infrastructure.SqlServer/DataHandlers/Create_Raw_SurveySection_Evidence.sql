@@ -1,4 +1,4 @@
-INSERT INTO [Raw_SurveySection_Evidence]
+INSERT INTO [raw].[SurveySection_Evidence]
     ([bk_SurveySectionId], [Description], [ref_SurveySectionEvidenceItemTypeReference], [MimeType], [Reference], [SortOrder], [CustomReference], [CustomTag], [FileOrigin], [BlobKey], [sk_Id], [bk_Id], [bk_TenantId], [target_Date], [source_DateCreated], [source_DateLastModified], [EntityStatus], [Load_DateTime])
 SELECT
     Tbl.Col.value('bk_SurveySectionId[1]', 'nvarchar(40)') AS [bk_SurveySectionId],

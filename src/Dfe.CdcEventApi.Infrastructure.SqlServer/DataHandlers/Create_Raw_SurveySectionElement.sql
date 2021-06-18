@@ -1,4 +1,4 @@
-INSERT INTO [Raw_SurveySectionElement]
+INSERT INTO [raw].[SurveySectionElement]
     ([bk_SurveySectionId], [ref_ElementTypeReference], [ref_ElementTypeDescription], [ref_Grade], [ref_Priority], [ref_UnitOfMeasureReference], [Quantity], [ref_MethodOfMeasurementReference], [PercentageOfParent], [ref_ActionRequiredReference], [ref_FailureTypeReference], [ref_ContributingFactorReference], [HealthAndSafetyIssue], [BudgetCost], [ResidualLife], [IsComplete], [IsRemoved], [ref_AccessReference], [ref_CompositionGroupName], [ActivityCycle], [FrequencyInYear], [Latitude], [Longitude], [SortOrder], [ExternalUUID], [EstimatedCost], [bk_ParentElementId], [sk_Id], [bk_Id], [bk_TenantId], [target_Date], [source_DateCreated], [source_DateLastModified], [EntityStatus], [Load_DateTime])
 SELECT
     Tbl.Col.value('bk_SurveySectionId[1]', 'nvarchar(40)') AS [bk_SurveySectionId],
