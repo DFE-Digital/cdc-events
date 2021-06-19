@@ -241,7 +241,7 @@
             short status,
             CancellationToken cancellationToken)
         {
-            this.loggerProvider.Debug($"Updating the lod status...");
+            this.loggerProvider.Debug($"Updating the load status...");
             await this.loadStorageAdapter
                         .UpdateLoadStatusAsync(runIdentifier, status)
                         .ConfigureAwait(false);
