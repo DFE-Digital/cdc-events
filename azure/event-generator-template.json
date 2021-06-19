@@ -121,6 +121,25 @@
         "definition": {
           "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
           "actions": {
+            "Finish_Run": {
+              "inputs": {
+                "headers": {
+                  "Authorization": "Bearer @{body('Parse_CDC_Events_OAuth_Token')?['access_token']}",
+                  "Content-Type": "application/json",
+                  "Ocp-Apim-Subscription-Key": "@body('Parse_cdc-events-subscription-key')?['value']",
+                  "X-Run-Identifier": "@variables('nowDateTime')",
+                  "X-Run-Status": "@{variables('runStatus')}"
+                },
+                "method": "PUT",
+                "uri": "https://dev-api-customerengagement.platform.education.gov.uk/v1/cdc-events/load"
+              },
+              "runAfter": {
+                "Set_runStatus_to_Finished": [
+                  "Succeeded"
+                ]
+              },
+              "type": "Http"
+            },
             "Finish_load": {
               "inputs": {
                 "headers": {
@@ -1155,6 +1174,18 @@
               },
               "runAfter": {
                 "Get_sessionId": [
+                  "Succeeded"
+                ]
+              },
+              "type": "SetVariable"
+            },
+            "Set_runStatus_to_Finished": {
+              "inputs": {
+                "name": "runStatus",
+                "value": 64
+              },
+              "runAfter": {
+                "For_each_attachment": [
                   "Succeeded"
                 ]
               },

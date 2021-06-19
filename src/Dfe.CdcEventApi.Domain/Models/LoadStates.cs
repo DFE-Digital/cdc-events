@@ -46,5 +46,12 @@
         /// </summary>
         [Description("Succeded")]
         Suceeeded = 32,
+
+
+        /// <summary>
+        /// The transform has finished.
+        /// </summary>
+        [Description("Finished")]
+        Finished = 64,
     }
 }
