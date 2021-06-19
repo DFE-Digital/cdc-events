@@ -121,33 +121,24 @@
         "definition": {
           "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
           "actions": {
-            "Check_Attachments_Finished_OK": {
-              "actions": {
-                "Set_runStatus_to_Succeeded": {
-                  "inputs": {
-                    "name": "runStatus",
-                    "value": 32
-                  },
-                  "runAfter": {},
-                  "type": "SetVariable"
-                }
-              },
-              "expression": {
-                "and": [
-                  {
-                    "equals": [
-                      "@variables('continueAttachments')",
-                      true
-                    ]
-                  }
-                ]
+            "Finish_Run": {
+              "inputs": {
+                "headers": {
+                  "Authorization": "Bearer @{body('Parse_CDC_Events_OAuth_Token')?['access_token']}",
+                  "Content-Type": "application/json",
+                  "Ocp-Apim-Subscription-Key": "@body('Parse_cdc-events-subscription-key')?['value']",
+                  "X-Run-Identifier": "@variables('nowDateTime')",
+                  "X-Run-Status": "@{variables('runStatus')}"
+                },
+                "method": "PUT",
+                "uri": "[concat(parameters('cdcEventsApiBaseUri'), '/load')]"
               },
               "runAfter": {
-                "For_each_attachment": [
+                "Set_runStatus_to_Finished": [
                   "Succeeded"
                 ]
               },
-              "type": "If"
+              "type": "Http"
             },
             "Finish_load": {
               "inputs": {
@@ -162,7 +153,7 @@
                 "uri": "[concat(parameters('cdcEventsApiBaseUri'), '/load')]"
               },
               "runAfter": {
-                "Check_Attachments_Finished_OK": [
+                "Set_runStatus_to_Succeeded": [
                   "Succeeded"
                 ]
               },
@@ -366,11 +357,8 @@
                   "inputs": {
                     "body": [
                       {
-                        "BlobData": "@body('Get_blob')",
                         "BlobKey": "@items('For_each_attachment')['BlobKey']",
-                        "MimeType": "@items('For_each_attachment')['MimeType']",
-                        "ParentObjectId": "@items('For_each_attachment')['ParentObjectId']",
-                        "ParentObjectType": "@items('For_each_attachment')['ParentObjectType']"
+                        "Path": "@body('Create_file')?['FileLocator']"
                       }
                     ],
                     "headers": {
@@ -383,7 +371,7 @@
                     "uri": "[concat(parameters('cdcEventsApiBaseUri'), '/blobs')]"
                   },
                   "runAfter": {
-                    "While_Continue_Attachments": [
+                    "Create_file": [
                       "Succeeded"
                     ]
                   },
@@ -393,6 +381,37 @@
                     }
                   },
                   "type": "Http"
+                },
+                "Create_file": {
+                  "inputs": {
+                    "body": "@body('Get_blob')",
+                    "headers": {
+                      "ReadFileMetadataFromServer": true
+                    },
+                    "host": {
+                      "connection": {
+                        "name": "@parameters('$connections')['azurefile']['connectionId']"
+                      }
+                    },
+                    "method": "post",
+                    "path": "/datasets/default/files",
+                    "queries": {
+                      "folderPath": "/cdcdocuments/@{items('For_each_attachment')['Folder']}/evidence",
+                      "name": "@{items('For_each_attachment')['BlobKey']}@{items('For_each_attachment')['Extension']}",
+                      "queryParametersSingleEncoded": true
+                    }
+                  },
+                  "runAfter": {
+                    "While_Continue_Attachments": [
+                      "Succeeded"
+                    ]
+                  },
+                  "runtimeConfiguration": {
+                    "contentTransfer": {
+                      "transferMode": "Chunked"
+                    }
+                  },
+                  "type": "ApiConnection"
                 },
                 "While_Continue_Attachments": {
                   "actions": {
@@ -404,6 +423,7 @@
                         "method": "GET",
                         "queries": {
                           "AsAtachment": "true",
+                          "AsAttachment": "true",
                           "BlobKey": "@items('For_each_attachment')['BlobKey']",
                           "SessionId": "@variables('AttachmentsSessionId')"
                         },
@@ -548,7 +568,7 @@
                 "uri": "[concat(parameters('cdcEventsApiBaseUri'), '/attachments')]"
               },
               "runAfter": {
-                "Update_load_status_to_Attachments": [
+                "Finish_load": [
                   "Succeeded"
                 ]
               },
@@ -1092,30 +1112,26 @@
               "inputs": {
                 "content": "@body('Get_Attachments')",
                 "schema": {
-                  "type": "array",
                   "items": {
-                    "type": "object",
                     "properties": {
                       "BlobKey": {
                         "type": "string"
                       },
-                      "MimeType": {
+                      "Extension": {
                         "type": "string"
                       },
-                      "ParentObjectType": {
-                        "type": "string"
-                      },
-                      "ParentObjectId": {
+                      "Folder": {
                         "type": "string"
                       }
                     },
                     "required": [
                       "BlobKey",
-                      "MimeType",
-                      "ParentObjectType",
-                      "ParentObjectId"
-                    ]
-                  }
+                      "Folder",
+                      "Extension"
+                    ],
+                    "type": "object"
+                  },
+                  "type": "array"
                 }
               },
               "runAfter": {
@@ -1149,18 +1165,6 @@
               },
               "type": "SetVariable"
             },
-            "Set_runStatus_to_Attachments": {
-              "inputs": {
-                "name": "runStatus",
-                "value": 16
-              },
-              "runAfter": {
-                "For_each_ApiEntitiesToPull": [
-                  "Succeeded"
-                ]
-              },
-              "type": "SetVariable"
-            },
             "Set_runStatus_to_Entities": {
               "inputs": {
                 "name": "runStatus",
@@ -1173,6 +1177,18 @@
               },
               "type": "SetVariable"
             },
+            "Set_runStatus_to_Finished": {
+              "inputs": {
+                "name": "runStatus",
+                "value": 64
+              },
+              "runAfter": {
+                "For_each_attachment": [
+                  "Succeeded"
+                ]
+              },
+              "type": "SetVariable"
+            },
             "Set_runStatus_to_Preparing": {
               "inputs": {
                 "name": "runStatus",
@@ -1180,6 +1196,18 @@
               },
               "runAfter": {
                 "Initialize_sinceDateTime": [
+                  "Succeeded"
+                ]
+              },
+              "type": "SetVariable"
+            },
+            "Set_runStatus_to_Succeeded": {
+              "inputs": {
+                "name": "runStatus",
+                "value": 32
+              },
+              "runAfter": {
+                "For_each_ApiEntitiesToPull": [
                   "Succeeded"
                 ]
               },
@@ -1217,25 +1245,6 @@
               },
               "runAfter": {
                 "Set_runStatus_to_Entities": [
-                  "Succeeded"
-                ]
-              },
-              "type": "Http"
-            },
-            "Update_load_status_to_Attachments": {
-              "inputs": {
-                "headers": {
-                  "Authorization": "Bearer @{body('Parse_CDC_Events_OAuth_Token')?['access_token']}",
-                  "Content-Type": "application/json",
-                  "Ocp-Apim-Subscription-Key": "@body('Parse_cdc-events-subscription-key')?['value']",
-                  "X-Run-Identifier": "@variables('nowDateTime')",
-                  "X-Run-Status": "@{variables('runStatus')}"
-                },
-                "method": "PATCH",
-                "uri": "[concat(parameters('cdcEventsApiBaseUri'), '/load')]"
-              },
-              "runAfter": {
-                "Set_runStatus_to_Attachments": [
                   "Succeeded"
                 ]
               },
@@ -1282,21 +1291,19 @@
           },
           "contentVersion": "1.0.0.0",
           "parameters": {
+            "$connections": {
+              "defaultValue": {},
+              "type": "Object"
+            },
             "ApiEntitiesToPull": {
               "defaultValue": [
-                "sites",
-                "surveysectionelements",
-                "portfolios",
                 "users",
-                "deleted",
-                "surveylots",
-                "activities",
-                "actuals",
-                "oncosts",
-                "plans",
-                "spends",
+                "portfolios",
+                "sites",
+                "surveys",
                 "surveysections",
-                "surveys"
+                "surveysectionelements",
+                "deleted"
               ],
               "type": "Array"
             },
@@ -1308,19 +1315,26 @@
           "triggers": {
             "Recurrence": {
               "recurrence": {
-                "frequency": "Day",
+                "frequency": "Month",
                 "interval": 1,
-                "schedule": {
-                  "hours": [
-                    "16"
-                  ]
-                }
+                "startTime": "2021-07-01T12:00:00.00Z",
+                "timeZone": "UTC"
               },
               "type": "Recurrence"
             }
           }
         },
-        "parameters": {}
+        "parameters": {
+          "$connections": {
+            "value": {
+              "azurefile": {
+                "connectionId": "/subscriptions/e9355f32-be6c-4dd8-b4e1-60c3ee7e73c0/resourceGroups/s153d01-cdcaeg/providers/Microsoft.Web/connections/azurefile-4",
+                "connectionName": "azurefile-4",
+                "id": "/subscriptions/e9355f32-be6c-4dd8-b4e1-60c3ee7e73c0/providers/Microsoft.Web/locations/westeurope/managedApis/azurefile"
+              }
+            }
+          }
+        }
       }
     }
   ],

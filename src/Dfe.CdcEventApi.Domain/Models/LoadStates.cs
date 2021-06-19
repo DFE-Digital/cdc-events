@@ -42,15 +42,16 @@
         Entities = 8,
 
         /// <summary>
-        /// The load is downloading attachment blobs.
-        /// </summary>
-        [Description("Attachments Failed")]
-        Attachments = 16,
-
-        /// <summary>
         /// The load has finished.
         /// </summary>
         [Description("Succeded")]
         Suceeeded = 32,
+
+
+        /// <summary>
+        /// The transform has finished.
+        /// </summary>
+        [Description("Finished")]
+        Finished = 64,
     }
 }

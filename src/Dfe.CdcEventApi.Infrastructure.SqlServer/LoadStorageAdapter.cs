@@ -26,7 +26,6 @@
         private readonly Assembly assembly;
         private readonly string loadHandlersPath;
         private readonly string rawDbConnectionString;
-        private readonly IBlobConvertor blobConvertor;
 
         /// <summary>
         /// Initialises a new instance of the
@@ -35,16 +34,12 @@
         /// <param name="entityStorageAdapterSettingsProvider">
         /// An instance of type
         /// <see cref="IEntityStorageAdapterSettingsProvider" />.
-        /// </param>
-        /// <param name="blobConvertor">
-        /// An instance of <see cref="IBlobConvertor"/>.
-        /// </param>
+        /// </param>       
         /// <param name="loggerProvider">
         /// An instance of type <see cref="ILoggerProvider" />.
         /// </param>
         public LoadStorageAdapter(
             IEntityStorageAdapterSettingsProvider entityStorageAdapterSettingsProvider,
-            IBlobConvertor blobConvertor,
             ILoggerProvider loggerProvider)
         {
             if (entityStorageAdapterSettingsProvider == null)
@@ -52,8 +47,6 @@
                 throw new ArgumentNullException(
                     nameof(entityStorageAdapterSettingsProvider));
             }
-
-            this.blobConvertor = blobConvertor ?? throw new ArgumentNullException(nameof(blobConvertor));
 
             this.loggerProvider = loggerProvider;
 
@@ -68,7 +61,7 @@
         }
 
         /// <summary>
-        /// Creates many <see cref="StorageBlob"/> records.
+        /// Creates many <see cref="Blob"/> records.
         /// </summary>
         /// <param name="runIdentifier">
         /// The run identifier start date time value.
@@ -84,18 +77,16 @@
 
             this.loggerProvider.Info($"Converting blob records to storage blob records.");
 
-            var storageBlobs = await this.blobConvertor.Convert(blobs, runIdentifier).ConfigureAwait(false);
-
             Stopwatch stopwatch = new Stopwatch();
             using (SqlConnection sqlConnection = new SqlConnection(this.rawDbConnectionString))
             {
-                var insertSql = this.ExtractHandler("Create_Raw_Blob");
+                var insertSql = this.ExtractHandler("Create_Extract_Blob");
                 this.loggerProvider.Debug($"Creating Storage Blob records.");
 
                 stopwatch.Start();
 
                 await sqlConnection
-                        .ExecuteAsync(insertSql, storageBlobs)
+                        .ExecuteAsync(insertSql, blobs)
                         .ConfigureAwait(false);
 
                 stopwatch.Stop();
@@ -164,6 +155,74 @@
         }
 
         /// <summary>
+        /// Execute the extract process.
+        /// </summary>
+        /// <param name="runIdentifier">The date and time of the run.</param>
+        /// <returns>An <see cref="Task"/> .</returns>
+        public async Task ExecuteExtract(DateTime runIdentifier)
+        {
+            this.loggerProvider.Info($"Starting an extract at {runIdentifier:O}");
+
+            Stopwatch stopwatch = new Stopwatch();
+            using (SqlConnection sqlConnection = new SqlConnection(this.rawDbConnectionString))
+            {
+                var procedureSql = this.ExtractHandler("Execute_Extract");
+
+                this.loggerProvider.Debug($"Executing the extract.");
+
+                stopwatch.Start();
+
+                int commandTimeoutAsLongAsItTakes = 0;
+
+                await sqlConnection
+                        .ExecuteAsync(procedureSql, new { runIdentifier }, null, commandTimeoutAsLongAsItTakes)
+                        .ConfigureAwait(false);
+
+                stopwatch.Stop();
+
+                TimeSpan elapsed = stopwatch.Elapsed;
+
+                this.loggerProvider.Info(
+                    $"Extract executed with success, time elapsed: " +
+                    $"{elapsed}.");
+            }
+        }
+
+        /// <summary>
+        /// Execute the transform process.
+        /// </summary>
+        /// <param name="runIdentifier">The date and time of the run.</param>
+        /// <returns>An <see cref="Task"/> .</returns>
+        public async Task ExecuteTransform(DateTime runIdentifier)
+        {
+            this.loggerProvider.Info($"Starting a transform at {runIdentifier:O}");
+
+            Stopwatch stopwatch = new Stopwatch();
+            using (SqlConnection sqlConnection = new SqlConnection(this.rawDbConnectionString))
+            {
+                var procedureSql = this.ExtractHandler("Execute_Transform");
+
+                this.loggerProvider.Debug($"Executing the transform.");
+
+                stopwatch.Start();
+
+                int commandTimeoutAsLongAsItTakes = 0;
+
+                await sqlConnection
+                        .ExecuteAsync(procedureSql, new { runIdentifier }, null, commandTimeoutAsLongAsItTakes)
+                        .ConfigureAwait(false);
+
+                stopwatch.Stop();
+
+                TimeSpan elapsed = stopwatch.Elapsed;
+
+                this.loggerProvider.Info(
+                    $"Transform executed with success, time elapsed: " +
+                    $"{elapsed}.");
+            }
+        }
+
+        /// <summary>
         /// Gets the Attechment process instruction records for the current load.
         /// </summary>
         /// <param name="runIdentifier">
@@ -179,7 +238,7 @@
             Stopwatch stopwatch = new Stopwatch();
             using (SqlConnection sqlConnection = new SqlConnection(this.rawDbConnectionString))
             {
-                string querySql = this.ExtractHandler("Retrieve_Raw_Load_Attachments");
+                string querySql = this.ExtractHandler("Retrieve_Extract_Attachments");
                 this.loggerProvider.Debug($"Retrieving attachment records.");
 
                 stopwatch.Start();

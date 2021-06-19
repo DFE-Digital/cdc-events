@@ -1,4 +1,4 @@
-UPDATE [dbo].[Raw_Load]
+UPDATE [raw].[Load]
    SET 
     [Finish_DateTime] = @Finish_DateTime,
     [Since_DateTime] = @Since_DateTime,

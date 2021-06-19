@@ -6,28 +6,21 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="DataHandlers\Create_Raw_Activity.sql" />
-    <None Remove="DataHandlers\Create_Raw_Activity_Field.sql" />
-    <None Remove="DataHandlers\Create_Raw_Actual.sql" />
-    <None Remove="DataHandlers\Create_Raw_Actual_Field.sql" />
+    <Compile Remove="Models\**" />
+    <EmbeddedResource Remove="Models\**" />
+    <None Remove="Models\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <None Remove="DataHandlers\Create_Raw_Blob.sql" />
     <None Remove="DataHandlers\Create_Raw_Deleted.sql" />
     <None Remove="DataHandlers\Create_Raw_Load.sql" />
-    <None Remove="DataHandlers\Create_Raw_Oncost.sql" />
-    <None Remove="DataHandlers\Create_Raw_Oncost_Field.sql" />
-    <None Remove="DataHandlers\Create_Raw_Plan.sql" />
-    <None Remove="DataHandlers\Create_Raw_Plan_Field.sql" />
     <None Remove="DataHandlers\Create_Raw_Portfolio.sql" />
     <None Remove="DataHandlers\Create_Raw_Portfolio_Field.sql" />
     <None Remove="DataHandlers\Create_Raw_Portfolio_SiteInfo.sql" />
     <None Remove="DataHandlers\Create_Raw_Site.sql" />
     <None Remove="DataHandlers\Create_Raw_Site_Field.sql" />
-    <None Remove="DataHandlers\Create_Raw_Spend.sql" />
-    <None Remove="DataHandlers\Create_Raw_Spend_Field.sql" />
     <None Remove="DataHandlers\Create_Raw_Survey.sql" />
-    <None Remove="DataHandlers\Create_Raw_SurveyLot.sql" />
-    <None Remove="DataHandlers\Create_Raw_SurveyLot_Field.sql" />
-    <None Remove="DataHandlers\Create_Raw_SurveyLot_SiteInfo.sql" />
     <None Remove="DataHandlers\Create_Raw_SurveySection.sql" />
     <None Remove="DataHandlers\Create_Raw_SurveySectionElement.sql" />
     <None Remove="DataHandlers\Create_Raw_SurveySectionElement_Evidence.sql" />
@@ -42,8 +35,10 @@
     <None Remove="DataHandlers\Retrieve_Raw_LoadNotificationTemplate.sql" />
     <None Remove="DataHandlers\Retrieve_Raw_LoadSince.sql" />
     <None Remove="DataHandlers\Update_Raw_Load.sql" />
+    <None Remove="LoadHandlers\Execute_Extract.sql" />
+    <None Remove="LoadHandlers\Execute_Transform.sql" />
+    <None Remove="LoadHandlers\Retrieve_Extract_Attachments.sql" />
     <None Remove="LoadHandlers\Retrieve_Raw_LoadCount.sql" />
-    <None Remove="LoadHandlers\Retrieve_Raw_Load_Attachments.sql" />
     <None Remove="LoadHandlers\Update_Raw_LoadStatus.sql" />
   </ItemGroup>
 
@@ -73,35 +68,24 @@
   </ItemGroup>
 
   <ItemGroup>
+    <EmbeddedResource Include="LoadHandlers\Execute_Transform.sql" />
     <EmbeddedResource Include="LoadHandlers\Retrieve_Raw_LoadCount.sql" />
-    <EmbeddedResource Include="LoadHandlers\Retrieve_Raw_Load_Attachments.sql" />
+    <EmbeddedResource Include="LoadHandlers\Retrieve_Extract_Attachments.sql" />
     <EmbeddedResource Include="LoadHandlers\Retrieve_Raw_LoadNotificationTemplate.sql" />
     <EmbeddedResource Include="LoadHandlers\Retrieve_Raw_LoadSince.sql" />
     <EmbeddedResource Include="LoadHandlers\Retrieve_Raw_LoadNotification.sql" />
+    <EmbeddedResource Include="LoadHandlers\Execute_Extract.sql" />
     <EmbeddedResource Include="LoadHandlers\Update_Raw_LoadStatus.sql" />
     <EmbeddedResource Include="LoadHandlers\Update_Raw_Load.sql" />
     <EmbeddedResource Include="LoadHandlers\Retrieve_Raw_Load.sql" />
-    <EmbeddedResource Include="DataHandlers\Create_Raw_Activity.sql" />
-    <EmbeddedResource Include="DataHandlers\Create_Raw_Activity_Field.sql" />
-    <EmbeddedResource Include="DataHandlers\Create_Raw_Actual.sql" />
-    <EmbeddedResource Include="DataHandlers\Create_Raw_Actual_Field.sql" />
-    <EmbeddedResource Include="LoadHandlers\Create_Raw_Blob.sql" />
+    <EmbeddedResource Include="LoadHandlers\Create_Extract_Blob.sql" />
     <EmbeddedResource Include="DataHandlers\Create_Raw_Deleted.sql" />
-    <EmbeddedResource Include="DataHandlers\Create_Raw_Oncost.sql" />
-    <EmbeddedResource Include="DataHandlers\Create_Raw_Oncost_Field.sql" />
-    <EmbeddedResource Include="DataHandlers\Create_Raw_Plan.sql" />
-    <EmbeddedResource Include="DataHandlers\Create_Raw_Plan_Field.sql" />
     <EmbeddedResource Include="DataHandlers\Create_Raw_Portfolio.sql" />
     <EmbeddedResource Include="DataHandlers\Create_Raw_Portfolio_Field.sql" />
     <EmbeddedResource Include="DataHandlers\Create_Raw_Portfolio_SiteInfo.sql" />
     <EmbeddedResource Include="DataHandlers\Create_Raw_Site.sql" />
     <EmbeddedResource Include="DataHandlers\Create_Raw_Site_Field.sql" />
-    <EmbeddedResource Include="DataHandlers\Create_Raw_Spend.sql" />
-    <EmbeddedResource Include="DataHandlers\Create_Raw_Spend_Field.sql" />
     <EmbeddedResource Include="DataHandlers\Create_Raw_Survey.sql" />
-    <EmbeddedResource Include="DataHandlers\Create_Raw_SurveyLot.sql" />
-    <EmbeddedResource Include="DataHandlers\Create_Raw_SurveyLot_Field.sql" />
-    <EmbeddedResource Include="DataHandlers\Create_Raw_SurveyLot_SiteInfo.sql" />
     <EmbeddedResource Include="DataHandlers\Create_Raw_SurveySection.sql" />
     <EmbeddedResource Include="DataHandlers\Create_Raw_SurveySectionElement.sql" />
     <EmbeddedResource Include="DataHandlers\Create_Raw_SurveySectionElement_Evidence.sql" />
@@ -116,10 +100,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Dfe.CdcEventApi.Domain\Dfe.CdcEventApi.Domain.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Models\" />
   </ItemGroup>
   
   <PropertyGroup>

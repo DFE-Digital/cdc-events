@@ -1,4 +1,4 @@
-INSERT INTO [Raw_Portfolio]
+INSERT INTO [raw].[Portfolio]
     ([Name], [Description], [Customer], [ref_SectorReference], [sk_Id], [bk_Id], [bk_TenantId], [target_Date], [source_DateCreated], [source_DateLastModified], [EntityStatus], [Load_DateTime])
 SELECT
     Tbl.Col.value('Name[1]', 'nvarchar(max)') AS [Name],

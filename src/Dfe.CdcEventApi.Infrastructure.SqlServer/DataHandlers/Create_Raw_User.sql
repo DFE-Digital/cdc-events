@@ -1,4 +1,4 @@
-INSERT INTO [dbo].[Raw_User] 
+INSERT INTO [raw].[User] 
     ([Email] ,[FirstName] ,[LastName] ,[OrganisationName] ,[PhoneNumber] ,[AcceptedTerms] ,[IsSurveyor] ,[AnalyticsRole] ,[sk_Id] ,[bk_Id] ,[bk_TenantId] ,[target_Date] ,[source_DateCreated] ,[source_DateLastModified] ,[EntityStatus] ,[Load_DateTime] ) 
 SELECT
 	Tbl.Col.value('Email[1]', 'nvarchar(max)') as [Email],

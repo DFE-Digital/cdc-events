@@ -4,6 +4,6 @@ SELECT [Status]
       ,[IncludeRowStats]
       ,[IncludeRIChecks]
 FROM 
-    [dbo].[Raw_LoadNotificationTemplate]
+    [raw].[LoadNotificationTemplate]
 WHERE 
     [Status] & @Status <> 0

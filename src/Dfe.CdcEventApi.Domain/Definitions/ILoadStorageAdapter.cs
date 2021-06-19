@@ -69,6 +69,13 @@
         Task UpdateLoadAsync(Load item);
 
         /// <summary>
+        /// Executes the extract process.
+        /// </summary>
+        /// <param name="runIdentifier">The load run identifier.</param>
+        /// <returns>An <see cref="Task"/>.</returns>
+        Task ExecuteExtract(DateTime runIdentifier);
+
+        /// <summary>
         /// Gets the report template for the specified status of any load.
         /// </summary>
         /// <param name="status">
@@ -80,7 +87,7 @@
         Task<LoadNotificationTemplate> GetLoadTemplateForStatus(short status);
 
         /// <summary>
-        /// Gets the Attechment process instruction records for the current load.
+        /// Gets the Attachment process instruction records for the current load.
         /// </summary>
         /// <param name="runIdentifier">
         /// The run identifier start date time value.
@@ -89,6 +96,18 @@
         /// An <see cref="Task"/> wrapping an collection of <see cref="Attachment"/> of the run.
         /// </returns>
         Task<IEnumerable<Attachment>> GetAttachments(DateTime runIdentifier);
+
+
+        /// <summary>
+        /// performs the transform operation from etl model to condition model.
+        /// </summary>
+        /// <param name="runIdentifier">
+        /// The run identifier start date time value.
+        /// </param>
+        /// <returns>
+        /// An <see cref="Task"/>.
+        /// </returns>
+        Task ExecuteTransform(DateTime runIdentifier);
 
         /// <summary>
         /// Creats new <see cref="Blob"/> records.
