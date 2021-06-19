@@ -249,6 +249,7 @@
                             cancellationToken)
                         .ConfigureAwait(false);
 
+                load.ReportTo = string.Empty;
                 if (template != null)
                 {
                     // get the required notification evidence
@@ -264,6 +265,8 @@
                         // nothing yet.
                         // var statistics = await this.loadProcessor.GetLoadStatisticsAsync(runIdentifier, cancellationToken).ConfigureAwait(false);
                     }
+
+                    load.ReportTo = string.Join("; ", notifications.Select(x => x.Email));
                 }
 
                 LoadStates state = load.Status;
@@ -272,8 +275,6 @@
                     "{0}",
                     state.ToEnumDescription(),
                     StringComparison.InvariantCultureIgnoreCase);
-
-                load.ReportTo = string.Join("; ", notifications.Select(x => x.Email));
 
                 // update the load with the report
                 StringBuilder reportBody = new StringBuilder("Dummy Report");
@@ -309,7 +310,7 @@
                 }
 
                 // perform transform only if finished is indicated.
-                if (load.Status == LoadStates.Suceeeded)
+                if (load.Status == LoadStates.Finished)
                 {
                     // as its a good load, transform the data into the condition data model
                     await this.loadProcessor.ExecuteTransform(runIdentifier.Value, cancellationToken)
