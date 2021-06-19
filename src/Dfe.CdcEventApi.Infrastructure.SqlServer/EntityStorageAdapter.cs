@@ -101,23 +101,34 @@
                     $"{sqlConnection.ClientConnectionId}).");
 
                 Stopwatch stopwatch = new Stopwatch();
-                using (SqlCommand sqlCommand = this.InitCreateSqlCommand(sqlConnection, handlerScript, runIdentifier, xDocument))
+                try
                 {
-                    this.loggerProvider.Debug("Executing query...");
+                    using (SqlCommand sqlCommand = this.InitCreateSqlCommand(sqlConnection, handlerScript, runIdentifier, xDocument))
+                    {
+                        this.loggerProvider.Debug("Executing query...");
 
-                    stopwatch.Start();
+                        stopwatch.Start();
 
-                    await sqlCommand.ExecuteNonQueryAsync(cancellationToken)
-                        .ConfigureAwait(false);
+                        await sqlCommand.ExecuteNonQueryAsync(cancellationToken)
+                            .ConfigureAwait(false);
 
-                    stopwatch.Stop();
+                        TimeSpan elapsed = stopwatch.Elapsed;
 
-                    TimeSpan elapsed = stopwatch.Elapsed;
-
-                    this.loggerProvider.Info(
-                        $"Query executed with success, time elapsed: " +
-                        $"{elapsed}.");
+                        this.loggerProvider.Info(
+                            $"Query executed with success, time elapsed: " +
+                            $"{elapsed}.");
+                    }
                 }
+                catch (Exception ex)
+                {
+                    this.loggerProvider.Error($"Unexpected error during {nameof(this.StoreEntitiesAsync)} for type {dataHandlerIdentifier}; {ex.Message} {ex.InnerException?.Message??string.Empty}", ex);
+                    throw;
+                }
+                finally
+                {
+                    stopwatch.Stop();
+                }
+
             }
         }
 
@@ -134,6 +145,7 @@
             SqlCommand toReturn = null;
 
             CommandType commandType = CommandType.Text;
+
 
             this.loggerProvider.Debug(
                 $"Preparing {nameof(SqlCommand)} with query " +
