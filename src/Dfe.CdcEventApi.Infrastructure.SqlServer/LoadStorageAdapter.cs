@@ -161,7 +161,7 @@
         /// <returns>An <see cref="Task"/> .</returns>
         public async Task ExecuteExtract(DateTime runIdentifier)
         {
-            this.loggerProvider.Info($"Starting a load at {runIdentifier:O}");
+            this.loggerProvider.Info($"Starting an extract at {runIdentifier:O}");
 
             Stopwatch stopwatch = new Stopwatch();
             using (SqlConnection sqlConnection = new SqlConnection(this.rawDbConnectionString))
@@ -184,6 +184,40 @@
 
                 this.loggerProvider.Info(
                     $"Extract executed with success, time elapsed: " +
+                    $"{elapsed}.");
+            }
+        }
+
+        /// <summary>
+        /// Execute the transform process.
+        /// </summary>
+        /// <param name="runIdentifier">The date and time of the run.</param>
+        /// <returns>An <see cref="Task"/> .</returns>
+        public async Task ExecuteTransform(DateTime runIdentifier)
+        {
+            this.loggerProvider.Info($"Starting a transform at {runIdentifier:O}");
+
+            Stopwatch stopwatch = new Stopwatch();
+            using (SqlConnection sqlConnection = new SqlConnection(this.rawDbConnectionString))
+            {
+                var procedureSql = this.ExtractHandler("Execute_Transform");
+
+                this.loggerProvider.Debug($"Executing the transform.");
+
+                stopwatch.Start();
+
+                int commandTimeoutAsLongAsItTakes = 0;
+
+                await sqlConnection
+                        .ExecuteAsync(procedureSql, new { runIdentifier }, null, commandTimeoutAsLongAsItTakes)
+                        .ConfigureAwait(false);
+
+                stopwatch.Stop();
+
+                TimeSpan elapsed = stopwatch.Elapsed;
+
+                this.loggerProvider.Info(
+                    $"Transform executed with success, time elapsed: " +
                     $"{elapsed}.");
             }
         }

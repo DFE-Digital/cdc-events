@@ -75,6 +75,26 @@
         }
 
         /// <summary>
+        /// Perform transform of etl model into condition model.
+        /// </summary>
+        /// <param name="runIdentifier">
+        /// The run identifier date and time value.
+        /// </param>
+        /// <param name="cancellationToken">
+        /// The asnychronous processing cancellation token.
+        /// </param>
+        /// <returns>
+        /// A instance of a <see cref="Task"/>.
+        /// </returns>
+        public async Task ExecuteTransform(DateTime runIdentifier, CancellationToken cancellationToken)
+        {
+
+            this.loggerProvider.Debug($"Transforming loaded data, this may take a short while...");
+            await this.loadStorageAdapter.ExecuteTransform(runIdentifier)
+                                .ConfigureAwait(false);
+        }
+
+        /// <summary>
         /// Get all <see cref="Attachment"/> instances deriving from the specfied <see cref="Load "/> date and time.
         /// </summary>
         /// <param name="runIdentifier">

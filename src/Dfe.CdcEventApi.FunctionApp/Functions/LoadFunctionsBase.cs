@@ -300,10 +300,17 @@
                 await this.loadProcessor.UpdateLoadAsync(load, cancellationToken)
                         .ConfigureAwait(false);
 
-                // as its a good load, extract the data into the etl data model
-                await this.loadProcessor.ExecuteExtract(runIdentifier.Value, cancellationToken)
-                        .ConfigureAwait(false);
+                // perform extract and load only if success is indicated.
+                if (load.Status == LoadStates.Suceeeded)
+                {
+                    // as its a good load, extract the data into the etl data model
+                    await this.loadProcessor.ExecuteExtract(runIdentifier.Value, cancellationToken)
+                            .ConfigureAwait(false);
 
+                    // as its a good load, transform the data into the condition data model
+                    await this.loadProcessor.ExecuteTransform(runIdentifier.Value, cancellationToken)
+                            .ConfigureAwait(false);
+                }
             }
             else
             {

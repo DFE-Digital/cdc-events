@@ -120,7 +120,7 @@
         Task<int> GetLoadCountAsync(DateTime runIdentifier, CancellationToken cancellationToken);
 
         /// <summary>
-        /// PErforms end of run processing to extract the data into the ETL model.
+        /// Performs end of run processing to extract the data into the ETL model.
         /// </summary>
         /// <param name="runIdentifier">
         /// The date and time.
@@ -129,8 +129,22 @@
         /// The asynchronous <see cref="CancellationToken"/>.
         /// </param>
         /// <returns>
-        /// A <see cref="Task"/> wrapping an <see cref="int"/>.
+        /// A <see cref="Task"/>.
         /// </returns>
         Task ExecuteExtract(DateTime runIdentifier, CancellationToken cancellationToken);
+
+        /// <summary>
+        /// Performs the transformation process from etl model into condition model.
+        /// </summary>
+        /// <param name="runIdentifier">
+        /// The date and time.
+        /// </param>
+        /// <param name="cancellationToken">
+        /// The asynchronous <see cref="CancellationToken"/>.
+        /// </param>
+        /// <returns>
+        /// A <see cref="Task"/>.
+        /// </returns>
+        Task ExecuteTransform(DateTime runIdentifier, CancellationToken cancellationToken);
     }
 }
