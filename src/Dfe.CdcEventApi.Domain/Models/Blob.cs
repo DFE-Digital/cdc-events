@@ -1,4 +1,6 @@
-﻿namespace Dfe.CdcEventApi.Domain.Models
+﻿using System;
+
+namespace Dfe.CdcEventApi.Domain.Models
 {
     /// <summary>
     /// Represents an individual <c>blob</c> entity.
@@ -14,5 +16,10 @@
         /// Gets or sets the path.
         /// </summary>
         public string Path { get; set; }
+
+        /// <summary>
+        /// Gets or sets the Obained date and time.
+        /// </summary>
+        public DateTime Obtained {  get;set;}
     }
 }
