@@ -121,34 +121,6 @@
         "definition": {
           "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
           "actions": {
-            "Check_Attachments_Finished_OK": {
-              "actions": {
-                "Set_runStatus_to_Succeeded": {
-                  "inputs": {
-                    "name": "runStatus",
-                    "value": 32
-                  },
-                  "runAfter": {},
-                  "type": "SetVariable"
-                }
-              },
-              "expression": {
-                "and": [
-                  {
-                    "equals": [
-                      "@variables('continueAttachments')",
-                      true
-                    ]
-                  }
-                ]
-              },
-              "runAfter": {
-                "For_each_attachment": [
-                  "Succeeded"
-                ]
-              },
-              "type": "If"
-            },
             "Finish_load": {
               "inputs": {
                 "headers": {
@@ -159,10 +131,10 @@
                   "X-Run-Status": "@{variables('runStatus')}"
                 },
                 "method": "PUT",
-                "uri": "[concat(parameters('cdcEventsApiBaseUri'), '/load')]"
+                "uri": "https://dev-api-customerengagement.platform.education.gov.uk/v1/cdc-events/load"
               },
               "runAfter": {
-                "Check_Attachments_Finished_OK": [
+                "Set_runStatus_to_Succeeded": [
                   "Succeeded"
                 ]
               },
@@ -188,7 +160,7 @@
                             "retryPolicy": {
                               "type": "none"
                             },
-                            "uri": "[concat(parameters('cdcEventsApiBaseUri'), '/@{items(', variables('singleQuote'), 'For_each_ApiEntitiesToPull', variables('singleQuote'), ')}')]"
+                            "uri": "https://dev-api-customerengagement.platform.education.gov.uk/v1/cdc-events/@{items('For_each_ApiEntitiesToPull')}"
                           },
                           "runAfter": {},
                           "type": "Http"
@@ -277,7 +249,7 @@
                         "retryPolicy": {
                           "type": "none"
                         },
-                        "uri": "[concat(variables('dataPathUri'), '/@{items(', variables('singleQuote'), 'For_each_ApiEntitiesToPull', variables('singleQuote'), ')}')]"
+                        "uri": "https://uatcdc2.kykloud.com/api/data/@{items('For_each_ApiEntitiesToPull')}"
                       },
                       "runAfter": {},
                       "type": "Http"
@@ -366,11 +338,8 @@
                   "inputs": {
                     "body": [
                       {
-                        "BlobData": "@body('Get_blob')",
                         "BlobKey": "@items('For_each_attachment')['BlobKey']",
-                        "MimeType": "@items('For_each_attachment')['MimeType']",
-                        "ParentObjectId": "@items('For_each_attachment')['ParentObjectId']",
-                        "ParentObjectType": "@items('For_each_attachment')['ParentObjectType']"
+                        "Path": "@body('Create_file')?['FileLocator']"
                       }
                     ],
                     "headers": {
@@ -380,7 +349,38 @@
                       "X-Run-Identifier": "@variables('nowDateTime')"
                     },
                     "method": "POST",
-                    "uri": "[concat(parameters('cdcEventsApiBaseUri'), '/blobs')]"
+                    "uri": "https://dev-api-customerengagement.platform.education.gov.uk/v1/cdc-events/blobs"
+                  },
+                  "runAfter": {
+                    "Create_file": [
+                      "Succeeded"
+                    ]
+                  },
+                  "runtimeConfiguration": {
+                    "contentTransfer": {
+                      "transferMode": "Chunked"
+                    }
+                  },
+                  "type": "Http"
+                },
+                "Create_file": {
+                  "inputs": {
+                    "body": "@body('Get_blob')",
+                    "headers": {
+                      "ReadFileMetadataFromServer": true
+                    },
+                    "host": {
+                      "connection": {
+                        "name": "@parameters('$connections')['azurefile']['connectionId']"
+                      }
+                    },
+                    "method": "post",
+                    "path": "/datasets/default/files",
+                    "queries": {
+                      "folderPath": "/cdcdocuments/@{items('For_each_attachment')['Folder']}/evidence",
+                      "name": "@{items('For_each_attachment')['BlobKey']}@{items('For_each_attachment')['Extension']}",
+                      "queryParametersSingleEncoded": true
+                    }
                   },
                   "runAfter": {
                     "While_Continue_Attachments": [
@@ -392,7 +392,7 @@
                       "transferMode": "Chunked"
                     }
                   },
-                  "type": "Http"
+                  "type": "ApiConnection"
                 },
                 "While_Continue_Attachments": {
                   "actions": {
@@ -404,10 +404,11 @@
                         "method": "GET",
                         "queries": {
                           "AsAtachment": "true",
+                          "AsAttachment": "true",
                           "BlobKey": "@items('For_each_attachment')['BlobKey']",
                           "SessionId": "@variables('AttachmentsSessionId')"
                         },
-                        "uri": "[concat(variables('dataPathUri'), '/blobs')]"
+                        "uri": "https://uatcdc2.kykloud.com/api/data/blobs"
                       },
                       "runAfter": {},
                       "type": "Http"
@@ -451,7 +452,7 @@
                                     "Email": "@parameters('KycloudApiEmail')",
                                     "Password": "@body('Parse_kycloud-api-password')?['value']"
                                   },
-                                  "uri": "[variables('loginUri')]"
+                                  "uri": "https://uatcdc2.kykloud.com/api/user/login"
                                 },
                                 "runAfter": {},
                                 "type": "Http"
@@ -545,10 +546,10 @@
                   "X-Run-Identifier": "@variables('nowDateTime')"
                 },
                 "method": "GET",
-                "uri": "[concat(parameters('cdcEventsApiBaseUri'), '/attachments')]"
+                "uri": "https://dev-api-customerengagement.platform.education.gov.uk/v1/cdc-events/attachments"
               },
               "runAfter": {
-                "Update_load_status_to_Attachments": [
+                "Finish_load": [
                   "Succeeded"
                 ]
               },
@@ -661,7 +662,7 @@
                       "Email": "@parameters('KycloudApiEmail')",
                       "Password": "@body('Parse_kycloud-api-password')?['value']"
                     },
-                    "uri": "[variables('loginUri')]"
+                    "uri": "https://uatcdc2.kykloud.com/api/user/login"
                   },
                   "runAfter": {},
                   "type": "Http"
@@ -676,94 +677,67 @@
             },
             "Get_and_Parse_Secrets_from_KeyVault": {
               "actions": {
-                "Get_kycloud-api-token_from_KeyVault": {
-                  "type": "Http",
-                  "inputs": {
-                    "authentication": {
-                      "audience": "https://vault.azure.net",
-                      "type": "ManagedServiceIdentity"
-                    },
-                    "method": "GET",
-                    "uri": "[concat(reference(variables('keyVaultSecretKycloudApiToken'), '2019-09-01').secretUriWithVersion, '?api-version=2016-10-01')]"
-                  }
-                },
-                "Parse_kycloud-api-token": {
-                  "runAfter": {
-                    "Get_kycloud-api-token_from_KeyVault": [
-                      "Succeeded"
-                    ]
-                  },
-                  "type": "ParseJson",
-                  "inputs": {
-                    "content": "@body('Get_kycloud-api-token_from_KeyVault')",
-                    "schema": {
-                      "properties": {
-                        "value": {
-                          "type": "string"
-                        }
-                      },
-                      "type": "object"
-                    }
-                  }
-                },
-                "Get_kycloud-api-password_from_KeyVault": {
-                  "runAfter": {
-                    "Parse_kycloud-api-token": [
-                      "Succeeded"
-                    ]
-                  },
-                  "type": "Http",
-                  "inputs": {
-                    "authentication": {
-                      "audience": "https://vault.azure.net",
-                      "type": "ManagedServiceIdentity"
-                    },
-                    "method": "GET",
-                    "uri": "[concat(reference(variables('keyVaultSecretKycloudApiPassword'), '2019-09-01').secretUriWithVersion, '?api-version=2016-10-01')]"
-                  }
-                },
-                "Parse_kycloud-api-password": {
-                  "runAfter": {
-                    "Get_kycloud-api-password_from_KeyVault": [
-                      "Succeeded"
-                    ]
-                  },
-                  "type": "ParseJson",
-                  "inputs": {
-                    "content": "@body('Get_kycloud-api-password_from_KeyVault')",
-                    "schema": {
-                      "properties": {
-                        "value": {
-                          "type": "string"
-                        }
-                      },
-                      "type": "object"
-                    }
-                  }
-                },
                 "Get_cdc-events-subscription-key": {
+                  "inputs": {
+                    "authentication": {
+                      "audience": "https://vault.azure.net",
+                      "type": "ManagedServiceIdentity"
+                    },
+                    "method": "GET",
+                    "uri": "https://s153d01-kv-01.vault.azure.net/secrets/cdc-events-subscription-key/9fd022fecaac4ff2a7c3c6adb980a428?api-version=2016-10-01"
+                  },
                   "runAfter": {
                     "Parse_kycloud-api-password": [
                       "Succeeded"
                     ]
                   },
-                  "type": "Http",
+                  "type": "Http"
+                },
+                "Get_cdc-events-token-request-payload": {
                   "inputs": {
                     "authentication": {
                       "audience": "https://vault.azure.net",
                       "type": "ManagedServiceIdentity"
                     },
                     "method": "GET",
-                    "uri": "[concat(reference(variables('keyVaultSecretCdcEventsSubscriptionKey'), '2019-09-01').secretUriWithVersion, '?api-version=2016-10-01')]"
-                  }
-                },
-                "Parse_cdc-events-subscription-key": {
+                    "uri": "https://s153d01-kv-01.vault.azure.net/secrets/cdc-events-token-request-payload/d53b247212ea4367961ec3ebecbc98ee?api-version=2016-10-01"
+                  },
                   "runAfter": {
-                    "Get_cdc-events-subscription-key": [
+                    "Parse_cdc-events-subscription-key": [
                       "Succeeded"
                     ]
                   },
-                  "type": "ParseJson",
+                  "type": "Http"
+                },
+                "Get_kycloud-api-password_from_KeyVault": {
+                  "inputs": {
+                    "authentication": {
+                      "audience": "https://vault.azure.net",
+                      "type": "ManagedServiceIdentity"
+                    },
+                    "method": "GET",
+                    "uri": "https://s153d01-kv-01.vault.azure.net/secrets/kycloud-api-password/fbecc50e32e243379e76941dc37085b7?api-version=2016-10-01"
+                  },
+                  "runAfter": {
+                    "Parse_kycloud-api-token": [
+                      "Succeeded"
+                    ]
+                  },
+                  "type": "Http"
+                },
+                "Get_kycloud-api-token_from_KeyVault": {
+                  "inputs": {
+                    "authentication": {
+                      "audience": "https://vault.azure.net",
+                      "type": "ManagedServiceIdentity"
+                    },
+                    "method": "GET",
+                    "uri": "https://s153d01-kv-01.vault.azure.net/secrets/kycloud-api-token/e2bac005ae6a4486827dfebdabadb7d8?api-version=2016-10-01"
+                  },
+                  "runAfter": {},
+                  "type": "Http"
+                },
+                "Parse_cdc-events-subscription-key": {
                   "inputs": {
                     "content": "@body('Get_cdc-events-subscription-key')",
                     "schema": {
@@ -774,23 +748,13 @@
                       },
                       "type": "object"
                     }
-                  }
-                },
-                "Get_cdc-events-token-request-payload": {
+                  },
                   "runAfter": {
-                    "Parse_cdc-events-subscription-key": [
+                    "Get_cdc-events-subscription-key": [
                       "Succeeded"
                     ]
                   },
-                  "type": "Http",
-                  "inputs": {
-                    "authentication": {
-                      "audience": "https://vault.azure.net",
-                      "type": "ManagedServiceIdentity"
-                    },
-                    "method": "GET",
-                    "uri": "[concat(reference(variables('keyVaultSecretCdcEventsTokenRequestPayload'), '2019-09-01').secretUriWithVersion, '?api-version=2016-10-01')]"
-                  }
+                  "type": "ParseJson"
                 },
                 "Parse_cdc-events-token-request-payload": {
                   "inputs": {
@@ -810,8 +774,47 @@
                     ]
                   },
                   "type": "ParseJson"
+                },
+                "Parse_kycloud-api-password": {
+                  "inputs": {
+                    "content": "@body('Get_kycloud-api-password_from_KeyVault')",
+                    "schema": {
+                      "properties": {
+                        "value": {
+                          "type": "string"
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "runAfter": {
+                    "Get_kycloud-api-password_from_KeyVault": [
+                      "Succeeded"
+                    ]
+                  },
+                  "type": "ParseJson"
+                },
+                "Parse_kycloud-api-token": {
+                  "inputs": {
+                    "content": "@body('Get_kycloud-api-token_from_KeyVault')",
+                    "schema": {
+                      "properties": {
+                        "value": {
+                          "type": "string"
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "runAfter": {
+                    "Get_kycloud-api-token_from_KeyVault": [
+                      "Succeeded"
+                    ]
+                  },
+                  "type": "ParseJson"
                 }
               },
+              "runAfter": {},
               "type": "Scope"
             },
             "Get_sessionId": {
@@ -863,7 +866,7 @@
                       "Email": "@parameters('KycloudApiEmail')",
                       "Password": "@body('Parse_kycloud-api-password')?['value']"
                     },
-                    "uri": "[variables('loginUri')]"
+                    "uri": "https://uatcdc2.kykloud.com/api/user/login"
                   },
                   "runAfter": {},
                   "type": "Http"
@@ -1056,7 +1059,7 @@
                       "Content-Type": "application/x-www-form-urlencoded"
                     },
                     "method": "POST",
-                    "uri": "[parameters('internalOAuthTokenEndpoint')]"
+                    "uri": "https://login.microsoftonline.com/9c7d9dd3-840c-4b3f-818e-552865082e16/oauth2/token"
                   },
                   "runAfter": {},
                   "type": "Http"
@@ -1092,30 +1095,26 @@
               "inputs": {
                 "content": "@body('Get_Attachments')",
                 "schema": {
-                  "type": "array",
                   "items": {
-                    "type": "object",
                     "properties": {
                       "BlobKey": {
                         "type": "string"
                       },
-                      "MimeType": {
+                      "Extension": {
                         "type": "string"
                       },
-                      "ParentObjectType": {
-                        "type": "string"
-                      },
-                      "ParentObjectId": {
+                      "Folder": {
                         "type": "string"
                       }
                     },
                     "required": [
                       "BlobKey",
-                      "MimeType",
-                      "ParentObjectType",
-                      "ParentObjectId"
-                    ]
-                  }
+                      "Folder",
+                      "Extension"
+                    ],
+                    "type": "object"
+                  },
+                  "type": "array"
                 }
               },
               "runAfter": {
@@ -1149,18 +1148,6 @@
               },
               "type": "SetVariable"
             },
-            "Set_runStatus_to_Attachments": {
-              "inputs": {
-                "name": "runStatus",
-                "value": 16
-              },
-              "runAfter": {
-                "For_each_ApiEntitiesToPull": [
-                  "Succeeded"
-                ]
-              },
-              "type": "SetVariable"
-            },
             "Set_runStatus_to_Entities": {
               "inputs": {
                 "name": "runStatus",
@@ -1185,6 +1172,18 @@
               },
               "type": "SetVariable"
             },
+            "Set_runStatus_to_Succeeded": {
+              "inputs": {
+                "name": "runStatus",
+                "value": 32
+              },
+              "runAfter": {
+                "For_each_ApiEntitiesToPull": [
+                  "Succeeded"
+                ]
+              },
+              "type": "SetVariable"
+            },
             "Start_load_as_Initialising": {
               "inputs": {
                 "headers": {
@@ -1194,7 +1193,7 @@
                   "X-Run-Identifier": "@variables('nowDateTime')"
                 },
                 "method": "POST",
-                "uri": "[concat(parameters('cdcEventsApiBaseUri'), '/load')]"
+                "uri": "https://dev-api-customerengagement.platform.education.gov.uk/v1/cdc-events/load"
               },
               "runAfter": {
                 "Initialise_nowDateTime": [
@@ -1213,29 +1212,10 @@
                   "X-Run-Status": "@{variables('runStatus')}"
                 },
                 "method": "PATCH",
-                "uri": "[concat(parameters('cdcEventsApiBaseUri'), '/load')]"
+                "uri": "https://dev-api-customerengagement.platform.education.gov.uk/v1/cdc-events/load"
               },
               "runAfter": {
                 "Set_runStatus_to_Entities": [
-                  "Succeeded"
-                ]
-              },
-              "type": "Http"
-            },
-            "Update_load_status_to_Attachments": {
-              "inputs": {
-                "headers": {
-                  "Authorization": "Bearer @{body('Parse_CDC_Events_OAuth_Token')?['access_token']}",
-                  "Content-Type": "application/json",
-                  "Ocp-Apim-Subscription-Key": "@body('Parse_cdc-events-subscription-key')?['value']",
-                  "X-Run-Identifier": "@variables('nowDateTime')",
-                  "X-Run-Status": "@{variables('runStatus')}"
-                },
-                "method": "PATCH",
-                "uri": "[concat(parameters('cdcEventsApiBaseUri'), '/load')]"
-              },
-              "runAfter": {
-                "Set_runStatus_to_Attachments": [
                   "Succeeded"
                 ]
               },
@@ -1251,7 +1231,7 @@
                   "X-Run-Status": "@{variables('runStatus')}"
                 },
                 "method": "PATCH",
-                "uri": "[concat(parameters('cdcEventsApiBaseUri'), '/load')]"
+                "uri": "https://dev-api-customerengagement.platform.education.gov.uk/v1/cdc-events/load"
               },
               "runAfter": {
                 "Set_runStatus_Login": [
@@ -1270,7 +1250,7 @@
                   "X-Run-Status": "@{variables('runStatus')}"
                 },
                 "method": "PATCH",
-                "uri": "[concat(parameters('cdcEventsApiBaseUri'), '/load')]"
+                "uri": "https://dev-api-customerengagement.platform.education.gov.uk/v1/cdc-events/load"
               },
               "runAfter": {
                 "Set_runStatus_to_Preparing": [
@@ -1282,21 +1262,19 @@
           },
           "contentVersion": "1.0.0.0",
           "parameters": {
+            "$connections": {
+              "defaultValue": {},
+              "type": "Object"
+            },
             "ApiEntitiesToPull": {
               "defaultValue": [
-                "sites",
-                "surveysectionelements",
-                "portfolios",
                 "users",
-                "deleted",
-                "surveylots",
-                "activities",
-                "actuals",
-                "oncosts",
-                "plans",
-                "spends",
+                "portfolios",
+                "sites",
+                "surveys",
                 "surveysections",
-                "surveys"
+                "surveysectionelements",
+                "deleted"
               ],
               "type": "Array"
             },
@@ -1308,19 +1286,26 @@
           "triggers": {
             "Recurrence": {
               "recurrence": {
-                "frequency": "Day",
+                "frequency": "Month",
                 "interval": 1,
-                "schedule": {
-                  "hours": [
-                    "16"
-                  ]
-                }
+                "startTime": "2021-07-01T12:00:00.00Z",
+                "timeZone": "UTC"
               },
               "type": "Recurrence"
             }
           }
         },
-        "parameters": {}
+        "parameters": {
+          "$connections": {
+            "value": {
+              "azurefile": {
+                "connectionId": "/subscriptions/e9355f32-be6c-4dd8-b4e1-60c3ee7e73c0/resourceGroups/s153d01-cdcaeg/providers/Microsoft.Web/connections/azurefile-4",
+                "connectionName": "azurefile-4",
+                "id": "/subscriptions/e9355f32-be6c-4dd8-b4e1-60c3ee7e73c0/providers/Microsoft.Web/locations/westeurope/managedApis/azurefile"
+              }
+            }
+          }
+        }
       }
     }
   ],
