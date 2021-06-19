@@ -8,7 +8,7 @@
     /// </summary>
     [Flags]
 #pragma warning disable CA1028 // Enum Storage should be Int32
-    public enum LoadStates : short
+    public enum LoadStates : int
 #pragma warning restore CA1028 // Enum Storage should be Int32
     {
         /// <summary>

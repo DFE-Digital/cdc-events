@@ -388,12 +388,12 @@
                     if (
                             status.Value < (short)LoadStates.Initialising
                             ||
-                            status.Value > (short)LoadStates.Suceeeded)
+                            status.Value > (short)LoadStates.Finished)
                     {
                         this.loggerProvider.Error(
                                 $"An invalid {nameof(status)} was supplied. The " +
                                 $"{nameof(status)} must be " +
-                                $"specified as a valid {nameof(Int16)} value in the range 1..32.");
+                                $"specified as a valid {nameof(Int16)} value in the range 1..64.");
                         return null;
                     }
                 }
