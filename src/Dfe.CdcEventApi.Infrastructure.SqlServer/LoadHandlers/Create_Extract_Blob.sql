@@ -5,4 +5,4 @@ INSERT INTO [etl].[Blob]
 SELECT
     @BlobKey ,
     @Path,
-    @RunIdentifier
+    @Obtained
