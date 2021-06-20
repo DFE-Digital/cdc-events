@@ -1330,15 +1330,7 @@
           }
         },
         "parameters": {
-          "$connections": {
-            "value": {
-              "azurefile": {
-                "connectionId": "/subscriptions/e9355f32-be6c-4dd8-b4e1-60c3ee7e73c0/resourceGroups/s153d01-cdcaeg/providers/Microsoft.Web/connections/azurefile-4",
-                "connectionName": "azurefile-4",
-                "id": "/subscriptions/e9355f32-be6c-4dd8-b4e1-60c3ee7e73c0/providers/Microsoft.Web/locations/westeurope/managedApis/azurefile"
-              }
-            }
-          }
+          
         }
       }
     }
