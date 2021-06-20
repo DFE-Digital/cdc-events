@@ -97,7 +97,6 @@
         /// </returns>
         Task<IEnumerable<Attachment>> GetAttachments(DateTime runIdentifier);
 
-
         /// <summary>
         /// performs the transform operation from etl model to condition model.
         /// </summary>

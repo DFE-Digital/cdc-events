@@ -7,9 +7,7 @@
     /// An enumeration of possible Load states.
     /// </summary>
     [Flags]
-#pragma warning disable CA1028 // Enum Storage should be Int32
     public enum LoadStates : int
-#pragma warning restore CA1028 // Enum Storage should be Int32
     {
         /// <summary>
         /// No state has yet been set as nothing has happend.
@@ -46,7 +44,6 @@
         /// </summary>
         [Description("Succeded")]
         Suceeeded = 32,
-
 
         /// <summary>
         /// The transform has finished.

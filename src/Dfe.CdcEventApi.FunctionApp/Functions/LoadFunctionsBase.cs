@@ -104,7 +104,6 @@
 
                     // also return the previous run time
                     toReturn.Headers.Add(HeaderNameSince, $"{sinceDateTime:O}");
-
                 }
                 catch (MissingLoadHandlerFileException exception)
                 {

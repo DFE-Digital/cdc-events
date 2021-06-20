@@ -4,7 +4,7 @@ USING (
 		@BlobKey AS [BlobKey],    
 		@Obtained as [Obtained]
 ) as source
-ON [etl].[Blob].[Blobkey] = source.Blobkey
+ON target.[Blobkey] = source.Blobkey
 WHEN MATCHED THEN
 	UPDATE SET 
 			[Obtained] = source.[Obtained]

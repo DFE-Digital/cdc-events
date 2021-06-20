@@ -34,7 +34,7 @@
         /// <param name="entityStorageAdapterSettingsProvider">
         /// An instance of type
         /// <see cref="IEntityStorageAdapterSettingsProvider" />.
-        /// </param>       
+        /// </param>
         /// <param name="loggerProvider">
         /// An instance of type <see cref="ILoggerProvider" />.
         /// </param>
@@ -73,7 +73,6 @@
         /// An <see cref="Task"/>.</returns>
         public async Task CreateBlobsAsync(DateTime runIdentifier, IEnumerable<Blob> blobs)
         {
-
             if (blobs == null)
             {
                 throw new ArgumentNullException(nameof(blobs));

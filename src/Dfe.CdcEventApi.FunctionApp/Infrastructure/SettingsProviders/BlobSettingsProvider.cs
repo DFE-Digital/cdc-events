@@ -3,9 +3,11 @@
     using System;
     using Dfe.CdcEventApi.Domain.Definitions.SettingsProviders;
 
-    public class BlobSettingsProvider: IBlobSettingsProvider
+    /// <summary>
+    /// Implements <see cref="IBlobSettingsProvider"/>.
+    /// </summary>
+    public class BlobSettingsProvider : IBlobSettingsProvider
     {
-
         /// <inheritdoc />
         public string AttachmentUrlPrefix
         {

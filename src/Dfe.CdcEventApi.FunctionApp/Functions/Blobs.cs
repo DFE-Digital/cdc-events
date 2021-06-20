@@ -6,6 +6,7 @@
     using Dfe.CdcEventApi.Application.Definitions;
     using Dfe.CdcEventApi.Application.Models;
     using Dfe.CdcEventApi.Domain.Definitions;
+    using Dfe.CdcEventApi.Domain.Definitions.SettingsProviders;
     using Dfe.CdcEventApi.Domain.Models;
     using Microsoft.AspNetCore.Http;
     using Microsoft.Azure.WebJobs;
@@ -22,13 +23,17 @@
         /// <param name="blobProcessor">
         /// An instance of type <see cref="IBlobProcessor" />.
         /// </param>
+        /// <param name="blobSettingsProvider">
+        /// An instance of type <see cref="IBlobSettingsProvider" />.
+        /// </param>
         /// <param name="loggerProvider">
         /// An instance of type <see cref="ILoggerProvider" />.
         /// </param>
         public Blobs(
             IBlobProcessor blobProcessor,
+            IBlobSettingsProvider blobSettingsProvider,
             ILoggerProvider loggerProvider)
-            : base(blobProcessor, loggerProvider)
+            : base(blobProcessor, blobSettingsProvider, loggerProvider)
         {
             // Nothing for now.
         }
