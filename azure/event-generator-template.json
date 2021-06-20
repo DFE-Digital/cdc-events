@@ -358,7 +358,8 @@
                     "body": [
                       {
                         "BlobKey": "@items('For_each_attachment')['BlobKey']",
-                        "Path": "@body('Create_file')?['FileLocator']"
+                        "Obtained": "@variables('nowDateTime')",
+                        "Path": "@body('Create_file')?['Path']"
                       }
                     ],
                     "headers": {
