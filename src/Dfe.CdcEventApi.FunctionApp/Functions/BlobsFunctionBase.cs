@@ -10,8 +10,8 @@
     using System.Threading.Tasks;
     using Dfe.CdcEventApi.Application.Definitions;
     using Dfe.CdcEventApi.Application.Exceptions;
-    using Dfe.CdcEventApi.Application.Models;
     using Dfe.CdcEventApi.Domain.Definitions;
+    using Dfe.CdcEventApi.Domain.Definitions.SettingsProviders;
     using Dfe.CdcEventApi.Domain.Exceptions;
     using Dfe.CdcEventApi.Domain.Models;
     using Microsoft.AspNetCore.Http;
@@ -24,7 +24,7 @@
     public abstract class BlobsFunctionBase
     {
         private const string HeaderNameRunIdentifier = "X-Run-Identifier";
-
+        private readonly IBlobSettingsProvider blobSettingsprovider;
         private readonly IBlobProcessor blobProcessor;
         private readonly ILoggerProvider loggerProvider;
 
@@ -35,13 +35,18 @@
         /// <param name="blobProcessor">
         /// An instance of type <see cref="IBlobProcessor" />.
         /// </param>
+        /// <param name="blobSettingsProvider">
+        /// An instance of <see cref="IBlobSettingsProvider"/>.
+        /// </param>
         /// <param name="loggerProvider">
         /// An instance of type <see cref="ILoggerProvider" />.
         /// </param>
         public BlobsFunctionBase(
             IBlobProcessor blobProcessor,
+            IBlobSettingsProvider blobSettingsProvider,
             ILoggerProvider loggerProvider)
         {
+            this.blobSettingsprovider = blobSettingsProvider;
             this.blobProcessor = blobProcessor;
             this.loggerProvider = loggerProvider;
         }
@@ -122,6 +127,12 @@
                         $"of {nameof(IEnumerable<Blob>)} instance(s)...");
 
                     var models = JsonConvert.DeserializeObject<IEnumerable<Blob>>(body);
+
+                    var environmentFileShareBaseUri = new Uri(this.blobSettingsprovider.AttachmentUrlPrefix);
+                    foreach (var model in models)
+                    {
+                        model.Url = new Uri(environmentFileShareBaseUri, model.Path).ToString();
+                    }
 
                     this.loggerProvider.Info(
                         $"{models.Count()} {nameof(Blob)} instance(s) " +

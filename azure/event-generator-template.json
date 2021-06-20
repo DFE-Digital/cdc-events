@@ -358,7 +358,9 @@
                     "body": [
                       {
                         "BlobKey": "@items('For_each_attachment')['BlobKey']",
-                        "Path": "@body('Create_file')?['FileLocator']"
+                        "Obtained": "@variables('nowDateTime')",
+                        "Path": "@body('Create_file')?['Path']",
+                        "SiteUniqueId": "@items('For_each_attachment')?['SiteUniqueId']"
                       }
                     ],
                     "headers": {
@@ -1121,6 +1123,9 @@
                         "type": "string"
                       },
                       "Folder": {
+                        "type": "string"
+                      },
+                      "SiteUniqueId": {
                         "type": "string"
                       }
                     },

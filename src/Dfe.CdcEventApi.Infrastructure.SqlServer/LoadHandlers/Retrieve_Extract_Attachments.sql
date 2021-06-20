@@ -1,4 +1,6 @@
-SELECT [Blobkey]
+SELECT DISTINCT 
+       [SiteUniqueId]
+      ,[Blobkey]
       ,[Folder]
       ,[Extension]
   FROM [etl].[Extract-Attachments]

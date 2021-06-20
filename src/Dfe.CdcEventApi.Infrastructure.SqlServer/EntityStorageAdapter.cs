@@ -121,14 +121,13 @@
                 }
                 catch (Exception ex)
                 {
-                    this.loggerProvider.Error($"Unexpected error during {nameof(this.StoreEntitiesAsync)} for type {dataHandlerIdentifier}; {ex.Message} {ex.InnerException?.Message??string.Empty}", ex);
+                    this.loggerProvider.Error($"Unexpected error during {nameof(this.StoreEntitiesAsync)} for type {dataHandlerIdentifier}; {ex.Message} {ex.InnerException?.Message ?? string.Empty}", ex);
                     throw;
                 }
                 finally
                 {
                     stopwatch.Stop();
                 }
-
             }
         }
 
@@ -145,7 +144,6 @@
             SqlCommand toReturn = null;
 
             CommandType commandType = CommandType.Text;
-
 
             this.loggerProvider.Debug(
                 $"Preparing {nameof(SqlCommand)} with query " +
