@@ -26,7 +26,7 @@ SELECT
 		GROUP BY 
 			[Load_DateTime], [Status], [Count]
 		HAVING
-			[Status] = 32
+			[Status] >= 32
 		ORDER BY
 			[Load_DateTime] DESC
 	) 
