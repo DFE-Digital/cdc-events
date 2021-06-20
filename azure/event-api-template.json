@@ -209,7 +209,7 @@
 
             {
               "name": "AttachmentUrlPrefix",
-              "value": "[concat('https://', variables('appNamePrefix'), 'cdcdocssa01.file.core.windows.net/cdcdocuments' )]"
+              "value": "[concat('https://', variables('namePrefix'), 'cdcdocssa01.file.core.windows.net/cdcdocuments' )]"
             }
 
           ],
