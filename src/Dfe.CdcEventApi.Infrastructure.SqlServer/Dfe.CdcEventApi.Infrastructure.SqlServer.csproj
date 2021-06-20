@@ -39,6 +39,7 @@
     <None Remove="LoadHandlers\Execute_Transform.sql" />
     <None Remove="LoadHandlers\Retrieve_Extract_Attachments.sql" />
     <None Remove="LoadHandlers\Retrieve_Raw_LoadCount.sql" />
+    <None Remove="LoadHandlers\Update_Extract_Attachment-Uses.sql" />
     <None Remove="LoadHandlers\Update_Raw_LoadStatus.sql" />
   </ItemGroup>
 
@@ -69,6 +70,7 @@
 
   <ItemGroup>
     <EmbeddedResource Include="LoadHandlers\Execute_Transform.sql" />
+    <EmbeddedResource Include="LoadHandlers\Update_Extract_Attachment-Uses.sql" />
     <EmbeddedResource Include="LoadHandlers\Retrieve_Raw_LoadCount.sql" />
     <EmbeddedResource Include="LoadHandlers\Retrieve_Extract_Attachments.sql" />
     <EmbeddedResource Include="LoadHandlers\Retrieve_Raw_LoadNotificationTemplate.sql" />

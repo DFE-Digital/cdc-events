@@ -51,6 +51,8 @@
         {
             serviceCollection
                 .AddSingleton<IEntityStorageAdapterSettingsProvider, EntityStorageAdapterSettingsProvider>();
+            serviceCollection
+               .AddSingleton<IBlobSettingsProvider, BlobSettingsProvider>();
         }
 
         private static void AddProcessors(IServiceCollection serviceCollection)

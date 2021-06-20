@@ -73,6 +73,12 @@
         /// An <see cref="Task"/>.</returns>
         public async Task CreateBlobsAsync(DateTime runIdentifier, IEnumerable<Blob> blobs)
         {
+
+            if (blobs == null)
+            {
+                throw new ArgumentNullException(nameof(blobs));
+            }
+
             this.loggerProvider.Info($"Starting a blob load at {runIdentifier:O}");
 
             this.loggerProvider.Info($"Converting blob records to storage blob records.");
@@ -81,6 +87,7 @@
             using (SqlConnection sqlConnection = new SqlConnection(this.rawDbConnectionString))
             {
                 var insertSql = this.ExtractHandler("Create_Extract_Blob");
+                var updateSql = this.ExtractHandler("Update_Extract_Attachment-Uses");
                 this.loggerProvider.Debug($"Creating Storage Blob records.");
 
                 stopwatch.Start();
@@ -88,6 +95,14 @@
                 await sqlConnection
                         .ExecuteAsync(insertSql, blobs)
                         .ConfigureAwait(false);
+
+                // now update uses of this blob to have the correct URL
+                foreach (var blob in blobs)
+                {
+                    await sqlConnection
+                        .ExecuteAsync(updateSql, blob)
+                        .ConfigureAwait(false);
+                }
 
                 stopwatch.Stop();
 
