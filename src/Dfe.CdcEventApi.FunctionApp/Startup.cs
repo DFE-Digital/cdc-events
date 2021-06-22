@@ -22,8 +22,7 @@
     public class Startup : FunctionsStartup
     {
         /// <inheritdoc />
-        public override void Configure(
-            IFunctionsHostBuilder functionsHostBuilder)
+        public override void Configure(IFunctionsHostBuilder functionsHostBuilder)
         {
             if (functionsHostBuilder == null)
             {

@@ -358,9 +358,13 @@
                     "body": [
                       {
                         "BlobKey": "@items('For_each_attachment')['BlobKey']",
-                        "Obtained": "@variables('nowDateTime')",
-                        "Path": "@body('Create_file')?['Path']",
-                        "SiteUniqueId": "@items('For_each_attachment')?['SiteUniqueId']"
+                        "BlobData": "@body('Get_blob')",
+                        "BlobMimeType": "@items('For_each_attachment')['MimeType']",
+                        "BlobShare": "/cdcdocuments",
+                        "BlobFolder": "/@{items('For_each_attachment')['Folder']}",
+                        "BlobFilename": "@{items('For_each_attachment')['BlobKey']}@{items('For_each_attachment')['Extension']}",
+                        "BlobSiteUniqueId": "@items('For_each_attachment')?['SiteUniqueId']",
+                        "BlobObtained": "@variables('nowDateTime')"
                       }
                     ],
                     "headers": {
@@ -373,37 +377,6 @@
                     "uri": "[concat(parameters('cdcEventsApiBaseUri'), '/blobs')]"
                   },
                   "runAfter": {
-                    "Create_file": [
-                      "Succeeded"
-                    ]
-                  },
-                  "runtimeConfiguration": {
-                    "contentTransfer": {
-                      "transferMode": "Chunked"
-                    }
-                  },
-                  "type": "Http"
-                },
-                "Create_file": {
-                  "inputs": {
-                    "body": "@body('Get_blob')",
-                    "headers": {
-                      "ReadFileMetadataFromServer": true
-                    },
-                    "host": {
-                      "connection": {
-                        "name": "@parameters('$connections')['azurefile']['connectionId']"
-                      }
-                    },
-                    "method": "post",
-                    "path": "/datasets/default/files",
-                    "queries": {
-                      "folderPath": "/cdcdocuments/@{items('For_each_attachment')['Folder']}/evidence",
-                      "name": "@{items('For_each_attachment')['BlobKey']}@{items('For_each_attachment')['Extension']}",
-                      "queryParametersSingleEncoded": true
-                    }
-                  },
-                  "runAfter": {
                     "While_Continue_Attachments": [
                       "Succeeded"
                     ]
@@ -413,7 +386,7 @@
                       "transferMode": "Chunked"
                     }
                   },
-                  "type": "ApiConnection"
+                  "type": "Http"
                 },
                 "While_Continue_Attachments": {
                   "actions": {
@@ -1119,6 +1092,9 @@
                       "BlobKey": {
                         "type": "string"
                       },
+                      "MimeType": {
+                        "type": "string"
+                      },
                       "Extension": {
                         "type": "string"
                       },
@@ -1131,6 +1107,7 @@
                     },
                     "required": [
                       "BlobKey",
+                      "MimeType",
                       "Folder",
                       "Extension"
                     ],
@@ -1322,7 +1299,7 @@
               "recurrence": {
                 "frequency": "Month",
                 "interval": 1,
-                "startTime": "2021-07-01T12:00:00.00Z",
+                "startTime": "2021-12-31T12:00:00.00Z",
                 "timeZone": "UTC"
               },
               "type": "Recurrence"

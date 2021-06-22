@@ -1,6 +1,7 @@
 SELECT DISTINCT 
        [SiteUniqueId]
       ,[Blobkey]
+      ,[MimeType]
       ,[Folder]
       ,[Extension]
   FROM [etl].[Extract-Attachments]

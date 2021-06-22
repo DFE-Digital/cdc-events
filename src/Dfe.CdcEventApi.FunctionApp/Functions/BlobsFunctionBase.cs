@@ -24,7 +24,7 @@
     public abstract class BlobsFunctionBase
     {
         private const string HeaderNameRunIdentifier = "X-Run-Identifier";
-        private readonly IBlobSettingsProvider blobSettingsprovider;
+        private readonly IBlobSettingsProvider blobSettingsProvider;
         private readonly IBlobProcessor blobProcessor;
         private readonly ILoggerProvider loggerProvider;
 
@@ -46,7 +46,7 @@
             IBlobSettingsProvider blobSettingsProvider,
             ILoggerProvider loggerProvider)
         {
-            this.blobSettingsprovider = blobSettingsProvider;
+            this.blobSettingsProvider = blobSettingsProvider;
             this.blobProcessor = blobProcessor;
             this.loggerProvider = loggerProvider;
         }
@@ -63,9 +63,7 @@
         /// <returns>
         /// An instance of <see cref="HttpResponseMessage" />.
         /// </returns>
-        protected async Task<HttpResponseMessage> PostAsync(
-            HttpRequest httpRequest,
-            CancellationToken cancellationToken)
+        protected async Task<HttpResponseMessage> PostAsync(HttpRequest httpRequest, CancellationToken cancellationToken)
         {
             HttpResponseMessage toReturn = null;
 
@@ -91,9 +89,7 @@
 
                 try
                 {
-                    runIdentifier = DateTime.Parse(
-                        runIdentifierStr,
-                        CultureInfo.InvariantCulture);
+                    runIdentifier = DateTime.Parse(runIdentifierStr, CultureInfo.InvariantCulture);
                 }
                 catch (FormatException formatException)
                 {
@@ -127,13 +123,6 @@
                         $"of {nameof(IEnumerable<Blob>)} instance(s)...");
 
                     var models = JsonConvert.DeserializeObject<IEnumerable<Blob>>(body);
-
-                    var environmentFileShareBaseUri = new Uri(this.blobSettingsprovider.AttachmentUrlPrefix);
-                    foreach (var model in models)
-                    {
-                        model.Url = new Uri(environmentFileShareBaseUri, model.Path).ToString();
-                    }
-
                     this.loggerProvider.Info(
                         $"{models.Count()} {nameof(Blob)} instance(s) " +
                         $"deserialised.");
@@ -145,6 +134,9 @@
                     await this.blobProcessor.CreateBlobsAsync(
                         runIdentifier.Value,
                         models,
+                        this.blobSettingsProvider.BlobStorageConnectionString,
+                        this.blobSettingsProvider.BlobStorageAccountName,
+                        this.blobSettingsProvider.BlobStorageAccountKey,
                         cancellationToken)
                         .ConfigureAwait(false);
 

@@ -4,10 +4,8 @@
     using System.Threading;
     using System.Threading.Tasks;
     using Dfe.CdcEventApi.Application.Definitions;
-    using Dfe.CdcEventApi.Application.Models;
     using Dfe.CdcEventApi.Domain.Definitions;
     using Dfe.CdcEventApi.Domain.Definitions.SettingsProviders;
-    using Dfe.CdcEventApi.Domain.Models;
     using Microsoft.AspNetCore.Http;
     using Microsoft.Azure.WebJobs;
     using Microsoft.Azure.WebJobs.Extensions.Http;
@@ -57,10 +55,7 @@
             CancellationToken cancellationToken)
         {
             HttpResponseMessage toReturn =
-                await this.PostAsync(
-                    httpRequest,
-                    cancellationToken)
-                .ConfigureAwait(false);
+                await this.PostAsync(httpRequest, cancellationToken).ConfigureAwait(false);
 
             return toReturn;
         }

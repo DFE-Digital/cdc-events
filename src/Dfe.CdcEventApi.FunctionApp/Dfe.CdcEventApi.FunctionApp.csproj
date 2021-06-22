@@ -9,6 +9,8 @@
   <ItemGroup>
 
     <!-- Microsoft -->
+    <PackageReference Include="Azure.Storage.Common" Version="12.8.0" />
+    <PackageReference Include="Azure.Storage.Files.Shares" Version="12.7.0" />
     <PackageReference Include="Microsoft.Azure.Functions.Extensions" Version="1.0.0" />
     <PackageReference Include="Microsoft.NET.Sdk.Functions" Version="3.0.3" />
 
