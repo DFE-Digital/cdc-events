@@ -32,6 +32,7 @@
             }
         }
 
+        /// <inheritdoc/>
         public string BlobStorageConnectionString
         {
             get
@@ -43,3 +44,4 @@
             }
         }
     }
+}

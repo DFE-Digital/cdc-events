@@ -55,14 +55,11 @@
                     nameof(entityStorageAdapterSettingsProvider));
             }
 
-            if (blobConvertor == null)
-            {
-                throw new ArgumentNullException(
+            this.blobConvertor = blobConvertor ?? throw new ArgumentNullException(
                    nameof(blobConvertor));
-            }
 
-            this.blobConvertor = blobConvertor;
-            this.loggerProvider = loggerProvider;
+            this.loggerProvider = loggerProvider ?? throw new ArgumentNullException(
+                   nameof(loggerProvider));
 
             Type type = typeof(LoadStorageAdapter);
 
@@ -152,7 +149,7 @@
                         file.UploadRange(new HttpRange(0, stream.Length), stream);
                     }
 
-                    blob.BlobUrl = this.GetFileSasUri(
+                    blob.BlobUrl = GetFileSasUri(
                         blob.BlobShare,
                         folderToUse,
                         DateTime.MaxValue,
@@ -163,7 +160,6 @@
                     await sqlConnection
                         .ExecuteAsync(updateSql, blob)
                         .ConfigureAwait(false);
-
                 }
 
                 transaction.Commit();
@@ -182,7 +178,6 @@
             }
             finally
             {
-
                 if (sqlConnection?.State != System.Data.ConnectionState.Closed)
                 {
                     sqlConnection?.Close();
@@ -588,37 +583,8 @@
             }
         }
 
-        private string ExtractHandler(string loadHandlerIdentifier)
-        {
-            string toReturn = null;
-
-            string dataHandlerFileName = string.Format(
-                CultureInfo.InvariantCulture,
-                LoadHandlerFileNameFormat,
-                loadHandlerIdentifier);
-
-            string dataHandlerPath =
-                this.loadHandlersPath + "." + dataHandlerFileName;
-
-            using (Stream stream = this.assembly.GetManifestResourceStream(dataHandlerPath))
-            {
-                if (stream == null)
-                {
-                    throw new MissingLoadHandlerFileException(
-                        loadHandlerIdentifier);
-                }
-
-                using (StreamReader streamReader = new StreamReader(stream))
-                {
-                    toReturn = streamReader.ReadToEnd();
-                }
-            }
-
-            return toReturn;
-        }
-
         /// <summary>
-        /// Create a SAS URI for a file
+        /// Create a SAS URI for a file.
         /// </summary>
         /// <param name="shareName">The share name being used.</param>
         /// <param name="filePath">The path to the file.</param>
@@ -629,7 +595,7 @@
         /// <returns>
         /// An instance of <see cref="Uri"/>.
         /// </returns>
-        private Uri GetFileSasUri(
+        private static Uri GetFileSasUri(
             string shareName,
             string filePath,
             DateTime expiration,
@@ -664,6 +630,35 @@
 
             // Return the URI
             return fileSasUri.Uri;
+        }
+
+        private string ExtractHandler(string loadHandlerIdentifier)
+        {
+            string toReturn = null;
+
+            string dataHandlerFileName = string.Format(
+                CultureInfo.InvariantCulture,
+                LoadHandlerFileNameFormat,
+                loadHandlerIdentifier);
+
+            string dataHandlerPath =
+                this.loadHandlersPath + "." + dataHandlerFileName;
+
+            using (Stream stream = this.assembly.GetManifestResourceStream(dataHandlerPath))
+            {
+                if (stream == null)
+                {
+                    throw new MissingLoadHandlerFileException(
+                        loadHandlerIdentifier);
+                }
+
+                using (StreamReader streamReader = new StreamReader(stream))
+                {
+                    toReturn = streamReader.ReadToEnd();
+                }
+            }
+
+            return toReturn;
         }
     }
 }

@@ -360,8 +360,8 @@
                         "BlobKey": "@items('For_each_attachment')['BlobKey']",
                         "BlobData": "@body('Get_blob')",
                         "BlobMimeType": "@items('For_each_attachment')['MimeType']",
-                        "BlobShare": "/cdcdocuments",
-                        "BlobFolder": "/@{items('For_each_attachment')['Folder']}",
+                        "BlobShare": "cdcdocuments",
+                        "BlobFolder": "@{items('For_each_attachment')['Folder']}",
                         "BlobFilename": "@{items('For_each_attachment')['BlobKey']}@{items('For_each_attachment')['Extension']}",
                         "BlobSiteUniqueId": "@items('For_each_attachment')?['SiteUniqueId']",
                         "BlobObtained": "@variables('nowDateTime')"
@@ -1108,8 +1108,9 @@
                     "required": [
                       "BlobKey",
                       "MimeType",
+                      "Extension",
                       "Folder",
-                      "Extension"
+                      "SiteUniqueId"
                     ],
                     "type": "object"
                   },
