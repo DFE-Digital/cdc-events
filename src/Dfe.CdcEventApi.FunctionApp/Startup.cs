@@ -61,6 +61,8 @@
             serviceCollection
                 .AddScoped<IBlobProcessor, BlobProcessor>();
             serviceCollection
+                .AddScoped<IBlobConvertor, BlobConvertor>();
+            serviceCollection
                 .AddScoped<ILoadProcessor, LoadProcessor>();
         }
 

@@ -118,10 +118,6 @@
 
                 stopwatch.Start();
 
-                await sqlConnection
-                        .ExecuteAsync(insertSql, blobs)
-                        .ConfigureAwait(false);
-
                 // now update uses of this blob to have the correct URL
                 foreach (var blob in blobs)
                 {
@@ -129,14 +125,13 @@
 
                     var folderToUse = blob.BlobFolder;
 
-                    switch (blob.BlobMimeType)
+                    if (blob.BlobMimeType.ToUpperInvariant() == "application/pdf".ToUpperInvariant())
                     {
-                        case "application.pdf":
-                            folderToUse += "/Site Reports";
-                            break;
-                        default:
-                            folderToUse += "/Evidence";
-                            break;
+                        folderToUse += "/Site Plan";
+                    }
+                    else
+                    {
+                        folderToUse += "/Evidence";
                     }
 
                     var directory = share.GetDirectoryClient(folderToUse);
@@ -149,16 +144,23 @@
                         file.UploadRange(new HttpRange(0, stream.Length), stream);
                     }
 
+                    // add it as a known blob
+                    await sqlConnection
+                        .ExecuteAsync(insertSql, blobs, transaction)
+                        .ConfigureAwait(false);
+
+                    // genreate its SAS based Url
                     blob.BlobUrl = GetFileSasUri(
                         blob.BlobShare,
-                        folderToUse,
+                        file.Path,
                         DateTime.MaxValue,
                         blobStorageAccountName,
                         blobStorageAccountKey,
                         ShareFileSasPermissions.Read).ToString();
 
+                    // update the evidence under the Site.
                     await sqlConnection
-                        .ExecuteAsync(updateSql, blob)
+                        .ExecuteAsync(updateSql, blob, transaction)
                         .ConfigureAwait(false);
                 }
 
@@ -587,7 +589,7 @@
         /// Create a SAS URI for a file.
         /// </summary>
         /// <param name="shareName">The share name being used.</param>
-        /// <param name="filePath">The path to the file.</param>
+        /// <param name="filePath">The full path to the file including name and extension.</param>
         /// <param name="expiration">How long the uri should last.</param>
         /// <param name="blobAccountName">The storage account name.</param>
         /// <param name="blobAccountKey">The storage account Shared Access Signature key.</param>

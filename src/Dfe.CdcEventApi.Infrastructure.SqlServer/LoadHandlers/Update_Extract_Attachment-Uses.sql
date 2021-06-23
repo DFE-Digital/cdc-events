@@ -1,1 +1,1 @@
-EXECUTE [etl].[p_EXTRACT-Update-Blobkey-Use] @SiteUniqueId, @BlobKey, @BlobUrl
+EXECUTE [etl].[p_EXTRACT-Update-Blobkey-Use] @BlobSiteUniqueId, @BlobKey, @BlobUrl
