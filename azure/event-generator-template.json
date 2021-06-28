@@ -1298,10 +1298,13 @@
           "triggers": {
             "Recurrence": {
               "recurrence": {
-                "frequency": "Month",
+                "frequency": "Day",
                 "interval": 1,
-                "startTime": "2021-12-31T12:00:00.00Z",
-                "timeZone": "UTC"
+                "schedule": {
+                  "hours": [
+                    "0"
+                  ]
+                }
               },
               "type": "Recurrence"
             }
