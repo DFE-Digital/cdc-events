@@ -1,5 +1,6 @@
 ﻿namespace Dfe.CdcEventApi.FunctionApp.Functions
 {
+    using System;
     using System.Net.Http;
     using System.Threading;
     using System.Threading.Tasks;
@@ -54,6 +55,35 @@
             HttpRequest httpRequest,
             CancellationToken cancellationToken)
         {
+
+#pragma warning disable SA1123 // Do not place regions within elements
+            #region REDUNDANTCODE
+#pragma warning restore SA1123 // Do not place regions within elements
+
+            // NOTE: The code checking the connection string and account key is to diagnose problems with the new configuration requirements that have not yet been tested and can be removed in future versions
+            var configAccountKey = Environment.GetEnvironmentVariable("BlobStorageAccountKey", EnvironmentVariableTarget.Process);
+            if (string.IsNullOrEmpty(configAccountKey))
+            {
+                throw new NullReferenceException(nameof(configAccountKey));
+            }
+
+            var configAccountConnectionString = Environment.GetEnvironmentVariable("BlobStorageConnectionString", EnvironmentVariableTarget.Process);
+            if (string.IsNullOrEmpty(configAccountConnectionString))
+            {
+                throw new NullReferenceException(nameof(configAccountConnectionString));
+            }
+
+            if (configAccountKey.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
+            {
+                throw new ArgumentException($"{nameof(configAccountKey)} has not been translated from the keyvault correctly.");
+            }
+
+            if (configAccountKey.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
+            {
+                throw new ArgumentException($"{nameof(configAccountKey)} has not been translated from the keyvault correctly.");
+            }
+            #endregion
+
             HttpResponseMessage toReturn =
                 await this.PostAsync(httpRequest, cancellationToken).ConfigureAwait(false);
 
