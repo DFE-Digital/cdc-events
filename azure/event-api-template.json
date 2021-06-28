@@ -35,6 +35,20 @@
       "type": "string",
       "defaultValue": "common"
     },
+    "keyVaultInstance": {
+      "type": "string",
+      "minLength": 2,
+      "maxLength": 2,
+      "defaultValue": "01"
+    },
+    "BlobStorageAccountConnectionString": {
+      "type": "string",
+      "defaultValue": "BlobStorageAccountConnectionString"
+    },
+    "BlobStorageAccountKey": {
+      "type": "string",
+      "defaultValue": "BlobStorageAccountKey"
+    },
     "appInsightsInstance": {
       "type": "string",
       "minLength": 2,
@@ -86,6 +100,7 @@
 
     "namePrefix": "[concat(parameters('serviceIdentifier'), parameters('environment'), parameters('environmentInstance'))]",
     "sharedResourceGroupName": "[concat(variables('namePrefix'), '-', parameters('sharedResourcesAppName'))]",
+    "keyVaultName": "[concat(variables('namePrefix'), '-kv-', parameters('keyVaultInstance'))]",
     "appNamePrefix": "[concat(variables('namePrefix'), '-', parameters('appName'))]",
 
     "servicePlanName": "[concat(variables('namePrefix'), '-asp-01')]",
@@ -107,8 +122,9 @@
     "functionAppId": "[resourceId('Microsoft.Web/sites/', variables('functionAppName'))]",
 
     "sqlServerName": "[concat(variables('namePrefix'), '-', parameters('cdcDataSqlAppName'), '-sql-01')]",
-    "sqlDatabaseName": "[concat(variables('namePrefix'), '-', parameters('sqlDatabaseNameSuffix'))]"
-
+    "sqlDatabaseName": "[concat(variables('namePrefix'), '-', parameters('sqlDatabaseNameSuffix'))]",
+    "BlobStorageAccountConnectionString": "[resourceId(variables('sharedResourceGroupName'), 'Microsoft.KeyVault/vaults/secrets', variables('keyVaultName'), parameters('BlobStorageAccountConnectionString'))]",
+    "BlobStorageAccountKey": "[resourceId(variables('sharedResourceGroupName'), 'Microsoft.KeyVault/vaults/secrets', variables('keyVaultName'), parameters('BlobStorageAccountKey'))]"
   },
   "resources": [
 
@@ -201,14 +217,22 @@
               "name": "WEBSITE_RUN_FROM_PACKAGE",
               "value": "[parameters('websiteRunFromPackage')]"
             },
-
             {
               "name": "RawDbConnectionString",
               "value": "[concat('Server=tcp:', variables('sqlServerName'), '.database.windows.net,1433;Initial Catalog=', variables('sqlDatabaseName'), ';Persist Security Info=False;User ID=', parameters('sqlServerUsername'), ';Password=', parameters('sqlServerPassword'), ';MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;')]"
             },
             {
+              "name": "BlobStorageConnectionString",
+              "value": "https://s153d01-kv-01.vault.azure.net/secrets/BlobStorageConnectionString/6f8534004e9a44e99036f149c46635ca"
+            },
+
+            {
               "name": "BlobStorageAccountName",
-              "value": "[concat('https://', variables('namePrefix'), 'cdcdocssa01' )]"
+              "value": "[concat(variables('namePrefix'), 'cdcdocssa01' )]"
+            },
+            {
+              "name": "BlobStorageAccountKey",
+              "value": "https://s153d01-kv-01.vault.azure.net/secrets/BlobStorageAccountKey/0ce90118e3074bd59b1296d1334b5953"
             }
 
           ],
