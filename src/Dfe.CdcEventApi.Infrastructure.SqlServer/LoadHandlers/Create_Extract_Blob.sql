@@ -2,7 +2,7 @@ MERGE [etl].[Blob] AS target
 USING (
 	SELECT     
 		@BlobKey AS [BlobKey],    
-		@Obtained as [Obtained]
+		@BlobObtained as [Obtained]
 ) as source
 ON target.[Blobkey] = source.Blobkey
 WHEN MATCHED THEN

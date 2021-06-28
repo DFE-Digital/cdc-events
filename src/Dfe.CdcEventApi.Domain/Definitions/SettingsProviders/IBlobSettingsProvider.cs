@@ -6,10 +6,18 @@
     public interface IBlobSettingsProvider
     {
         /// <summary>
-        /// Gets the attachment Url prefix to apply to the handling of all incoming blob items.
+        /// Gets the file share connection stirng.
         /// </summary>
-#pragma warning disable CA1056 // URI-like properties should not be strings
-        string AttachmentUrlPrefix { get; }
-#pragma warning restore CA1056 // URI-like properties should not be strings
+        string BlobStorageConnectionString { get; }
+
+        /// <summary>
+        /// Gets the file share account name value the is used for generating (SAS) Secured Access Signature query parameters and prefixing the Blob's Url itself.
+        /// </summary>
+        string BlobStorageAccountName { get; }
+
+        /// <summary>
+        /// Gets the account Key value for generating (SAS) Secured Access Signature query parameters.
+        /// </summary>
+        string BlobStorageAccountKey { get; }
     }
 }

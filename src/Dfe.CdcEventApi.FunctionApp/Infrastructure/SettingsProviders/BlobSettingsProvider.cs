@@ -8,13 +8,37 @@
     /// </summary>
     public class BlobSettingsProvider : IBlobSettingsProvider
     {
-        /// <inheritdoc />
-        public string AttachmentUrlPrefix
+        /// <inheritdoc/>
+        public string BlobStorageAccountName
         {
             get
             {
                 string toReturn = Environment.GetEnvironmentVariable(
-                        "AttachmentUrlPrefix");
+                           "BlobStorageAccountName");
+
+                return toReturn;
+            }
+        }
+
+        /// <inheritdoc/>
+        public string BlobStorageAccountKey
+        {
+            get
+            {
+                string toReturn = Environment.GetEnvironmentVariable(
+                       "BlobStorageAccountKey");
+
+                return toReturn;
+            }
+        }
+
+        /// <inheritdoc/>
+        public string BlobStorageConnectionString
+        {
+            get
+            {
+                string toReturn = Environment.GetEnvironmentVariable(
+                          "BlobStorageConnectionString");
 
                 return toReturn;
             }

@@ -21,6 +21,9 @@
         /// <param name="models">
         /// A collection of instances of type<see cref="Blob"/>.
         /// </param>
+        /// <param name="blobStorageConnectionString">The file store connection string.</param>
+        /// <param name="blobStorageAccountName">The file storage account name.</param>
+        /// <param name="blobStorageAccountKey">The file storage Shared Access Signature (SAS) key.</param>
         /// <param name="cancellationToken">
         /// An instance of <see cref="CancellationToken" />.
         /// </param>
@@ -30,6 +33,9 @@
         Task CreateBlobsAsync(
             DateTime runIdentifier,
             IEnumerable<Blob> models,
+            string blobStorageConnectionString,
+            string blobStorageAccountName,
+            string blobStorageAccountKey,
             CancellationToken cancellationToken);
     }
 }

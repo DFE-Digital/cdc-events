@@ -9,6 +9,10 @@
     using System.Linq;
     using System.Reflection;
     using System.Threading.Tasks;
+    using Azure;
+    using Azure.Storage;
+    using Azure.Storage.Files.Shares;
+    using Azure.Storage.Sas;
     using Dapper;
     using Dfe.CdcEventApi.Domain;
     using Dfe.CdcEventApi.Domain.Definitions;
@@ -26,6 +30,7 @@
         private readonly Assembly assembly;
         private readonly string loadHandlersPath;
         private readonly string rawDbConnectionString;
+        private readonly IBlobConvertor blobConvertor;
 
         /// <summary>
         /// Initialises a new instance of the
@@ -35,11 +40,13 @@
         /// An instance of type
         /// <see cref="IEntityStorageAdapterSettingsProvider" />.
         /// </param>
+        /// <param name="blobConvertor">An instance of <see cref="IBlobConvertor"/>.</param>
         /// <param name="loggerProvider">
         /// An instance of type <see cref="ILoggerProvider" />.
         /// </param>
         public LoadStorageAdapter(
             IEntityStorageAdapterSettingsProvider entityStorageAdapterSettingsProvider,
+            IBlobConvertor blobConvertor,
             ILoggerProvider loggerProvider)
         {
             if (entityStorageAdapterSettingsProvider == null)
@@ -48,7 +55,11 @@
                     nameof(entityStorageAdapterSettingsProvider));
             }
 
-            this.loggerProvider = loggerProvider;
+            this.blobConvertor = blobConvertor ?? throw new ArgumentNullException(
+                   nameof(blobConvertor));
+
+            this.loggerProvider = loggerProvider ?? throw new ArgumentNullException(
+                   nameof(loggerProvider));
 
             Type type = typeof(LoadStorageAdapter);
 
@@ -66,12 +77,20 @@
         /// <param name="runIdentifier">
         /// The run identifier start date time value.
         /// </param>
+        /// <param name="blobStorageConnectionString">The file share connection string.</param>
+        /// <param name="blobStorageAccountName">The file storage account name.</param>
+        /// <param name="blobStorageAccountKey">The file storage Shared Access Signature (SAS) key.</param>
         /// <param name="blobs">
         /// A collection of <see cref="Blob"/>.
         /// </param>
         /// <returns>
         /// An <see cref="Task"/>.</returns>
-        public async Task CreateBlobsAsync(DateTime runIdentifier, IEnumerable<Blob> blobs)
+        public async Task CreateBlobsAsync(
+            DateTime runIdentifier,
+            string blobStorageConnectionString,
+            string blobStorageAccountName,
+            string blobStorageAccountKey,
+            IEnumerable<Blob> blobs)
         {
             if (blobs == null)
             {
@@ -83,26 +102,69 @@
             this.loggerProvider.Info($"Converting blob records to storage blob records.");
 
             Stopwatch stopwatch = new Stopwatch();
-            using (SqlConnection sqlConnection = new SqlConnection(this.rawDbConnectionString))
+            SqlTransaction transaction = null;
+            SqlConnection sqlConnection = null;
+            try
             {
+                sqlConnection = new SqlConnection(this.rawDbConnectionString);
+
+                sqlConnection.Open();
+
+                transaction = sqlConnection.BeginTransaction();
+
                 var insertSql = this.ExtractHandler("Create_Extract_Blob");
                 var updateSql = this.ExtractHandler("Update_Extract_Attachment-Uses");
                 this.loggerProvider.Debug($"Creating Storage Blob records.");
 
                 stopwatch.Start();
 
-                await sqlConnection
-                        .ExecuteAsync(insertSql, blobs)
-                        .ConfigureAwait(false);
-
                 // now update uses of this blob to have the correct URL
                 foreach (var blob in blobs)
                 {
+                    ShareClient share = new ShareClient(blobStorageConnectionString, blob.BlobShare);
+
+                    var folderToUse = blob.BlobFolder;
+
+                    if (blob.BlobMimeType.ToUpperInvariant() == "application/pdf".ToUpperInvariant())
+                    {
+                        folderToUse += "/Site Plan";
+                    }
+                    else
+                    {
+                        folderToUse += "/Evidence";
+                    }
+
+                    var directory = share.GetDirectoryClient(folderToUse);
+                    var file = directory.GetFileClient(blob.BlobFilename);
+
+                    using (MemoryStream stream = new MemoryStream(this.blobConvertor.Convert(blob)))
+                    {
+                        stream.Position = 0;
+                        file.Create(stream.Length);
+                        file.UploadRange(new HttpRange(0, stream.Length), stream);
+                    }
+
+                    // add it as a known blob
                     await sqlConnection
-                        .ExecuteAsync(updateSql, blob)
+                        .ExecuteAsync(insertSql, blobs, transaction)
+                        .ConfigureAwait(false);
+
+                    // genreate its SAS based Url
+                    blob.BlobUrl = GetFileSasUri(
+                        blob.BlobShare,
+                        file.Path,
+                        DateTime.MaxValue,
+                        blobStorageAccountName,
+                        blobStorageAccountKey,
+                        ShareFileSasPermissions.Read).ToString();
+
+                    // update the evidence under the Site.
+                    await sqlConnection
+                        .ExecuteAsync(updateSql, blob, transaction)
                         .ConfigureAwait(false);
                 }
 
+                transaction.Commit();
                 stopwatch.Stop();
 
                 TimeSpan elapsed = stopwatch.Elapsed;
@@ -110,6 +172,20 @@
                 this.loggerProvider.Info(
                     $"Query executed with success, time elapsed: " +
                     $"{elapsed}.");
+            }
+            catch (Exception)
+            {
+                transaction?.Rollback();
+                throw;
+            }
+            finally
+            {
+                if (sqlConnection?.State != System.Data.ConnectionState.Closed)
+                {
+                    sqlConnection?.Close();
+                }
+
+                sqlConnection?.Dispose();
             }
         }
 
@@ -507,6 +583,55 @@
                     $"Update executed with success, time elapsed: " +
                     $"{elapsed}.");
             }
+        }
+
+        /// <summary>
+        /// Create a SAS URI for a file.
+        /// </summary>
+        /// <param name="shareName">The share name being used.</param>
+        /// <param name="filePath">The full path to the file including name and extension.</param>
+        /// <param name="expiration">How long the uri should last.</param>
+        /// <param name="blobAccountName">The storage account name.</param>
+        /// <param name="blobAccountKey">The storage account Shared Access Signature key.</param>
+        /// <param name="permissions">The file access permissions.</param>
+        /// <returns>
+        /// An instance of <see cref="Uri"/>.
+        /// </returns>
+        private static Uri GetFileSasUri(
+            string shareName,
+            string filePath,
+            DateTime expiration,
+            string blobAccountName,
+            string blobAccountKey,
+            ShareFileSasPermissions permissions)
+        {
+            // Get the account details from app settings
+            ShareSasBuilder fileSAS = new ShareSasBuilder()
+            {
+                ShareName = shareName,
+                FilePath = filePath,
+
+                // Specify an Azure file resource
+                Resource = "f",
+
+                // Expires in 24 hours
+                ExpiresOn = expiration,
+            };
+
+            // Set the permissions for the SAS
+            fileSAS.SetPermissions(permissions);
+
+            // Create a SharedKeyCredential that we can use to sign the SAS token
+            StorageSharedKeyCredential credential = new StorageSharedKeyCredential(blobAccountName, blobAccountKey);
+
+            // Build a SAS URI
+            UriBuilder fileSasUri = new UriBuilder($"https://{blobAccountName}.file.core.windows.net/{fileSAS.ShareName}/{fileSAS.FilePath}")
+            {
+                Query = fileSAS.ToSasQueryParameters(credential).ToString(),
+            };
+
+            // Return the URI
+            return fileSasUri.Uri;
         }
 
         private string ExtractHandler(string loadHandlerIdentifier)

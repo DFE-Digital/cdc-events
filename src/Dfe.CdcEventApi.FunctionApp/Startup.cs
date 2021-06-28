@@ -22,8 +22,7 @@
     public class Startup : FunctionsStartup
     {
         /// <inheritdoc />
-        public override void Configure(
-            IFunctionsHostBuilder functionsHostBuilder)
+        public override void Configure(IFunctionsHostBuilder functionsHostBuilder)
         {
             if (functionsHostBuilder == null)
             {
@@ -61,6 +60,8 @@
                 .AddScoped<IEntityProcessor, EntityProcessor>();
             serviceCollection
                 .AddScoped<IBlobProcessor, BlobProcessor>();
+            serviceCollection
+                .AddScoped<IBlobConvertor, BlobConvertor>();
             serviceCollection
                 .AddScoped<ILoadProcessor, LoadProcessor>();
         }

@@ -46,6 +46,7 @@
   <ItemGroup>
 
     <!-- Microsoft -->
+    <PackageReference Include="Azure.Storage.Files.Shares" Version="12.7.0" />
     <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
     <PackageReference Include="System.Data.SqlClient" Version="4.8.2" />
 

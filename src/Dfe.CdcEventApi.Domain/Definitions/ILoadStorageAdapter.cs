@@ -112,9 +112,17 @@
         /// Creats new <see cref="Blob"/> records.
         /// </summary>
         /// <param name="runIdentifier">The load run identifier.</param>
+        /// <param name="blobStorageConnectionString">The file share connection string.</param>
+        /// <param name="blobStorageAccountName">The file storage account name.</param>
+        /// <param name="blobStorageAccountKey">The file storage Shared Access Signature (SAS) key.</param>
         /// <param name="blobs">The collection of <see cref="Blob"/> entities.</param>
         /// <returns>An <see cref="Task"/>.</returns>
-        Task CreateBlobsAsync(DateTime runIdentifier, IEnumerable<Blob> blobs);
+        Task CreateBlobsAsync(
+            DateTime runIdentifier,
+            string blobStorageConnectionString,
+            string blobStorageAccountName,
+            string blobStorageAccountKey,
+            IEnumerable<Blob> blobs);
 
         /// <summary>
         /// Gets the loaded row count for the run.
