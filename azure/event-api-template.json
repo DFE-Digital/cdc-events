@@ -41,14 +41,6 @@
       "maxLength": 2,
       "defaultValue": "01"
     },
-    "BlobStorageAccountConnectionString": {
-      "type": "string",
-      "defaultValue": "BlobStorageAccountConnectionString"
-    },
-    "BlobStorageAccountKey": {
-      "type": "string",
-      "defaultValue": "BlobStorageAccountKey"
-    },
     "appInsightsInstance": {
       "type": "string",
       "minLength": 2,
@@ -123,8 +115,6 @@
 
     "sqlServerName": "[concat(variables('namePrefix'), '-', parameters('cdcDataSqlAppName'), '-sql-01')]",
     "sqlDatabaseName": "[concat(variables('namePrefix'), '-', parameters('sqlDatabaseNameSuffix'))]",
-    "BlobStorageAccountConnectionString": "[resourceId(variables('sharedResourceGroupName'), 'Microsoft.KeyVault/vaults/secrets', variables('keyVaultName'), parameters('BlobStorageAccountConnectionString'))]",
-    "BlobStorageAccountKey": "[resourceId(variables('sharedResourceGroupName'), 'Microsoft.KeyVault/vaults/secrets', variables('keyVaultName'), parameters('BlobStorageAccountKey'))]"
   },
   "resources": [
 
@@ -223,7 +213,7 @@
             },
             {
               "name": "BlobStorageConnectionString",
-              "value": "https://s153d01-kv-01.vault.azure.net/secrets/BlobStorageConnectionString/6f8534004e9a44e99036f149c46635ca"
+              "value": "[concat('@Microsoft.KeyVault(VaultName=', variables('keyVaultName'), ';SecretName=BlobStorageConnectionString)')]"
             },
 
             {
@@ -232,7 +222,7 @@
             },
             {
               "name": "BlobStorageAccountKey",
-              "value": "https://s153d01-kv-01.vault.azure.net/secrets/BlobStorageAccountKey/0ce90118e3074bd59b1296d1334b5953"
+              "value": "[concat('@Microsoft.KeyVault(VaultName=', variables('keyVaultName'), ';SecretName=BlobStorageAccountKey)')]"
             }
 
           ],
