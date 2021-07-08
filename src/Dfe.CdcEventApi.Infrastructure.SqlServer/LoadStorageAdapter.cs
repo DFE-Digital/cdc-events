@@ -110,10 +110,15 @@
 
                 sqlConnection.Open();
 
+                this.loggerProvider.Info($"Opened SQL Connection");
+
                 transaction = sqlConnection.BeginTransaction();
+
+                this.loggerProvider.Info($"Started transaction");
 
                 var insertSql = this.ExtractHandler("Create_Extract_Blob");
                 var updateSql = this.ExtractHandler("Update_Extract_Attachment-Uses");
+
                 this.loggerProvider.Debug($"Creating Storage Blob records.");
 
                 stopwatch.Start();
@@ -122,6 +127,7 @@
                 foreach (var blob in blobs)
                 {
                     ShareClient share = new ShareClient(blobStorageConnectionString, blob.BlobShare);
+                    this.loggerProvider.Info($"Created file share client.");
 
                     var folderToUse = blob.BlobFolder;
 
@@ -137,6 +143,8 @@
                     var directory = share.GetDirectoryClient(folderToUse);
                     var file = directory.GetFileClient(blob.BlobFilename);
 
+                    this.loggerProvider.Info($"Obtained file share file reference.");
+
                     using (MemoryStream stream = new MemoryStream(this.blobConvertor.Convert(blob)))
                     {
                         stream.Position = 0;
@@ -144,10 +152,14 @@
                         file.UploadRange(new HttpRange(0, stream.Length), stream);
                     }
 
+                    this.loggerProvider.Info($"Stored blob data as file: {blobStorageAccountName}/{blob.BlobShare}/{file.Path}");
+
                     // add it as a known blob
                     await sqlConnection
                         .ExecuteAsync(insertSql, blobs, transaction)
                         .ConfigureAwait(false);
+
+                    this.loggerProvider.Info($"Stored Blob Key 'obtained' reference");
 
                     // genreate its SAS based Url
                     blob.BlobUrl = GetFileSasUri(
@@ -158,14 +170,19 @@
                         blobStorageAccountKey,
                         ShareFileSasPermissions.Read).ToString();
 
+                    this.loggerProvider.Info($"Generated file share SAS");
+
                     // update the evidence under the Site.
                     await sqlConnection
                         .ExecuteAsync(updateSql, blob, transaction)
                         .ConfigureAwait(false);
+
+                    this.loggerProvider.Info($"Updated evidence with file Url.");
                 }
 
                 transaction.Commit();
                 stopwatch.Stop();
+                this.loggerProvider.Info($"Commited Transaction.");
 
                 TimeSpan elapsed = stopwatch.Elapsed;
 
@@ -173,9 +190,10 @@
                     $"Query executed with success, time elapsed: " +
                     $"{elapsed}.");
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 transaction?.Rollback();
+                this.loggerProvider.Error($"Exception. {ex}");
                 throw;
             }
             finally
