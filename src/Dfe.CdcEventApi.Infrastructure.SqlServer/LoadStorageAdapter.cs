@@ -127,7 +127,7 @@
                 foreach (var blob in blobs)
                 {
                     ShareClient share = new ShareClient(blobStorageConnectionString, blob.BlobShare);
-                    this.loggerProvider.Info($"Created file share client.");
+                    this.loggerProvider.Info($"Created file share client for share {blob.BlobShare}.");
 
                     var folderToUse = blob.BlobFolder;
 
@@ -143,7 +143,7 @@
                     var directory = share.GetDirectoryClient(folderToUse);
                     var file = directory.GetFileClient(blob.BlobFilename);
 
-                    this.loggerProvider.Info($"Obtained file share file reference.");
+                    this.loggerProvider.Info($"Obtained file share file reference {file.Path} for file of mime type {blob.BlobMimeType}.");
 
                     using (MemoryStream stream = new MemoryStream(this.blobConvertor.Convert(blob)))
                     {
