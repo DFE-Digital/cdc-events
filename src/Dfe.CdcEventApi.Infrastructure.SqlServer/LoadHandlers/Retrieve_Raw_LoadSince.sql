@@ -3,10 +3,7 @@ SELECT
 	[Since_DateTime],
 	[Finish_DateTime],
 	[Count],
-	[Status],
-	[ReportTitle],
-	[ReportBody],
-	[ReportedTo]
+	[Status]
 FROM
 	[etl].[Control]
 WHERE 
