@@ -1,4 +1,4 @@
-UPDATE [raw].[Load]
+UPDATE [etl].[Control]
    SET 
        [Status] = @Status,
        [ReportTitle] = @ReportTitle

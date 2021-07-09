@@ -8,6 +8,6 @@ SELECT
 	[ReportBody] ,
 	[ReportedTo] 
 FROM 
-	[raw].[Load] 
+	[etl].[Control] 
 WHERE 
 	[Load_DateTime] = @runIdentifier

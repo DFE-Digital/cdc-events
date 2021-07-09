@@ -8,7 +8,7 @@ SELECT
 	[ReportBody],
 	[ReportedTo]
 FROM
-	[raw].[Load]
+	[etl].[Control]
 WHERE 
 	 [Load_DateTime]  BETWEEN DATEADD(ms,-5, @RunIdentifier) AND DATEADD(ms,5, @RunIdentifier)
 OR
@@ -18,7 +18,7 @@ OR
 SELECT 
 		TOP 1 [Load_DateTime] 
 		 FROM
-			[raw].[Load] 
+			[etl].[Control] 
 		WHERE 
 			[Load_DateTime] < DATEADD(ms,-5, @RunIdentifier)
 		AND 
