@@ -99,8 +99,6 @@
 
             this.loggerProvider.Info($"Starting a blob load at {runIdentifier:O}");
 
-            this.loggerProvider.Info($"Converting blob records to storage blob records.");
-
             Stopwatch stopwatch = new Stopwatch();
             SqlTransaction transaction = null;
             SqlConnection sqlConnection = null;
@@ -148,11 +146,23 @@
                     using (MemoryStream stream = new MemoryStream(this.blobConvertor.Convert(blob)))
                     {
                         stream.Position = 0;
-                        file.Create(stream.Length);
-                        file.UploadRange(new HttpRange(0, stream.Length), stream);
+                        if (!(await directory.ExistsAsync().ConfigureAwait(false)))
+                        {
+                            this.loggerProvider.Info($"Creating folder {directory.Path}.");
+                            await directory.CreateAsync().ConfigureAwait(false);
+                            this.loggerProvider.Info($"Created folder {directory.Path}.");
+                        }
+
+                        this.loggerProvider.Info($"Creating file {file.Path}.");
+                        await file.CreateAsync(stream.Length).ConfigureAwait(false);
+                        this.loggerProvider.Info($"Created file {file.Path}.");
+
+                        this.loggerProvider.Info($"Creating file content for {file.Path}.");
+                        await file.UploadRangeAsync(new HttpRange(0, stream.Length), stream).ConfigureAwait(false);
+                        this.loggerProvider.Info($"Created file content for {file.Path}.");
                     }
 
-                    this.loggerProvider.Info($"Stored blob data as file: {blobStorageAccountName}/{blob.BlobShare}/{file.Path}");
+                    this.loggerProvider.Info($"Storing blob key 'obtained' reference");
 
                     // add it as a known blob
                     await sqlConnection
@@ -161,7 +171,8 @@
 
                     this.loggerProvider.Info($"Stored Blob Key 'obtained' reference");
 
-                    // genreate its SAS based Url
+                    this.loggerProvider.Info($"Generating file share readonly SAS");
+
                     blob.BlobUrl = GetFileSasUri(
                         blob.BlobShare,
                         file.Path,
@@ -170,9 +181,10 @@
                         blobStorageAccountKey,
                         ShareFileSasPermissions.Read).ToString();
 
-                    this.loggerProvider.Info($"Generated file share SAS");
+                    this.loggerProvider.Info($"Generated file share readonly SAS");
 
-                    // update the evidence under the Site.
+                    this.loggerProvider.Info($"Updating evidence with file Url.");
+
                     await sqlConnection
                         .ExecuteAsync(updateSql, blob, transaction)
                         .ConfigureAwait(false);
@@ -200,6 +212,7 @@
             {
                 if (sqlConnection?.State != System.Data.ConnectionState.Closed)
                 {
+                    this.loggerProvider.Info($"Closing database connection.");
                     sqlConnection?.Close();
                 }
 
