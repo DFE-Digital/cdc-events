@@ -145,19 +145,15 @@
 
                     using (MemoryStream stream = new MemoryStream(this.blobConvertor.Convert(blob)))
                     {
-                        stream.Position = 0;
-                        if (!(await directory.ExistsAsync().ConfigureAwait(false)))
-                        {
-                            this.loggerProvider.Info($"Creating folder {directory.Path}.");
-                            await directory.CreateAsync().ConfigureAwait(false);
-                            this.loggerProvider.Info($"Created folder {directory.Path}.");
-                        }
+
+                        await EnsureFoldersExistFor(directory, share).ConfigureAwait(false);
 
                         this.loggerProvider.Info($"Creating file {file.Path}.");
                         await file.CreateAsync(stream.Length).ConfigureAwait(false);
                         this.loggerProvider.Info($"Created file {file.Path}.");
 
                         this.loggerProvider.Info($"Creating file content for {file.Path}.");
+                        stream.Position = 0;
                         await file.UploadRangeAsync(new HttpRange(0, stream.Length), stream).ConfigureAwait(false);
                         this.loggerProvider.Info($"Created file content for {file.Path}.");
                     }
@@ -217,6 +213,37 @@
                 }
 
                 sqlConnection?.Dispose();
+            }
+        }
+
+        /// <summary>
+        /// Ensures that all of the parent folders for a file actually exist.
+        /// </summary>
+        /// <param name="directory">The immediate parent folder of the file.</param>
+        /// <param name="share">The file share.</param>
+        /// <returns>An isntance of <see cref="Task"/>.</returns>
+        private async Task EnsureFoldersExistFor(ShareDirectoryClient directory, ShareClient share)
+        {
+            if (!directory.Exists())
+            {
+                this.loggerProvider.Info($"'{directory.Path}' does not exist.");
+                var folders = directory.Path.Split('/');
+
+                var workingPath = string.Empty;
+
+                foreach (var folder in folders)
+                {
+                    workingPath += $"{(workingPath.Length == 0 ? string.Empty : "/")}{folder}";
+                    this.loggerProvider.Info($"Creating folder '{workingPath}'.");
+                    await share.GetDirectoryClient(workingPath)
+                        .CreateIfNotExistsAsync()
+                        .ConfigureAwait(false);
+                    this.loggerProvider.Info($"'{folder}' now exists.");
+                }
+            }
+            else
+            {
+                this.loggerProvider.Info($"'{directory.Path}' already exists.");
             }
         }
 
