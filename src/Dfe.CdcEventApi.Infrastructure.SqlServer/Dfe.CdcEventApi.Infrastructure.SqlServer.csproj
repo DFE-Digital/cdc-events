@@ -74,9 +74,7 @@
     <EmbeddedResource Include="LoadHandlers\Update_Extract_Attachment-Uses.sql" />
     <EmbeddedResource Include="LoadHandlers\Retrieve_Raw_LoadCount.sql" />
     <EmbeddedResource Include="LoadHandlers\Retrieve_Extract_Attachments.sql" />
-    <EmbeddedResource Include="LoadHandlers\Retrieve_Raw_LoadNotificationTemplate.sql" />
     <EmbeddedResource Include="LoadHandlers\Retrieve_Raw_LoadSince.sql" />
-    <EmbeddedResource Include="LoadHandlers\Retrieve_Raw_LoadNotification.sql" />
     <EmbeddedResource Include="LoadHandlers\Execute_Extract.sql" />
     <EmbeddedResource Include="LoadHandlers\Update_Raw_LoadStatus.sql" />
     <EmbeddedResource Include="LoadHandlers\Update_Raw_Load.sql" />

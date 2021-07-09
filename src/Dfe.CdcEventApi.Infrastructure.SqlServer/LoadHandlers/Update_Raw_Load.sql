@@ -1,4 +1,4 @@
-UPDATE [raw].[Load]
+UPDATE [etl].[Control]
    SET 
     [Finish_DateTime] = @Finish_DateTime,
     [Since_DateTime] = @Since_DateTime,

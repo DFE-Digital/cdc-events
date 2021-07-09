@@ -15,6 +15,8 @@
     /// </summary>
     public class Users : EntityFunctionsBase
     {
+        private readonly ILoggerProvider loggerProvider;
+
         /// <summary>
         /// Initialises a new instance of the <see cref="Users" /> class.
         /// </summary>
@@ -31,7 +33,7 @@
                   entityProcessor,
                   loggerProvider)
         {
-            // Nothing for now.
+            this.loggerProvider = loggerProvider;
         }
 
         /// <summary>
@@ -52,13 +54,21 @@
             HttpRequest httpRequest,
             CancellationToken cancellationToken)
         {
-            HttpResponseMessage toReturn =
-                await this.PostAsync<User>(
-                    httpRequest,
-                    cancellationToken)
-                .ConfigureAwait(false);
+            try
+            {
+                HttpResponseMessage toReturn =
+               await this.PostAsync<User>(
+                   httpRequest,
+                   cancellationToken)
+               .ConfigureAwait(false);
 
-            return toReturn;
+                return toReturn;
+            }
+            catch (System.Exception ex)
+            {
+                this.loggerProvider.Error($"Exception in {nameof(Users)} endpoint.", ex);
+                throw;
+            }
         }
     }
 }

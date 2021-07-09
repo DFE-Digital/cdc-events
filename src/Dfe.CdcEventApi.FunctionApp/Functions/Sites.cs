@@ -15,6 +15,8 @@
     /// </summary>
     public class Sites : EntityFunctionsBase
     {
+        private readonly ILoggerProvider loggerProvider;
+
         /// <summary>
         /// Initialises a new instance of the <see cref="Sites" /> class.
         /// </summary>
@@ -31,7 +33,7 @@
                   entityProcessor,
                   loggerProvider)
         {
-            // Nothing for now.
+            this.loggerProvider = loggerProvider;
         }
 
         /// <summary>
@@ -52,13 +54,22 @@
             HttpRequest httpRequest,
             CancellationToken cancellationToken)
         {
-            HttpResponseMessage toReturn =
-                await this.PostAsync<Site>(
-                    httpRequest,
-                    cancellationToken)
-                .ConfigureAwait(false);
+            try
+            {
 
-            return toReturn;
+                HttpResponseMessage toReturn =
+                    await this.PostAsync<Site>(
+                        httpRequest,
+                        cancellationToken)
+                    .ConfigureAwait(false);
+
+                return toReturn;
+            }
+            catch (System.Exception ex)
+            {
+                this.loggerProvider.Error($"Exception in {nameof(Sites)} endpoint.", ex);
+                throw;
+            }
         }
     }
 }

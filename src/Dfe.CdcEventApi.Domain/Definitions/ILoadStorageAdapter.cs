@@ -47,17 +47,6 @@
         Task<Load> GetLoadAsync(DateTime runIdentifier);
 
         /// <summary>
-        /// Gets the report template for the specified status of any load.
-        /// </summary>
-        /// <param name="status">
-        /// The status value.
-        /// </param>
-        /// <returns>
-        /// An <see cref="Task"/> wrapping an collection of <see cref="LoadNotificationTemplate"/>.
-        /// </returns>
-        Task<IEnumerable<LoadNotification>> GetLoadNotificationsForStatus(short status);
-
-        /// <summary>
         /// Updates a <see cref="Load"/> of the specified date and time.
         /// </summary>
         /// <param name="item">
@@ -74,17 +63,6 @@
         /// <param name="runIdentifier">The load run identifier.</param>
         /// <returns>An <see cref="Task"/>.</returns>
         Task ExecuteExtract(DateTime runIdentifier);
-
-        /// <summary>
-        /// Gets the report template for the specified status of any load.
-        /// </summary>
-        /// <param name="status">
-        /// The status value.
-        /// </param>
-        /// <returns>
-        /// An <see cref="Task"/> wrapping an collection of <see cref="LoadNotificationTemplate"/>.
-        /// </returns>
-        Task<LoadNotificationTemplate> GetLoadTemplateForStatus(short status);
 
         /// <summary>
         /// Gets the Attachment process instruction records for the current load.

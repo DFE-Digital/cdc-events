@@ -14,6 +14,8 @@
     /// </summary>
     public class Load : LoadFunctionsBase
     {
+        private readonly ILoggerProvider loggerProvider;
+
         /// <summary>
         /// Initialises a new instance of the
         /// <see cref="Load" /> class.
@@ -31,7 +33,7 @@
                   loadProcessor,
                   loggerProvider)
         {
-            // Nothing for now.
+            this.loggerProvider = loggerProvider;
         }
 
         /// <summary>
@@ -53,37 +55,46 @@
             HttpRequest httpRequest,
             CancellationToken cancellationToken)
         {
-            switch (httpRequest?.Method ?? "BAD")
+            try
             {
-                case "POST":
-                    HttpResponseMessage postReturn =
-                                            await this.StartLoad(
-                                                httpRequest,
-                                                cancellationToken)
-                                            .ConfigureAwait(false);
+                switch (httpRequest?.Method ?? "BAD")
+                {
+                    case "POST":
+                        HttpResponseMessage postReturn =
+                                                await this.StartLoad(
+                                                    httpRequest,
+                                                    cancellationToken)
+                                                .ConfigureAwait(false);
 
-                    return postReturn;
+                        return postReturn;
 
-                case "PATCH":
+                    case "PATCH":
 
-                    HttpResponseMessage patchReturn =
-                                            await this.UpdateLoad(
-                                                httpRequest,
-                                                cancellationToken)
-                                            .ConfigureAwait(false);
+                        HttpResponseMessage patchReturn =
+                                                await this.UpdateLoad(
+                                                    httpRequest,
+                                                    cancellationToken)
+                                                .ConfigureAwait(false);
 
-                    return patchReturn;
+                        return patchReturn;
 
-                case "PUT":
-                    HttpResponseMessage putReturn =
-                                            await this.FinishLoad(
-                                                httpRequest,
-                                                cancellationToken)
-                                            .ConfigureAwait(false);
+                    case "PUT":
+                        HttpResponseMessage putReturn =
+                                                await this.FinishLoad(
+                                                    httpRequest,
+                                                    cancellationToken)
+                                                .ConfigureAwait(false);
 
-                    return putReturn;
-                default:
-                    return new HttpResponseMessage(System.Net.HttpStatusCode.BadRequest);
+                        return putReturn;
+                    default:
+                        return new HttpResponseMessage(System.Net.HttpStatusCode.BadRequest);
+                }
+            }
+            catch (System.Exception ex)
+            {
+
+                this.loggerProvider.Error($"Exception in {nameof(Load)} endpoint.", ex);
+                throw;
             }
         }
     }

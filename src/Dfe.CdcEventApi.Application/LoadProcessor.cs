@@ -156,50 +156,6 @@
         }
 
         /// <summary>
-        /// Retrieves all the required <see cref="LoadNotification"/> entities for the specified run status value.
-        /// </summary>
-        /// <param name="status">
-        /// The run status value.
-        /// </param>
-        /// <param name="cancellationToken">
-        /// The asnychronous processing cancellation token.
-        /// </param>
-        /// <returns>
-        /// A <see cref="Task"/> wrapping a collection of <see cref="LoadNotification"/>.
-        /// </returns>
-        public async Task<IEnumerable<LoadNotification>> GetLoadNotifications(
-            short status,
-            CancellationToken cancellationToken)
-        {
-            this.loggerProvider.Debug($"Getting the load notifications to process...");
-            return await this.loadStorageAdapter
-                                 .GetLoadNotificationsForStatus(status)
-                                 .ConfigureAwait(false);
-        }
-
-        /// <summary>
-        /// Gets the <see cref="LoadNotificationTemplate"/> for the specified status value.
-        /// </summary>
-        /// <param name="status">
-        /// The status value.
-        /// </param>
-        /// <param name="cancellationToken">
-        /// The asnychronous <see cref="CancellationToken"/>.
-        /// </param>
-        /// <returns>
-        /// A <see cref="Task"/> wrapping the <see cref="LoadNotificationTemplate"/>.
-        /// </returns>
-        public async Task<LoadNotificationTemplate> GetLoadTemplateForStatus(
-            short status,
-            CancellationToken cancellationToken)
-        {
-            this.loggerProvider.Debug($"Getting load status template...");
-            return await this.loadStorageAdapter
-                                .GetLoadTemplateForStatus(status)
-                                .ConfigureAwait(false);
-        }
-
-        /// <summary>
         /// Uploads a complete instance of <see cref="Load"/>.
         /// </summary>
         /// <param name="item">
