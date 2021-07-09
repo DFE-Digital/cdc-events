@@ -54,32 +54,5 @@
             get;
             set;
         }
-
-        /// <summary>
-        /// Gets or sets the report title describing the load run.
-        /// </summary>
-        public string ReportTitle
-        {
-            get;
-            set;
-        }
-
-        /// <summary>
-        /// Gets or sets the report body describing the laod run.
-        /// </summary>
-        public string ReportBody
-        {
-            get;
-            set;
-        }
-
-        /// <summary>
-        /// Gets or sets a separated list of email addresses to send report to.
-        /// </summary>
-        public string ReportTo
-        {
-            get;
-            set;
-        }
     }
 }

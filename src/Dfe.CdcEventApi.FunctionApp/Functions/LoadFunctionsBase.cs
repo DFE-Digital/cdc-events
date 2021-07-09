@@ -237,48 +237,11 @@
                                         cancellationToken)
                                         .ConfigureAwait(false);
 
-                // get the load notification data for the status
-                var notifications =
-                    await this.loadProcessor.GetLoadNotifications(status.Value, cancellationToken)
-                    .ConfigureAwait(false);
-
-                LoadNotificationTemplate template = await this.loadProcessor
-                        .GetLoadTemplateForStatus(
-                            status.Value,
-                            cancellationToken)
-                        .ConfigureAwait(false);
-
-                load.ReportTo = string.Empty;
-                if (template != null)
-                {
-                    // get the required notification evidence
-                    if (template.IncludeRIChecks)
-                    {
-                        // nothing yet.
-                        // var statistics = await this.loadProcessor.GetRIChecks(runIdentifier, cancellationToken).ConfigureAwait(false);
-                    }
-
-                    // get load stats.
-                    if (template.IncludeRowStats)
-                    {
-                        // nothing yet.
-                        // var statistics = await this.loadProcessor.GetLoadStatisticsAsync(runIdentifier, cancellationToken).ConfigureAwait(false);
-                    }
-
-                    load.ReportTo = string.Join("; ", notifications.Select(x => x.Email));
-                }
-
                 LoadStates state = load.Status;
-
-                load.ReportTitle = template.Subject.Replace(
-                    "{0}",
-                    state.ToEnumDescription(),
-                    StringComparison.InvariantCultureIgnoreCase);
 
                 // update the load with the report
                 StringBuilder reportBody = new StringBuilder("Dummy Report");
 
-                load.ReportBody = reportBody.ToString();
                 load.Finish_DateTime = DateTime.UtcNow;
 
                 toReturn = new HttpResponseMessage(HttpStatusCode.Accepted)
@@ -350,9 +313,9 @@
             HttpResponseMessage toReturn;
             if (runIdentifier.HasValue)
             {
-                var attachtments = await this.loadProcessor.GetAttachments(
-                                                                runIdentifier.Value,
-                                                                cancellationToken).ConfigureAwait(false);
+                var attachtments = await this.loadProcessor
+                        .GetAttachments(runIdentifier.Value, cancellationToken)
+                        .ConfigureAwait(false);
 
                 toReturn = new HttpResponseMessage(HttpStatusCode.OK)
                 {
