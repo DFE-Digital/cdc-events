@@ -1,6 +1,5 @@
 UPDATE [etl].[Control]
    SET 
-       [Status] = @Status,
-       [ReportTitle] = @ReportTitle
+       [Status] = @Status
  WHERE 
     [Load_DateTime] = @RunIdentifier
