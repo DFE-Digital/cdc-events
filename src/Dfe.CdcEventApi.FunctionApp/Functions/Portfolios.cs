@@ -15,6 +15,8 @@
     /// </summary>
     public class Portfolios : EntityFunctionsBase
     {
+        private readonly ILoggerProvider loggerProvider;
+
         /// <summary>
         /// Initialises a new instance of the <see cref="Portfolios" />
         /// class.
@@ -32,7 +34,7 @@
                   entityProcessor,
                   loggerProvider)
         {
-            // Nothing for now.
+            this.loggerProvider = loggerProvider;
         }
 
         /// <summary>
@@ -53,13 +55,22 @@
             HttpRequest httpRequest,
             CancellationToken cancellationToken)
         {
-            HttpResponseMessage toReturn =
-                await this.PostAsync<Portfolio>(
-                    httpRequest,
-                    cancellationToken)
-                .ConfigureAwait(false);
+            try
+            {
 
-            return toReturn;
+                HttpResponseMessage toReturn =
+                    await this.PostAsync<Portfolio>(
+                        httpRequest,
+                        cancellationToken)
+                    .ConfigureAwait(false);
+
+                return toReturn;
+            }
+            catch (System.Exception ex)
+            {
+                this.loggerProvider.Error($"Exception in {nameof(Portfolios)} endpoint.", ex);
+                throw;
+            }
         }
     }
 }

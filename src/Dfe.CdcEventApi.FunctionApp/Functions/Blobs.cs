@@ -16,6 +16,8 @@
     /// </summary>
     public class Blobs : BlobsFunctionBase
     {
+        private readonly ILoggerProvider loggerProvider;
+
         /// <summary>
         /// Initialises a new instance of the <see cref="Blobs" /> class.
         /// </summary>
@@ -34,7 +36,7 @@
             ILoggerProvider loggerProvider)
             : base(blobProcessor, blobSettingsProvider, loggerProvider)
         {
-            // Nothing for now.
+            this.loggerProvider = loggerProvider;
         }
 
         /// <summary>
@@ -55,10 +57,20 @@
             HttpRequest httpRequest,
             CancellationToken cancellationToken)
         {
-            HttpResponseMessage toReturn =
-                await this.PostAsync(httpRequest, cancellationToken).ConfigureAwait(false);
+            try
+            {
 
-            return toReturn;
+                HttpResponseMessage toReturn =
+                    await this.PostAsync(httpRequest, cancellationToken).ConfigureAwait(false);
+
+                return toReturn;
+            }
+            catch (Exception ex)
+            {
+                this.loggerProvider.Error($"Exception in {nameof(Blobs)} endpoint.", ex);
+
+                throw;
+            }
         }
     }
 }

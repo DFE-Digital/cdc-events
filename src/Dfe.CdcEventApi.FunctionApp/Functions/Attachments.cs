@@ -14,6 +14,8 @@ namespace Dfe.CdcEventApi.FunctionApp.Functions
     /// </summary>
     public class Attachments : LoadFunctionsBase
     {
+        private readonly ILoggerProvider loggerProvider;
+
         /// <summary>
         /// Initialises a new instance of the <see cref="Attachments" /> class.
         /// </summary>
@@ -28,7 +30,7 @@ namespace Dfe.CdcEventApi.FunctionApp.Functions
             ILoggerProvider loggerProvider)
             : base(loadProcessor, loggerProvider)
         {
-            // nothing here.
+            this.loggerProvider = loggerProvider;
         }
 
         /// <summary>
@@ -48,13 +50,22 @@ namespace Dfe.CdcEventApi.FunctionApp.Functions
             [HttpTrigger(AuthorizationLevel.Function, "GET")] HttpRequest httpRequest,
             CancellationToken cancellationToken)
         {
-            HttpResponseMessage toReturn =
+            try
+            {
+                HttpResponseMessage toReturn =
                 await this.GetAttachments(
                     httpRequest,
                     cancellationToken)
                 .ConfigureAwait(false);
 
-            return toReturn;
+                return toReturn;
+            }
+            catch (System.Exception ex)
+            {
+
+                this.loggerProvider.Error($"Exception in {nameof(Attachments)} endpoint.", ex);
+                throw;
+            }
         }
     }
 }
