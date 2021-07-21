@@ -9,7 +9,6 @@
     using System.Threading;
     using System.Threading.Tasks;
     using Dfe.CdcEventApi.Application.Definitions;
-    using Dfe.CdcEventApi.Domain;
     using Dfe.CdcEventApi.Domain.Definitions;
     using Dfe.CdcEventApi.Domain.Exceptions;
     using Dfe.CdcEventApi.Domain.Models;
@@ -237,7 +236,7 @@
                                         cancellationToken)
                                         .ConfigureAwait(false);
 
-                LoadStates state = load.Status;
+                ControlState state = load.Status;
 
                 // update the load with the report
                 StringBuilder reportBody = new StringBuilder("Dummy Report");
@@ -250,7 +249,7 @@
                     Content = new StringContent(JsonConvert.SerializeObject(load)),
                 };
 
-                if (state == LoadStates.Suceeeded)
+                if (state == ControlState.Extracting)
                 {
                     var count = await this.loadProcessor.GetLoadCountAsync(
                         runIdentifier.Value,
@@ -264,7 +263,7 @@
                         .ConfigureAwait(false);
 
                 // perform extract only if success is indicated.
-                if (load.Status == LoadStates.Suceeeded)
+                if (load.Status == ControlState.Extracting)
                 {
                     // as its a good load, extract the data into the etl data model
                     await this.loadProcessor.ExecuteExtract(runIdentifier.Value, cancellationToken)
@@ -272,7 +271,7 @@
                 }
 
                 // perform transform only if finished is indicated.
-                if (load.Status == LoadStates.Finished)
+                if (load.Status == ControlState.Finished)
                 {
                     // as its a good load, transform the data into the condition data model
                     await this.loadProcessor.ExecuteTransform(runIdentifier.Value, cancellationToken)
@@ -349,9 +348,9 @@
                         statusString,
                         CultureInfo.InvariantCulture);
                     if (
-                            status.Value < (short)LoadStates.Initialising
+                            status.Value < (short)ControlState.Start
                             ||
-                            status.Value > (short)LoadStates.Finished)
+                            status.Value > (short)ControlState.Finished)
                     {
                         this.loggerProvider.Error(
                                 $"An invalid {nameof(status)} was supplied. The " +

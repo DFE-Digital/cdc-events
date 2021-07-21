@@ -25,10 +25,21 @@
     /// </summary>
     public class LoadStorageAdapter : ILoadStorageAdapter
     {
-        private const string LoadHandlerFileNameFormat = "{0}.sql";
+        private const string ControlCreate = "CONTROL-Create";
+        private const string CONTROLGet = "CONTROL-Get";
+        private const string CONTROLGetCount = "CONTROL-Get-Count";
+        private const string CONTROLSince = "CONTROL-Since";
+        private const string CONTROLStatusUpdate = "CONTROL-Status-Update";
+        private const string CONTROLUpdate = "CONTROL-Update";
+        private const string EXTRACTAll = "EXTRACT-All";
+        private const string EXTRACTMergeBlob = "EXTRACT-Merge-Blob";
+        private const string EXTRACTUpdateBlobKeyUses = "EXTRACT-Update-Blobkey-Use";
+        private const string EXTRACTGetAttachments = "EXTRACT-Get-Attachments";
+        private const string TRANSFORMAll = "TRANSFORM-All";
+        private const string ProcessHandlerFileNameFormat = "{0}.sql";
         private readonly ILoggerProvider loggerProvider;
         private readonly Assembly assembly;
-        private readonly string loadHandlersPath;
+        private readonly string controlHandlersPath;
         private readonly string rawDbConnectionString;
         private readonly IBlobConvertor blobConvertor;
 
@@ -65,7 +76,7 @@
 
             this.assembly = type.Assembly;
 
-            this.loadHandlersPath = $"{type.Namespace}.LoadHandlers";
+            this.controlHandlersPath = $"{type.Namespace}.ControlHandlers";
 
             this.rawDbConnectionString =
                 entityStorageAdapterSettingsProvider.RawDbConnectionString;
@@ -114,8 +125,8 @@
 
                 this.loggerProvider.Info($"Started transaction");
 
-                var insertSql = this.ExtractHandler("Create_Extract_Blob");
-                var updateSql = this.ExtractHandler("Update_Extract_Attachment-Uses");
+                var insertSql = this.ExtractHandler(EXTRACTMergeBlob);
+                var updateSql = this.ExtractHandler(EXTRACTUpdateBlobKeyUses);
 
                 this.loggerProvider.Debug($"Creating Storage Blob records.");
 
@@ -263,7 +274,7 @@
             Stopwatch stopwatch = new Stopwatch();
             using (SqlConnection sqlConnection = new SqlConnection(this.rawDbConnectionString))
             {
-                var insertSql = this.ExtractHandler("Create_Raw_Load");
+                var insertSql = this.ExtractHandler(ControlCreate);
                 this.loggerProvider.Debug($"Creating Load record.");
 
                 stopwatch.Start();
@@ -282,7 +293,7 @@
 
                 this.loggerProvider.Debug($"Retrieving this current and last successful load records.");
 
-                string querySql = this.ExtractHandler("Retrieve_Raw_LoadSince");
+                string querySql = this.ExtractHandler(CONTROLSince);
 
                 stopwatch.Restart();
 
@@ -314,7 +325,7 @@
             Stopwatch stopwatch = new Stopwatch();
             using (SqlConnection sqlConnection = new SqlConnection(this.rawDbConnectionString))
             {
-                var procedureSql = this.ExtractHandler("Execute_Extract");
+                var procedureSql = this.ExtractHandler(EXTRACTAll);
 
                 this.loggerProvider.Debug($"Executing the extract.");
 
@@ -348,7 +359,7 @@
             Stopwatch stopwatch = new Stopwatch();
             using (SqlConnection sqlConnection = new SqlConnection(this.rawDbConnectionString))
             {
-                var procedureSql = this.ExtractHandler("Execute_Transform");
+                var procedureSql = this.ExtractHandler(TRANSFORMAll);
 
                 this.loggerProvider.Debug($"Executing the transform.");
 
@@ -386,7 +397,7 @@
             Stopwatch stopwatch = new Stopwatch();
             using (SqlConnection sqlConnection = new SqlConnection(this.rawDbConnectionString))
             {
-                string querySql = this.ExtractHandler("Retrieve_Extract_Attachments");
+                string querySql = this.ExtractHandler(EXTRACTGetAttachments);
                 this.loggerProvider.Debug($"Retrieving attachment records.");
 
                 stopwatch.Start();
@@ -421,7 +432,7 @@
             Stopwatch stopwatch = new Stopwatch();
             using (SqlConnection sqlConnection = new SqlConnection(this.rawDbConnectionString))
             {
-                string querySql = this.ExtractHandler("Retrieve_Raw_Load");
+                string querySql = this.ExtractHandler(CONTROLGet);
                 this.loggerProvider.Debug($"Retrieving Load record.");
 
                 stopwatch.Start();
@@ -456,7 +467,7 @@
         {
             this.loggerProvider.Info($"Getting the count of loaded rows for {runIdentifier}");
 
-            string querySql = this.ExtractHandler("Retrieve_Raw_LoadCount");
+            string querySql = this.ExtractHandler(CONTROLGetCount);
 
             Stopwatch stopwatch = new Stopwatch();
             using (SqlConnection sqlConnection = new SqlConnection(this.rawDbConnectionString))
@@ -498,7 +509,7 @@
 
             this.loggerProvider.Info($"Updating a load from {item.Load_DateTime:O}");
 
-            string udpateSql = this.ExtractHandler("Update_Raw_Load");
+            string udpateSql = this.ExtractHandler(CONTROLUpdate);
             SqlMapper.AddTypeMap(typeof(DateTime), System.Data.DbType.DateTime);
 
             Stopwatch stopwatch = new Stopwatch();
@@ -537,14 +548,14 @@
         {
             this.loggerProvider.Info($"Updating load at {runIdentifier:O} to {status}");
 
-            var updateSql = this.ExtractHandler("Update_Raw_LoadStatus");
+            var updateSql = this.ExtractHandler(CONTROLStatusUpdate);
 
             Stopwatch stopwatch = new Stopwatch();
             using (SqlConnection sqlConnection = new SqlConnection(this.rawDbConnectionString))
             {
                 this.loggerProvider.Debug($"Updating Load record status.");
 
-                var state = status.ToEnum<LoadStates>();
+                var state = status.ToEnum<ControlState>();
 
                 stopwatch.Start();
 
@@ -623,11 +634,11 @@
 
             string dataHandlerFileName = string.Format(
                 CultureInfo.InvariantCulture,
-                LoadHandlerFileNameFormat,
+                ProcessHandlerFileNameFormat,
                 loadHandlerIdentifier);
 
             string dataHandlerPath =
-                this.loadHandlersPath + "." + dataHandlerFileName;
+                this.controlHandlersPath + "." + dataHandlerFileName;
 
             using (Stream stream = this.assembly.GetManifestResourceStream(dataHandlerPath))
             {
