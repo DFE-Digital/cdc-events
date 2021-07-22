@@ -111,7 +111,11 @@
                   }
                 ]
               },
-              "runAfter": { "Init-SourceOAUTHToken": [ "Succeeded" ] },
+              "runAfter": {
+                "Init-SourceOAUTHToken": [
+                  "Succeeded"
+                ]
+              },
               "type": "InitializeVariable"
             },
             "Init-Control-Continue": {
@@ -125,7 +129,11 @@
                   }
                 ]
               },
-              "runAfter": { "Init-Control-Continue-Step": [ "Succeeded" ] },
+              "runAfter": {
+                "Init-Control-Continue-Step": [
+                  "Succeeded"
+                ]
+              },
               "type": "InitializeVariable"
             },
             "Init-Control-Continue-Step": {
@@ -139,7 +147,11 @@
                   }
                 ]
               },
-              "runAfter": { "Init-Control-Since": [ "Succeeded" ] },
+              "runAfter": {
+                "Init-Control-Since": [
+                  "Succeeded"
+                ]
+              },
               "type": "InitializeVariable"
             },
             "Init-Control-Error": {
@@ -153,7 +165,11 @@
                   }
                 ]
               },
-              "runAfter": { "Init-Control-Status": [ "Succeeded" ] },
+              "runAfter": {
+                "Init-Control-Status": [
+                  "Succeeded"
+                ]
+              },
               "type": "InitializeVariable"
             },
             "Init-Control-Error-Message": {
@@ -167,7 +183,11 @@
                   }
                 ]
               },
-              "runAfter": { "Init-Control-Error": [ "Succeeded" ] },
+              "runAfter": {
+                "Init-Control-Error": [
+                  "Succeeded"
+                ]
+              },
               "type": "InitializeVariable"
             },
             "Init-Control-Page": {
@@ -181,7 +201,11 @@
                   }
                 ]
               },
-              "runAfter": { "Init-Control-Continue": [ "Succeeded" ] },
+              "runAfter": {
+                "Init-Control-Continue": [
+                  "Succeeded"
+                ]
+              },
               "type": "InitializeVariable"
             },
             "Init-Control-Since": {
@@ -195,7 +219,11 @@
                   }
                 ]
               },
-              "runAfter": { "Init-Control-Started": [ "Succeeded" ] },
+              "runAfter": {
+                "Init-Control-Started": [
+                  "Succeeded"
+                ]
+              },
               "type": "InitializeVariable"
             },
             "Init-Control-Started": {
@@ -209,7 +237,11 @@
                   }
                 ]
               },
-              "runAfter": { "Init-Control-Error-Message": [ "Succeeded" ] },
+              "runAfter": {
+                "Init-Control-Error-Message": [
+                  "Succeeded"
+                ]
+              },
               "type": "InitializeVariable"
             },
             "Init-Control-Status": {
@@ -237,7 +269,11 @@
                   }
                 ]
               },
-              "runAfter": { "Init-Control-Page": [ "Succeeded" ] },
+              "runAfter": {
+                "Init-Control-Page": [
+                  "Succeeded"
+                ]
+              },
               "type": "InitializeVariable"
             },
             "Init-SourceOAUTHSecret": {
@@ -251,7 +287,11 @@
                   }
                 ]
               },
-              "runAfter": { "Init-SourceOAUTHKey": [ "Succeeded" ] },
+              "runAfter": {
+                "Init-SourceOAUTHKey": [
+                  "Succeeded"
+                ]
+              },
               "type": "InitializeVariable"
             },
             "Init-SourceOAUTHToken": {
@@ -265,7 +305,11 @@
                   }
                 ]
               },
-              "runAfter": { "Init-TargetOAUTHToken": [ "Succeeded" ] },
+              "runAfter": {
+                "Init-TargetOAUTHToken": [
+                  "Succeeded"
+                ]
+              },
               "type": "InitializeVariable"
             },
             "Init-TargetOAUTHCredentials": {
@@ -279,7 +323,11 @@
                   }
                 ]
               },
-              "runAfter": { "Init-TargetOAUTHKey": [ "Succeeded" ] },
+              "runAfter": {
+                "Init-TargetOAUTHKey": [
+                  "Succeeded"
+                ]
+              },
               "type": "InitializeVariable"
             },
             "Init-TargetOAUTHKey": {
@@ -293,7 +341,11 @@
                   }
                 ]
               },
-              "runAfter": { "Init-SourceOAUTHSecret": [ "Succeeded" ] },
+              "runAfter": {
+                "Init-SourceOAUTHSecret": [
+                  "Succeeded"
+                ]
+              },
               "type": "InitializeVariable"
             },
             "Init-TargetOAUTHToken": {
@@ -307,14 +359,53 @@
                   }
                 ]
               },
-              "runAfter": { "Init-TargetOAUTHCredentials": [ "Succeeded" ] },
+              "runAfter": {
+                "Init-TargetOAUTHCredentials": [
+                  "Succeeded"
+                ]
+              },
               "type": "InitializeVariable"
             },
             "Scope-Attachments": {
               "actions": {
-                "For_each_attachment": {
+                "For-Each-Attachment": {
                   "actions": {
-                    "If-Post-Blob-Success": {
+                    "Post-blob": {
+                      "inputs": {
+                        "body": [
+                          {
+                            "BlobData": "@body('Get-Blob')",
+                            "BlobFilename": "@{items('For-Each-Attachment')['BlobKey']}@{items('For-Each-Attachment')['Extension']}",
+                            "BlobFolder": "@{items('For-Each-Attachment')['Folder']}",
+                            "BlobKey": "@items('For-Each-Attachment')['BlobKey']",
+                            "BlobMimeType": "@items('For-Each-Attachment')['MimeType']",
+                            "BlobObtained": "@variables('Control-Started')",
+                            "BlobShare": "cdcdocuments",
+                            "BlobSiteUniqueId": "@items('For-Each-Attachment')?['SiteUniqueId']"
+                          }
+                        ],
+                        "headers": {
+                          "Authorization": "Bearer @{variables('TargetOAUTHToken')}",
+                          "Content-Type": "application/octet-stream",
+                          "Ocp-Apim-Subscription-Key": "@variables('TargetOAUTHKey')",
+                          "X-Run-Identifier": "@variables('Control-Started')"
+                        },
+                        "method": "POST",
+                        "uri": "@{parameters('TargetEndpoint')}blobs"
+                      },
+                      "runAfter": {
+                        "While-Control-Continue-Step-True": [
+                          "Succeeded"
+                        ]
+                      },
+                      "runtimeConfiguration": {
+                        "contentTransfer": {
+                          "transferMode": "Chunked"
+                        }
+                      },
+                      "type": "Http"
+                    },
+                    "Validate-Post-blob": {
                       "actions": {},
                       "else": {
                         "actions": {
@@ -324,7 +415,11 @@
                               "name": "Control-Error",
                               "value": "@int('__ERROR_')"
                             },
-                            "runAfter": { "Set_variable": [ "Succeeded" ] },
+                            "runAfter": {
+                              "Set_variable": [
+                                "Succeeded"
+                              ]
+                            },
                             "type": "SetVariable"
                           },
                           "Set_variable": {
@@ -337,47 +432,35 @@
                           }
                         }
                       },
-                      "expression": { "and": [ { "equals": [ "@outputs('Post-blob')['statusCode']", 202 ] } ] },
-                      "runAfter": { "Post-blob": [ "Succeeded" ] },
-                      "type": "If"
-                    },
-                    "Post-blob": {
-                      "inputs": {
-                        "body": [
+                      "expression": {
+                        "and": [
                           {
-                            "BlobData": "@body('Get-Blob')",
-                            "BlobFilename": "@{items('For_each_attachment')['BlobKey']}@{items('For_each_attachment')['Extension']}",
-                            "BlobFolder": "@{items('For_each_attachment')['Folder']}",
-                            "BlobKey": "@items('For_each_attachment')['BlobKey']",
-                            "BlobMimeType": "@items('For_each_attachment')['MimeType']",
-                            "BlobObtained": "@variables('Control-Started')",
-                            "BlobShare": "cdcdocuments",
-                            "BlobSiteUniqueId": "@items('For_each_attachment')?['SiteUniqueId']"
+                            "equals": [
+                              "",
+                              202
+                            ]
                           }
-                        ],
-                        "headers": {
-                          "Authorization": "Bearer @{variables('TargetOAUTHToken')}",
-                          "Content-Type": "application/octet-stream",
-                          "Ocp-Apim-Subscription-Key": "@variables('TargetOAUTHKey')",
-                          "X-Run-Identifier": "@variables('Control-Started')"
-                        },
-                        "method": "POST",
-                        "uri": "@{parameters('TargetEndpoint')}blobs"
+                        ]
                       },
-                      "runAfter": { "While-Control-Continue-Step-True": [ "Succeeded" ] },
-                      "runtimeConfiguration": { "contentTransfer": { "transferMode": "Chunked" } },
-                      "type": "Http"
+                      "runAfter": {
+                        "Post-blob": [
+                          "Succeeded"
+                        ]
+                      },
+                      "type": "If"
                     },
                     "While-Control-Continue-Step-True": {
                       "actions": {
                         "Get-Blob": {
                           "inputs": {
-                            "headers": { "Accept": "*/*" },
+                            "headers": {
+                              "Accept": "*/*"
+                            },
                             "method": "GET",
                             "queries": {
                               "AsAtachment": "true",
                               "AsAttachment": "true",
-                              "BlobKey": "@items('For_each_attachment')['BlobKey']",
+                              "BlobKey": "@{items('For-Each-Attachment')['BlobKey']}",
                               "SessionId": "@variables('SourceOAUTHToken')"
                             },
                             "uri": "@{parameters('SourceEndpoint')}blobs"
@@ -385,29 +468,17 @@
                           "runAfter": {},
                           "type": "Http"
                         },
-                        "If-Get-Blob-Success": {
+                        "Validate-Get-Blob": {
                           "actions": {},
                           "else": {
                             "actions": {
                               "If-Unauthorised": {
                                 "actions": {
-                                  "Parse_relogin_after_401": {
+                                  "Get-Blob-Reauthenticate": {
                                     "inputs": {
-                                      "content": "@body('Re_login_after_401')",
-                                      "schema": {
-                                        "properties": {
-                                          "SessionId": { "type": "string" },
-                                          "Success": { "type": "boolean" }
-                                        },
-                                        "type": "object"
-                                      }
-                                    },
-                                    "runAfter": { "Re_login_after_401": [ "Succeeded" ] },
-                                    "type": "ParseJson"
-                                  },
-                                  "Re_login_after_401": {
-                                    "inputs": {
-                                      "headers": { "Accept": "application/json" },
+                                      "headers": {
+                                        "Accept": "application/json"
+                                      },
                                       "method": "POST",
                                       "queries": {
                                         "ApiToken": "@variables('SourceOAUTHToken')",
@@ -419,58 +490,168 @@
                                     "runAfter": {},
                                     "type": "Http"
                                   },
-                                  "Set_AttachementsSessionId_after_relogin_after_401": {
-                                    "inputs": {
-                                      "name": "SourceOAUTHToken",
-                                      "value": "@body('Parse_relogin_after_401')?['SessionId']"
+                                  "Validate-Get-Blob-Reauthenticate": {
+                                    "actions": {
+                                      "Parse-Get-Blob-Reauthenticate": {
+                                        "inputs": {
+                                          "content": "@body('Get-Blob-Reauthenticate')",
+                                          "schema": {
+                                            "properties": {
+                                              "SessionId": {
+                                                "type": "string"
+                                              },
+                                              "Success": {
+                                                "type": "boolean"
+                                              }
+                                            },
+                                            "type": "object"
+                                          }
+                                        },
+                                        "runAfter": {},
+                                        "type": "ParseJson"
+                                      },
+                                      "Set-Get-Blob-Reauthenticate": {
+                                        "inputs": {
+                                          "name": "SourceOAUTHToken",
+                                          "value": "@body('Parse-Get-Blob-Reauthenticate')?['SessionId']"
+                                        },
+                                        "runAfter": {
+                                          "Parse-Get-Blob-Reauthenticate": [
+                                            "Succeeded"
+                                          ]
+                                        },
+                                        "type": "SetVariable"
+                                      }
                                     },
-                                    "runAfter": { "Parse_relogin_after_401": [ "Succeeded" ] },
-                                    "type": "SetVariable"
+                                    "else": {
+                                      "actions": {
+                                        "Set-Get-Blob-Reauthenticate-Fail": {
+                                          "inputs": {
+                                            "name": "Control-Error",
+                                            "value": "@int('__ERROR__')"
+                                          },
+                                          "runAfter": {
+                                            "Set-Get-Blob-Reauthenticate-Fail-Message": [
+                                              "Succeeded"
+                                            ]
+                                          },
+                                          "type": "SetVariable"
+                                        },
+                                        "Set-Get-Blob-Reauthenticate-Fail-Message": {
+                                          "inputs": {
+                                            "name": "Control-Error-Message",
+                                            "value": "Failed to re-authenticate with source API.\n@{outputs('Get-Blob-Reauthenticate')['headers']}\n@{body('Get-Blob-Reauthenticate')}\n@{outputs('Get-Blob-Reauthenticate')['statusCode']}"
+                                          },
+                                          "runAfter": {},
+                                          "type": "SetVariable"
+                                        }
+                                      }
+                                    },
+                                    "expression": {
+                                      "and": [
+                                        {
+                                          "equals": [
+                                            "",
+                                            200
+                                          ]
+                                        }
+                                      ]
+                                    },
+                                    "runAfter": {
+                                      "Get-Blob-Reauthenticate": [
+                                        "Succeeded"
+                                      ]
+                                    },
+                                    "type": "If"
                                   }
                                 },
                                 "else": {
                                   "actions": {
-                                    "Set-Control-Continue-Step-False": {
-                                      "inputs": {
-                                        "name": "Control-Continue-Step",
-                                        "value": "@false"
-                                      },
-                                      "runAfter": {},
-                                      "type": "SetVariable"
-                                    },
-                                    "Set-Control-Error-Get-Blob-Error": {
+                                    "Set-Scope-Attachments-Fail": {
                                       "inputs": {
                                         "name": "Control-Error",
                                         "value": "@int('__EROR__')"
                                       },
-                                      "runAfter": { "Set-Control-Continue-Step-False": [ "Succeeded" ] },
+                                      "runAfter": {
+                                        "Set-Scope-Attachments-Fail-Message": [
+                                          "Succeeded"
+                                        ]
+                                      },
+                                      "type": "SetVariable"
+                                    },
+                                    "Set-Scope-Attachments-Fail-Message": {
+                                      "inputs": {
+                                        "name": "Control-Error-Message",
+                                        "value": "Failed attempting to obtain attachment data.\n@{outputs('Get-Blob')['headers']}\n@{body('Get-Blob')}\n@{outputs('Get-Blob')['statusCode']}\n"
+                                      },
+                                      "runAfter": {},
                                       "type": "SetVariable"
                                     }
                                   }
                                 },
-                                "expression": { "and": [ { "equals": [ "", 401 ] } ] },
+                                "expression": {
+                                  "and": [
+                                    {
+                                      "equals": [
+                                        "@outputs('Get-Blob')['statusCode']",
+                                        401
+                                      ]
+                                    }
+                                  ]
+                                },
                                 "runAfter": {},
                                 "type": "If"
                               }
                             }
                           },
-                          "expression": { "and": [ { "equals": [ "@outputs('Get-Blob')['statusCode']", 200 ] } ] },
-                          "runAfter": { "Get-Blob": [ "Succeeded" ] },
+                          "expression": {
+                            "and": [
+                              {
+                                "equals": [
+                                  "",
+                                  200
+                                ]
+                              }
+                            ]
+                          },
+                          "runAfter": {
+                            "Get-Blob": [
+                              "Succeeded"
+                            ]
+                          },
                           "type": "If"
                         }
                       },
-                      "expression": { "and": [ { "equals": [ "@variables('Control-Continue-Step')", "@true" ] } ] },
+                      "expression": {
+                        "and": [
+                          {
+                            "equals": [
+                              "@variables('Control-Continue-Step')",
+                              "@true"
+                            ]
+                          }
+                        ]
+                      },
                       "runAfter": {},
                       "type": "If"
                     }
                   },
                   "foreach": "@variables('Control-Attachments')",
                   "runAfter": {},
+                  "runtimeConfiguration": {
+                    "concurrency": {
+                      "repetitions": 1
+                    }
+                  },
                   "type": "Foreach"
                 }
               },
               "description": "Obtain all of the attachments on the list and post the data and metadata to the blobs endpoint to store the file and update the database.",
-              "runAfter": { "Scope-Source-OAUTH-Refresh": [ "Succeeded" ] },
+              "runAfter": {
+                "Scope-Source-OAUTH-Refresh": [
+                  "Succeeded"
+                ]
+              },
               "type": "Scope"
             },
             "Scope-Attachments-List": {
@@ -489,48 +670,119 @@
                   "runAfter": {},
                   "type": "Http"
                 },
-                "Parse-Attachments-List": {
-                  "inputs": {
-                    "content": "@body('Get-Attachments-List')",
-                    "schema": {
-                      "items": {
-                        "properties": {
-                          "BlobKey": { "type": "string" },
-                          "Extension": { "type": "string" },
-                          "Folder": { "type": "string" },
-                          "MimeType": { "type": "string" },
-                          "SiteUniqueId": { "type": "string" }
-                        },
-                        "required": [ "BlobKey", "MimeType", "Extension", "Folder", "SiteUniqueId" ],
-                        "type": "object"
+                "Validate-Scope-Attachments-List": {
+                  "actions": {
+                    "Parse-Attachments-List": {
+                      "inputs": {
+                        "content": "@body('Get-Attachments-List')",
+                        "schema": {
+                          "items": {
+                            "properties": {
+                              "BlobKey": {
+                                "type": "string"
+                              },
+                              "Extension": {
+                                "type": "string"
+                              },
+                              "Folder": {
+                                "type": "string"
+                              },
+                              "MimeType": {
+                                "type": "string"
+                              },
+                              "SiteUniqueId": {
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "BlobKey",
+                              "MimeType",
+                              "Extension",
+                              "Folder",
+                              "SiteUniqueId"
+                            ],
+                            "type": "object"
+                          },
+                          "type": "array"
+                        }
                       },
-                      "type": "array"
+                      "runAfter": {},
+                      "type": "ParseJson"
+                    },
+                    "Set-Control-Attachments-List": {
+                      "inputs": {
+                        "name": "Control-Attachments",
+                        "value": "@body('Parse-Attachments-List')"
+                      },
+                      "runAfter": {
+                        "Parse-Attachments-List": [
+                          "Succeeded"
+                        ]
+                      },
+                      "type": "SetVariable"
                     }
                   },
-                  "runAfter": { "Get-Attachments-List": [ "Succeeded" ] },
-                  "type": "ParseJson"
-                },
-                "Set-Control-Attachments-List": {
-                  "inputs": {
-                    "name": "Control-Attachments",
-                    "value": "@body('Parse-Attachments-List')"
+                  "else": {
+                    "actions": {
+                      "Set-Scope-Attachments-List-Fail": {
+                        "inputs": {
+                          "name": "Control-Error",
+                          "value": "@int('__ERROR__')"
+                        },
+                        "runAfter": {
+                          "Set-Scope-Attachments-List-Fail-Message": [
+                            "Succeeded"
+                          ]
+                        },
+                        "type": "SetVariable"
+                      },
+                      "Set-Scope-Attachments-List-Fail-Message": {
+                        "inputs": {
+                          "name": "Control-Error-Message",
+                          "value": "Failed to get the attachments list to downlaod attachment files."
+                        },
+                        "runAfter": {},
+                        "type": "SetVariable"
+                      }
+                    }
                   },
-                  "runAfter": { "Parse-Attachments-List": [ "Succeeded" ] },
-                  "type": "SetVariable"
+                  "expression": {
+                    "and": [
+                      {
+                        "equals": [
+                          "@outputs('Get-Attachments-List')['statusCode']",
+                          200
+                        ]
+                      }
+                    ]
+                  },
+                  "runAfter": {
+                    "Get-Attachments-List": [
+                      "Succeeded"
+                    ]
+                  },
+                  "type": "If"
                 }
               },
-              "runAfter": { "Scope-Update-Status-Extract": [ "Succeeded" ] },
+              "runAfter": {
+                "Scope-Update-Status-Extract": [
+                  "Succeeded"
+                ]
+              },
               "type": "Scope"
             },
             "Scope-Entities": {
               "actions": {
-                "For_each_ApiEntitiesToPull": {
+                "For-Each-Entity": {
                   "actions": {
-                    "Loop_through_pages": {
+                    "For-Each-Page": {
                       "actions": {
                         "Get-Entity-Page": {
+                          "description": "Call the entity endpoint and ask for as much as it will allow",
                           "inputs": {
-                            "headers": { "Accept": "application/json" },
+                            "headers": {
+                              "Accept": "application/json"
+                            },
                             "method": "GET",
                             "queries": {
                               "Page": "@{variables('Control-Page')}",
@@ -540,15 +792,55 @@
                               "format": "json",
                               "jsconfig": "dh:iso8601"
                             },
-                            "retryPolicy": { "type": "none" },
-                            "uri": "@{parameters('SourceEndpoint')}@{items('For_each_ApiEntitiesToPull')}"
+                            "retryPolicy": {
+                              "type": "none"
+                            },
+                            "uri": "@{parameters('SourceEndpoint')}@{items('For-Each-Entity')}"
                           },
                           "runAfter": {},
                           "type": "Http"
                         },
-                        "If-Entities-Received": {
+                        "Increment-Control-Page": {
+                          "inputs": {
+                            "name": "Control-Page",
+                            "value": 1
+                          },
+                          "runAfter": {
+                            "Parse-Entity-Page": [
+                              "Succeeded"
+                            ]
+                          },
+                          "type": "IncrementVariable"
+                        },
+                        "Parse-Entity-Page": {
+                          "inputs": {
+                            "content": "@body('Get-Entity-Page')",
+                            "schema": {
+                              "properties": {
+                                "Infos": {
+                                  "items": {
+                                    "type": "object"
+                                  },
+                                  "type": "array"
+                                },
+                                "Success": {
+                                  "type": "boolean"
+                                }
+                              },
+                              "type": "object"
+                            }
+                          },
+                          "runAfter": {
+                            "Get-Entity-Page": [
+                              "Succeeded"
+                            ]
+                          },
+                          "type": "ParseJson"
+                        },
+                        "Validate-Get-Entity-Page": {
                           "actions": {
                             "Post-Entity-Page": {
+                              "description": "Post the received entities to the target API",
                               "inputs": {
                                 "body": "@body('Parse-Entity-Page')?['Infos']",
                                 "headers": {
@@ -559,16 +851,63 @@
                                   "X-Run-Identifier": "@variables('Control-Started')"
                                 },
                                 "method": "POST",
-                                "retryPolicy": { "type": "none" },
-                                "uri": "@{parameters('TargetEndpoint')}@{items('For_each_ApiEntitiesToPull')}"
+                                "retryPolicy": {
+                                  "type": "none"
+                                },
+                                "uri": "@{parameters('TargetEndpoint')}@{items('For-Each-Entity')}"
                               },
                               "runAfter": {},
                               "type": "Http"
+                            },
+                            "Validate-Post-Entity-Page": {
+                              "actions": {},
+                              "description": "Check the call worked",
+                              "else": {
+                                "actions": {
+                                  "Set-Post-Entity-Page-Fail": {
+                                    "inputs": {
+                                      "name": "Control-Error",
+                                      "value": "@int('__ERROR__')"
+                                    },
+                                    "runAfter": {
+                                      "Set-Post-Entity-Page-Fail-Message": [
+                                        "Succeeded"
+                                      ]
+                                    },
+                                    "type": "SetVariable"
+                                  },
+                                  "Set-Post-Entity-Page-Fail-Message": {
+                                    "inputs": {
+                                      "name": "Control-Error-Message",
+                                      "value": "Failed posting entities (@{items('For-Each-Entity')}) to Target API:\n@{outputs('Post-Entity-Page')['headers']}\n@{body('Post-Entity-Page')}\n@{outputs('Post-Entity-Page')['statusCode']}\n"
+                                    },
+                                    "runAfter": {},
+                                    "type": "SetVariable"
+                                  }
+                                }
+                              },
+                              "expression": {
+                                "and": [
+                                  {
+                                    "equals": [
+                                      "",
+                                      202
+                                    ]
+                                  }
+                                ]
+                              },
+                              "runAfter": {
+                                "Post-Entity-Page": [
+                                  "Succeeded"
+                                ]
+                              },
+                              "type": "If"
                             }
                           },
                           "else": {
                             "actions": {
                               "Set-Control-Continue-False": {
+                                "description": "As there are no more entity members we stop processing this entity",
                                 "inputs": {
                                   "name": "Control-Continue",
                                   "value": "@false"
@@ -578,42 +917,35 @@
                               }
                             }
                           },
-                          "expression": { "and": [ { "greater": [ "@length(body('Parse-Entity-Page')['Infos'])", 0 ] } ] },
-                          "runAfter": { "Increment-Control-Page": [ "Succeeded" ] },
+                          "expression": {
+                            "and": [
+                              {
+                                "greater": [
+                                  "@length(body('Parse-Entity-Page')['Infos'])",
+                                  0
+                                ]
+                              }
+                            ]
+                          },
+                          "runAfter": {
+                            "Increment-Control-Page": [
+                              "Succeeded"
+                            ]
+                          },
                           "type": "If"
-                        },
-                        "Increment-Control-Page": {
-                          "inputs": {
-                            "name": "Control-Page",
-                            "value": 1
-                          },
-                          "runAfter": { "Parse-Entity-Page": [ "Succeeded" ] },
-                          "type": "IncrementVariable"
-                        },
-                        "Parse-Entity-Page": {
-                          "inputs": {
-                            "content": "@body('Get-Entity-Page')",
-                            "schema": {
-                              "properties": {
-                                "Infos": {
-                                  "items": { "type": "object" },
-                                  "type": "array"
-                                },
-                                "Success": { "type": "boolean" }
-                              },
-                              "type": "object"
-                            }
-                          },
-                          "runAfter": { "Get-Entity-Page": [ "Succeeded" ] },
-                          "type": "ParseJson"
                         }
                       },
+                      "description": "Process the entity's pages",
                       "expression": "@equals(variables('Control-Continue'), false)",
                       "limit": {
                         "count": 5000,
                         "timeout": "PT1H"
                       },
-                      "runAfter": { "Set-Control-Page-1": [ "Succeeded" ] },
+                      "runAfter": {
+                        "Set-Control-Page-1": [
+                          "Succeeded"
+                        ]
+                      },
                       "type": "Until"
                     },
                     "Set-Control-Continue-True": {
@@ -629,58 +961,36 @@
                         "name": "Control-Page",
                         "value": 1
                       },
-                      "runAfter": { "Set-Control-Continue-True": [ "Succeeded" ] },
+                      "runAfter": {
+                        "Set-Control-Continue-True": [
+                          "Succeeded"
+                        ]
+                      },
                       "type": "SetVariable"
                     }
                   },
+                  "description": "Process the entities list",
                   "foreach": "@parameters('SourceEntities')",
                   "runAfter": {},
-                  "runtimeConfiguration": { "concurrency": { "repetitions": 1 } },
+                  "runtimeConfiguration": {
+                    "concurrency": {
+                      "repetitions": 1
+                    }
+                  },
                   "type": "Foreach"
                 }
               },
-              "runAfter": { "Scope-Update-Status-Entities": [ "Succeeded" ] },
+              "description": "Download all of the entities which we have not yet had changes for.",
+              "runAfter": {
+                "Scope-Update-Status-Entities": [
+                  "Succeeded"
+                ]
+              },
               "type": "Scope"
             },
             "Scope-Get-Secrets": {
               "actions": {
-                "Get_cdc-events-subscription-key": {
-                  "inputs": {
-                    "authentication": {
-                      "audience": "@parameters('SecretsAudience')",
-                      "type": "ManagedServiceIdentity"
-                    },
-                    "method": "GET",
-                    "uri": "@parameters('TargetOAUTHKeyUri')"
-                  },
-                  "runAfter": { "Set-SourceOAUTHSecret": [ "Succeeded" ] },
-                  "type": "Http"
-                },
-                "Get_cdc-events-token-request-payload": {
-                  "inputs": {
-                    "authentication": {
-                      "audience": "@parameters('SecretsAudience')",
-                      "type": "ManagedServiceIdentity"
-                    },
-                    "method": "GET",
-                    "uri": "@parameters('TargetOAUTHCredentialsUri')"
-                  },
-                  "runAfter": { "Set-TargetOAUTHKey": [ "Succeeded" ] },
-                  "type": "Http"
-                },
-                "Get_kycloud-api-password_from_KeyVault": {
-                  "inputs": {
-                    "authentication": {
-                      "audience": "@parameters('SecretsAudience')",
-                      "type": "ManagedServiceIdentity"
-                    },
-                    "method": "GET",
-                    "uri": "@parameters('SourceOAUTHSecretUri')"
-                  },
-                  "runAfter": { "Set-SourceOAUTHKey": [ "Succeeded" ] },
-                  "type": "Http"
-                },
-                "Get_kycloud-api-token_from_KeyVault": {
+                "Get-SourceOAUTHKey": {
                   "inputs": {
                     "authentication": {
                       "audience": "@parameters('SecretsAudience')",
@@ -692,80 +1002,176 @@
                   "runAfter": {},
                   "type": "Http"
                 },
-                "Parse_cdc-events-subscription-key": {
+                "Get-SourceOAUTHSecret": {
                   "inputs": {
-                    "content": "@body('Get_cdc-events-subscription-key')",
+                    "authentication": {
+                      "audience": "@parameters('SecretsAudience')",
+                      "type": "ManagedServiceIdentity"
+                    },
+                    "method": "GET",
+                    "uri": "@parameters('SourceOAUTHSecretUri')"
+                  },
+                  "runAfter": {
+                    "Set-SourceOAUTHKey": [
+                      "Succeeded"
+                    ]
+                  },
+                  "type": "Http"
+                },
+                "Get-TargetOAUTHCredentials": {
+                  "inputs": {
+                    "authentication": {
+                      "audience": "@parameters('SecretsAudience')",
+                      "type": "ManagedServiceIdentity"
+                    },
+                    "method": "GET",
+                    "uri": "@parameters('TargetOAUTHCredentialsUri')"
+                  },
+                  "runAfter": {
+                    "Set-TargetOAUTHKey": [
+                      "Succeeded"
+                    ]
+                  },
+                  "type": "Http"
+                },
+                "Get-TargetOAUTHKey": {
+                  "inputs": {
+                    "authentication": {
+                      "audience": "@parameters('SecretsAudience')",
+                      "type": "ManagedServiceIdentity"
+                    },
+                    "method": "GET",
+                    "uri": "@parameters('TargetOAUTHKeyUri')"
+                  },
+                  "runAfter": {
+                    "Set-SourceOAUTHSecret": [
+                      "Succeeded"
+                    ]
+                  },
+                  "type": "Http"
+                },
+                "Parse-SourceOAUTHKey": {
+                  "inputs": {
+                    "content": "@body('Get-SourceOAUTHKey')",
                     "schema": {
-                      "properties": { "value": { "type": "string" } },
+                      "properties": {
+                        "value": {
+                          "type": "string"
+                        }
+                      },
                       "type": "object"
                     }
                   },
-                  "runAfter": { "Get_cdc-events-subscription-key": [ "Succeeded" ] },
+                  "runAfter": {
+                    "Get-SourceOAUTHKey": [
+                      "Succeeded"
+                    ]
+                  },
                   "type": "ParseJson"
                 },
-                "Parse_cdc-events-token-request-payload": {
+                "Parse-SourceOAUTHSecret": {
                   "inputs": {
-                    "content": "@body('Get_cdc-events-token-request-payload')",
+                    "content": "@body('Get-SourceOAUTHSecret')",
                     "schema": {
-                      "properties": { "value": { "type": "string" } },
+                      "properties": {
+                        "value": {
+                          "type": "string"
+                        }
+                      },
                       "type": "object"
                     }
                   },
-                  "runAfter": { "Get_cdc-events-token-request-payload": [ "Succeeded" ] },
+                  "runAfter": {
+                    "Get-SourceOAUTHSecret": [
+                      "Succeeded"
+                    ]
+                  },
                   "type": "ParseJson"
                 },
-                "Parse_kycloud-api-password": {
+                "Parse-TargetOAUTHCredentials": {
                   "inputs": {
-                    "content": "@body('Get_kycloud-api-password_from_KeyVault')",
+                    "content": "@body('Get-TargetOAUTHCredentials')",
                     "schema": {
-                      "properties": { "value": { "type": "string" } },
+                      "properties": {
+                        "value": {
+                          "type": "string"
+                        }
+                      },
                       "type": "object"
                     }
                   },
-                  "runAfter": { "Get_kycloud-api-password_from_KeyVault": [ "Succeeded" ] },
+                  "runAfter": {
+                    "Get-TargetOAUTHCredentials": [
+                      "Succeeded"
+                    ]
+                  },
                   "type": "ParseJson"
                 },
-                "Parse_kycloud-api-token": {
+                "Parse-TargetOAUTHKey": {
                   "inputs": {
-                    "content": "@body('Get_kycloud-api-token_from_KeyVault')",
+                    "content": "@body('Get-TargetOAUTHKey')",
                     "schema": {
-                      "properties": { "value": { "type": "string" } },
+                      "properties": {
+                        "value": {
+                          "type": "string"
+                        }
+                      },
                       "type": "object"
                     }
                   },
-                  "runAfter": { "Get_kycloud-api-token_from_KeyVault": [ "Succeeded" ] },
+                  "runAfter": {
+                    "Get-TargetOAUTHKey": [
+                      "Succeeded"
+                    ]
+                  },
                   "type": "ParseJson"
                 },
                 "Set-SourceOAUTHKey": {
                   "inputs": {
                     "name": "SourceOAUTHKey",
-                    "value": "@body('Parse_kycloud-api-token')?['value']"
+                    "value": "@body('Parse-SourceOAUTHKey')?['value']"
                   },
-                  "runAfter": { "Parse_kycloud-api-token": [ "Succeeded" ] },
+                  "runAfter": {
+                    "Parse-SourceOAUTHKey": [
+                      "Succeeded"
+                    ]
+                  },
                   "type": "SetVariable"
                 },
                 "Set-SourceOAUTHSecret": {
                   "inputs": {
                     "name": "SourceOAUTHSecret",
-                    "value": "@body('Parse_kycloud-api-password')?['value']"
+                    "value": "@body('Parse-SourceOAUTHSecret')?['value']"
                   },
-                  "runAfter": { "Parse_kycloud-api-password": [ "Succeeded" ] },
+                  "runAfter": {
+                    "Parse-SourceOAUTHSecret": [
+                      "Succeeded"
+                    ]
+                  },
                   "type": "SetVariable"
                 },
                 "Set-TargetOAUTHCredentials": {
                   "inputs": {
                     "name": "TargetOAUTHCredentials",
-                    "value": "@body('Parse_cdc-events-token-request-payload')?['value']"
+                    "value": "@body('Parse-TargetOAUTHCredentials')?['value']"
                   },
-                  "runAfter": { "Parse_cdc-events-token-request-payload": [ "Succeeded" ] },
+                  "runAfter": {
+                    "Parse-TargetOAUTHCredentials": [
+                      "Succeeded"
+                    ]
+                  },
                   "type": "SetVariable"
                 },
                 "Set-TargetOAUTHKey": {
                   "inputs": {
                     "name": "TargetOAUTHKey",
-                    "value": "@body('Parse_cdc-events-subscription-key')?['value']"
+                    "value": "@body('Parse-TargetOAUTHKey')?['value']"
                   },
-                  "runAfter": { "Parse_cdc-events-subscription-key": [ "Succeeded" ] },
+                  "runAfter": {
+                    "Parse-TargetOAUTHKey": [
+                      "Succeeded"
+                    ]
+                  },
                   "type": "SetVariable"
                 },
                 "Validate-Secrets": {
@@ -777,7 +1183,11 @@
                           "name": "Control-Error",
                           "value": "@int('__ERROR__')"
                         },
-                        "runAfter": { "Scope-Get-Secrets-Fail-Message": [ "Succeeded" ] },
+                        "runAfter": {
+                          "Scope-Get-Secrets-Fail-Message": [
+                            "Succeeded"
+                          ]
+                        },
                         "type": "SetVariable"
                       },
                       "Scope-Get-Secrets-Fail-Message": {
@@ -792,30 +1202,86 @@
                   },
                   "expression": {
                     "and": [
-                      { "not": { "equals": [ "@variables('SourceOAUTHKey')", "@null" ] } },
-                      { "not": { "equals": [ "@variables('SourceOAUTHSecret')", "" ] } },
-                      { "not": { "equals": [ "@variables('TargetOAUTHKey')", "" ] } },
-                      { "not": { "equals": [ "@variables('TargetOAUTHCredentials')", "" ] } }
+                      {
+                        "not": {
+                          "equals": [
+                            "@variables('SourceOAUTHKey')",
+                            "@null"
+                          ]
+                        }
+                      },
+                      {
+                        "not": {
+                          "equals": [
+                            "@variables('SourceOAUTHSecret')",
+                            ""
+                          ]
+                        }
+                      },
+                      {
+                        "not": {
+                          "equals": [
+                            "@variables('TargetOAUTHKey')",
+                            ""
+                          ]
+                        }
+                      },
+                      {
+                        "not": {
+                          "equals": [
+                            "@variables('TargetOAUTHCredentials')",
+                            ""
+                          ]
+                        }
+                      }
                     ]
                   },
-                  "runAfter": { "Set-TargetOAUTHCredentials": [ "Succeeded" ] },
+                  "runAfter": {
+                    "Set-TargetOAUTHCredentials": [
+                      "Succeeded"
+                    ]
+                  },
                   "type": "If"
                 }
               },
-              "runAfter": { "Init-Control-Attachments": [ "Succeeded" ] },
+              "runAfter": {
+                "Init-Control-Attachments": [
+                  "Succeeded"
+                ]
+              },
               "type": "Scope"
             },
             "Scope-Report": {
               "actions": {
-                "If-Control-Status-Success": {
-                  "actions": {},
+                "Validate-Scope-Report": {
+                  "actions": {
+                    "Set-Control-Error-Message-Success": {
+                      "inputs": {
+                        "name": "Control-Error-Message",
+                        "value": "Process completed successfully."
+                      },
+                      "runAfter": {},
+                      "type": "SetVariable"
+                    },
+                    "Success": {
+                      "inputs": {
+                        "runStatus": "Succeeded"
+                      },
+                      "runAfter": {
+                        "Set-Control-Error-Message-Success": [
+                          "Succeeded"
+                        ]
+                      },
+                      "type": "Terminate"
+                    }
+                  },
                   "else": {
                     "actions": {
-                      "Terminate": {
+                      "Fail": {
                         "inputs": {
                           "runError": {
                             "code": "1",
-                            "message": "Termianted after failure"
+                            "message": "Termianted after failure: @{variables('Control-Error-Message')}"
                           },
                           "runStatus": "Failed"
                         },
@@ -824,13 +1290,29 @@
                       }
                     }
                   },
-                  "expression": { "and": [ { "equals": [ "@variables('Control-Status')", "@parameters('StatusReporting')" ] } ] },
+                  "expression": {
+                    "and": [
+                      {
+                        "equals": [
+                          "@variables('Control-Status')",
+                          "@parameters('StatusReporting')"
+                        ]
+                      }
+                    ]
+                  },
                   "runAfter": {},
                   "type": "If"
                 }
               },
               "description": "To send notification via email on results of the run.",
-              "runAfter": { "Scope-Update-Status-Transform": [ "Succeeded", "TimedOut", "Skipped", "Failed" ] },
+              "runAfter": {
+                "Scope-Update-Status-Transform": [
+                  "Succeeded",
+                  "TimedOut",
+                  "Skipped",
+                  "Failed"
+                ]
+              },
               "type": "Scope"
             },
             "Scope-Source-OAUTH": {
@@ -838,7 +1320,9 @@
                 "Get-SourceOAUTHToken": {
                   "description": "Perform a login API call to the source data provider",
                   "inputs": {
-                    "headers": { "Accept": "application/json" },
+                    "headers": {
+                      "Accept": "application/json"
+                    },
                     "method": "POST",
                     "queries": {
                       "ApiToken": "@variables('SourceOAUTHKey')",
@@ -850,57 +1334,128 @@
                   "runAfter": {},
                   "type": "Http"
                 },
-                "Parse-SourceOAUTHToken": {
-                  "inputs": {
-                    "content": "@body('Get-SourceOAUTHToken')",
-                    "schema": {
-                      "properties": {
-                        "SessionId": { "type": "string" },
-                        "Success": { "type": "boolean" }
-                      },
-                      "type": "object"
-                    }
-                  },
-                  "runAfter": { "Get-SourceOAUTHToken": [ "Succeeded" ] },
-                  "type": "ParseJson"
-                },
                 "Validate-SourceOAUTHToken-Request": {
                   "actions": {
+                    "Parse-SourceOAUTHToken": {
+                      "inputs": {
+                        "content": "@body('Get-SourceOAUTHToken')",
+                        "schema": {
+                          "properties": {
+                            "SessionId": {
+                              "type": "string"
+                            },
+                            "Success": {
+                              "type": "boolean"
+                            }
+                          },
+                          "type": "object"
+                        }
+                      },
+                      "runAfter": {},
+                      "type": "ParseJson"
+                    },
                     "Set-SourceOAUTHToken": {
                       "inputs": {
                         "name": "SourceOAUTHToken",
                         "value": "@body('Parse-SourceOAUTHToken')?['SessionId']"
                       },
-                      "runAfter": {},
+                      "runAfter": {
+                        "Parse-SourceOAUTHToken": [
+                          "Succeeded"
+                        ]
+                      },
                       "type": "SetVariable"
                     }
                   },
                   "else": {
                     "actions": {
-                      "Scope-Source-Error-Fail-SourceOAUTH": {
+                      "Set-Scope-Source-OAUTH-Fail": {
                         "description": "Throws an error which deflects to last Scope",
                         "inputs": {
                           "name": "Control-Error",
                           "value": "@int('__FAIL__')"
+                        },
+                        "runAfter": {
+                          "Set-Scope-Source-OAUTH-Fail-Message": [
+                            "Succeeded"
+                          ]
+                        },
+                        "type": "SetVariable"
+                      },
+                      "Set-Scope-Source-OAUTH-Fail-Message": {
+                        "inputs": {
+                          "name": "Control-Error-Message",
+                          "value": "Failed to obtain the source API authorisation token (sessionId)"
                         },
                         "runAfter": {},
                         "type": "SetVariable"
                       }
                     }
                   },
-                  "expression": { "and": [ { "equals": [ "@body('Parse-SourceOAUTHToken')?['Success']", true ] } ] },
-                  "runAfter": { "Parse-SourceOAUTHToken": [ "Succeeded" ] },
+                  "expression": {
+                    "and": [
+                      {
+                        "equals": [
+                          "@outputs('Record-Control-Status-Source-Login')['statusCode']",
+                          202
+                        ]
+                      }
+                    ]
+                  },
+                  "runAfter": {
+                    "Get-SourceOAUTHToken": [
+                      "Succeeded"
+                    ]
+                  },
                   "type": "If"
                 }
               },
-              "runAfter": { "Scope-Update-Status-Source-Login": [ "Succeeded" ] },
+              "runAfter": {
+                "Scope-Update-Status-Source-Login": [
+                  "Succeeded"
+                ]
+              },
               "type": "Scope"
             },
             "Scope-Source-OAUTH-Refresh": {
               "actions": {
-                "If-Source-OAUTH-Refresh-Success": {
+                "Source-OAUTH-Refresh": {
+                  "inputs": {
+                    "headers": {
+                      "Accept": "application/json"
+                    },
+                    "method": "POST",
+                    "queries": {
+                      "ApiToken": "@variables('SourceOAUTHKey')",
+                      "Email": "@parameters('SourceOAUTHId')",
+                      "Password": "@variables('SourceOAUTHSecret')"
+                    },
+                    "uri": "@parameters('SourceOAUTHEndpoint')"
+                  },
+                  "runAfter": {},
+                  "type": "Http"
+                },
+                "Validate-Scope-Source-OAUTH-Refresh": {
                   "actions": {
-                    "If-Parse-Source-OAUTH-Refresh-Token-Success": {
+                    "Parse-Source-OAUTH-Refresh": {
+                      "inputs": {
+                        "content": "@body('Source-OAUTH-Refresh')",
+                        "schema": {
+                          "properties": {
+                            "SessionId": {
+                              "type": "string"
+                            },
+                            "Success": {
+                              "type": "boolean"
+                            }
+                          },
+                          "type": "object"
+                        }
+                      },
+                      "runAfter": {},
+                      "type": "ParseJson"
+                    },
+                    "Validate-Parse-Source-OAUTH-Refresh": {
                       "actions": {
                         "Set-SourceOAUTHToken-Again": {
                           "inputs": {
@@ -913,69 +1468,95 @@
                       },
                       "else": {
                         "actions": {
-                          "Scope-Source-OAUTH-Refresh-Fail-Parse": {
+                          "Set-Parse-Source-OAUTH-Refresh-Fail": {
                             "description": "Throw error because re login parse of data failed",
                             "inputs": {
                               "name": "Control-Error",
                               "value": "@int('__FAIL__')"
+                            },
+                            "runAfter": {
+                              "Set-Parse-Source-OAUTH-Refresh-Fail-Message": [
+                                "Succeeded"
+                              ]
+                            },
+                            "type": "SetVariable"
+                          },
+                          "Set-Parse-Source-OAUTH-Refresh-Fail-Message": {
+                            "inputs": {
+                              "name": "Control-Error-Message",
+                              "value": "Failed to parse the source login token."
                             },
                             "runAfter": {},
                             "type": "SetVariable"
                           }
                         }
                       },
-                      "expression": { "and": [ { "equals": [ "@body('Parse-Source-OAUTH-Refresh')?['Success']", true ] } ] },
-                      "runAfter": { "Parse-Source-OAUTH-Refresh": [ "Succeeded" ] },
-                      "type": "If"
-                    },
-                    "Parse-Source-OAUTH-Refresh": {
-                      "inputs": {
-                        "content": "@body('Source-OAUTH-Refresh')",
-                        "schema": {
-                          "properties": {
-                            "SessionId": { "type": "string" },
-                            "Success": { "type": "boolean" }
-                          },
-                          "type": "object"
-                        }
+                      "expression": {
+                        "and": [
+                          {
+                            "equals": [
+                              "@body('Parse-Source-OAUTH-Refresh')?['Success']",
+                              true
+                            ]
+                          }
+                        ]
                       },
-                      "runAfter": {},
-                      "type": "ParseJson"
+                      "runAfter": {
+                        "Parse-Source-OAUTH-Refresh": [
+                          "Succeeded"
+                        ]
+                      },
+                      "type": "If"
                     }
                   },
                   "else": {
                     "actions": {
-                      "Scope-Source-OAUTH-Refresh-Fail-Status": {
+                      "Set-Scope-Source-OAUTH-Refresh-Fail": {
                         "description": "Throw and error because the re login failed with bad http status",
                         "inputs": {
                           "name": "Control-Error",
                           "value": "@int('__ERROR__')"
+                        },
+                        "runAfter": {
+                          "Set-Scope-Source-OAUTH-Refresh-Fail-Message": [
+                            "Succeeded"
+                          ]
+                        },
+                        "type": "SetVariable"
+                      },
+                      "Set-Scope-Source-OAUTH-Refresh-Fail-Message": {
+                        "inputs": {
+                          "name": "Control-Error-Message",
+                          "value": "Failed to re-authenticate with the source API.\n@{outputs('Source-OAUTH-Refresh')['headers']}\n@{body('Source-OAUTH-Refresh')}\n@{outputs('Source-OAUTH-Refresh')['statusCode']}"
                         },
                         "runAfter": {},
                         "type": "SetVariable"
                       }
                     }
                   },
-                  "expression": { "and": [ { "equals": [ "@outputs('Source-OAUTH-Refresh')['statusCode']", 200 ] } ] },
-                  "runAfter": { "Source-OAUTH-Refresh": [ "Succeeded" ] },
-                  "type": "If"
-                },
-                "Source-OAUTH-Refresh": {
-                  "inputs": {
-                    "headers": { "Accept": "application/json" },
-                    "method": "POST",
-                    "queries": {
-                      "ApiToken": "@variables('SourceOAUTHKey')",
-                      "Email": "@parameters('SourceOAUTHId')",
-                      "Password": "@variables('SourceOAUTHSecret')"
-                    },
-                    "uri": "@parameters('SourceOAUTHEndpoint')"
+                  "expression": {
+                    "and": [
+                      {
+                        "equals": [
+                          "@outputs('Source-OAUTH-Refresh')['statusCode']",
+                          200
+                        ]
+                      }
+                    ]
                   },
-                  "runAfter": {},
-                  "type": "Http"
+                  "runAfter": {
+                    "Source-OAUTH-Refresh": [
+                      "Succeeded"
+                    ]
+                  },
+                  "type": "If"
                 }
               },
-              "runAfter": { "Scope-Attachments-List": [ "Succeeded" ] },
+              "runAfter": {
+                "Scope-Attachments-List": [
+                  "Succeeded"
+                ]
+              },
               "type": "Scope"
             },
             "Scope-Start-Status": {
@@ -994,26 +1575,78 @@
                   "runAfter": {},
                   "type": "Http"
                 },
-                "Set-Control-Since": {
-                  "description": "Set the Since date and time according to the returned value of the last successful run",
-                  "inputs": {
-                    "name": "Control-Since",
-                    "value": "@{outputs('Record-Control-Status-Start')['headers']?['X-Run-Since']}"
+                "Validate-Scope-Start-Status": {
+                  "actions": {
+                    "Set-Control-Since": {
+                      "description": "Set the Since date and time according to the returned value of the last successful run",
+                      "inputs": {
+                        "name": "Control-Since",
+                        "value": "@{outputs('Record-Control-Status-Start')['headers']?['X-Run-Since']}"
+                      },
+                      "runAfter": {
+                        "Set-Control-Started": [
+                          "Succeeded"
+                        ]
+                      },
+                      "type": "SetVariable"
+                    },
+                    "Set-Control-Started": {
+                      "description": "Set the started date and time using the returned value to get SQL adjusted milliseconds",
+                      "inputs": {
+                        "name": "Control-Started",
+                        "value": "@{outputs('Record-Control-Status-Start')['headers']?['X-Run-Identifier']}"
+                      },
+                      "runAfter": {},
+                      "type": "SetVariable"
+                    }
                   },
-                  "runAfter": { "Set-Control-Started": [ "Succeeded" ] },
-                  "type": "SetVariable"
-                },
-                "Set-Control-Started": {
-                  "description": "Set the started date and time using the returned value to get SQL adjusted milliseconds",
-                  "inputs": {
-                    "name": "Control-Started",
-                    "value": "@{outputs('Record-Control-Status-Start')['headers']?['X-Run-Identifier']}"
+                  "else": {
+                    "actions": {
+                      "Set-Scope-Start-Status-Fail": {
+                        "inputs": {
+                          "name": "Control-Error",
+                          "value": "@int('__ERROR__')"
+                        },
+                        "runAfter": {
+                          "Set-Scope-Start-Status-Fail-Message": [
+                            "Succeeded"
+                          ]
+                        },
+                        "type": "SetVariable"
+                      },
+                      "Set-Scope-Start-Status-Fail-Message": {
+                        "inputs": {
+                          "name": "Control-Error-Message",
+                          "value": "Failed to record the process start"
+                        },
+                        "runAfter": {},
+                        "type": "SetVariable"
+                      }
+                    }
                   },
-                  "runAfter": { "Record-Control-Status-Start": [ "Succeeded" ] },
-                  "type": "SetVariable"
+                  "expression": {
+                    "and": [
+                      {
+                        "equals": [
+                          "@outputs('Record-Control-Status-Start')['statusCode']",
+                          201
+                        ]
+                      }
+                    ]
+                  },
+                  "runAfter": {
+                    "Record-Control-Status-Start": [
+                      "Succeeded"
+                    ]
+                  },
+                  "type": "If"
                 }
               },
-              "runAfter": { "Scope-Target-OAUTH": [ "Succeeded" ] },
+              "runAfter": {
+                "Scope-Target-OAUTH": [
+                  "Succeeded"
+                ]
+              },
               "type": "Scope"
             },
             "Scope-Target-OAUTH": {
@@ -1021,34 +1654,46 @@
                 "Get-TargetOAUTHToken": {
                   "inputs": {
                     "body": "@variables('TargetOAUTHCredentials')",
-                    "headers": { "Content-Type": "application/x-www-form-urlencoded" },
+                    "headers": {
+                      "Content-Type": "application/x-www-form-urlencoded"
+                    },
                     "method": "POST",
                     "uri": "@parameters('TargetOAUTHEndpoint')"
                   },
                   "runAfter": {},
                   "type": "Http"
                 },
-                "Parse-TargetOAUTHToken": {
-                  "inputs": {
-                    "content": "@body('Get-TargetOAUTHToken')",
-                    "schema": {
-                      "properties": { "access_token": { "type": "string" } },
-                      "type": "object"
+                "Validate-Scope-Target-OAUTH": {
+                  "actions": {
+                    "Parse-TargetOAUTHToken": {
+                      "inputs": {
+                        "content": "@body('Get-TargetOAUTHToken')",
+                        "schema": {
+                          "properties": {
+                            "access_token": {
+                              "type": "string"
+                            }
+                          },
+                          "type": "object"
+                        }
+                      },
+                      "runAfter": {},
+                      "type": "ParseJson"
+                    },
+                    "Set-TargetOAUTHToken": {
+                      "inputs": {
+                        "name": "TargetOAUTHToken",
+                        "value": "@body('Parse-TargetOAUTHToken')?['access_token']"
+                      },
+                      "runAfter": {
+                        "Parse-TargetOAUTHToken": [
+                          "Succeeded"
+                        ]
+                      },
+                      "type": "SetVariable"
                     }
                   },
-                  "runAfter": { "Validate-Scope-Target-OAUTH": [ "Succeeded" ] },
-                  "type": "ParseJson"
-                },
-                "Set-TargetOAUTHToken": {
-                  "inputs": {
-                    "name": "TargetOAUTHToken",
-                    "value": "@body('Parse-TargetOAUTHToken')?['access_token']"
-                  },
-                  "runAfter": { "Parse-TargetOAUTHToken": [ "Succeeded" ] },
-                  "type": "SetVariable"
-                },
-                "Validate-Scope-Target-OAUTH": {
-                  "actions": {},
+                  "description": "Check that the status code is correct",
                   "else": {
                     "actions": {
                       "Set-Scope-Target-OAUTH-Fail": {
@@ -1056,7 +1701,11 @@
                           "name": "Control-Error",
                           "value": "@int('__ERROR__')"
                         },
-                        "runAfter": { "Set-Scope-Target-OAUTH-Fail-Message": [ "Succeeded" ] },
+                        "runAfter": {
+                          "Set-Scope-Target-OAUTH-Fail-Message": [
+                            "Succeeded"
+                          ]
+                        },
                         "type": "SetVariable"
                       },
                       "Set-Scope-Target-OAUTH-Fail-Message": {
@@ -1069,12 +1718,30 @@
                       }
                     }
                   },
-                  "expression": { "and": [ { "equals": [ "@outputs('Get-TargetOAUTHToken')['statusCode']", 200 ] } ] },
-                  "runAfter": { "Get-TargetOAUTHToken": [ "Succeeded" ] },
+                  "expression": {
+                    "and": [
+                      {
+                        "equals": [
+                          "@outputs('Get-TargetOAUTHToken')['statusCode']",
+                          200
+                        ]
+                      }
+                    ]
+                  },
+                  "runAfter": {
+                    "Get-TargetOAUTHToken": [
+                      "Succeeded"
+                    ]
+                  },
                   "type": "If"
                 }
               },
-              "runAfter": { "Scope-Get-Secrets": [ "Succeeded" ] },
+              "description": "Connect up to azure and get a target authorisation token",
+              "runAfter": {
+                "Scope-Get-Secrets": [
+                  "Succeeded"
+                ]
+              },
               "type": "Scope"
             },
             "Scope-Update-Status-Entities": {
@@ -1091,7 +1758,11 @@
                     "method": "PATCH",
                     "uri": "@parameters('TargetControlEndpoint')"
                   },
-                  "runAfter": { "Set-Control-Status-Entities": [ "Succeeded" ] },
+                  "runAfter": {
+                    "Set-Control-Status-Entities": [
+                      "Succeeded"
+                    ]
+                  },
                   "type": "Http"
                 },
                 "Set-Control-Status-Entities": {
@@ -1101,9 +1772,56 @@
                   },
                   "runAfter": {},
                   "type": "SetVariable"
+                },
+                "Validate-Scope-Update-Status-Entities": {
+                  "actions": {},
+                  "else": {
+                    "actions": {
+                      "Set-Scope-Update-Status-Entities-Fail": {
+                        "inputs": {
+                          "name": "Control-Error",
+                          "value": "@int('__ERROR__')"
+                        },
+                        "runAfter": {
+                          "Set-Scope-Update-Status-Entities-Fail-Message": [
+                            "Succeeded"
+                          ]
+                        },
+                        "type": "SetVariable"
+                      },
+                      "Set-Scope-Update-Status-Entities-Fail-Message": {
+                        "inputs": {
+                          "name": "Control-Error-Message",
+                          "value": "Failed to record task prgress to Entities"
+                        },
+                        "runAfter": {},
+                        "type": "SetVariable"
+                      }
+                    }
+                  },
+                  "expression": {
+                    "and": [
+                      {
+                        "equals": [
+                          "",
+                          ""
+                        ]
+                      }
+                    ]
+                  },
+                  "runAfter": {
+                    "Record-Control-Status-Entities": [
+                      "Succeeded"
+                    ]
+                  },
+                  "type": "If"
                 }
               },
-              "runAfter": { "Scope-Source-OAUTH": [ "Succeeded" ] },
+              "runAfter": {
+                "Scope-Source-OAUTH": [
+                  "Succeeded"
+                ]
+              },
               "type": "Scope"
             },
             "Scope-Update-Status-Extract": {
@@ -1120,7 +1838,11 @@
                     "method": "PUT",
                     "uri": "@parameters('TargetControlEndpoint')"
                   },
-                  "runAfter": { "Set-Control-Status-Extract": [ "Succeeded" ] },
+                  "runAfter": {
+                    "Set-Control-Status-Extract": [
+                      "Succeeded"
+                    ]
+                  },
                   "type": "Http"
                 },
                 "Set-Control-Status-Extract": {
@@ -1130,9 +1852,56 @@
                   },
                   "runAfter": {},
                   "type": "SetVariable"
+                },
+                "Validate-Scope-Update-Status-Extract": {
+                  "actions": {},
+                  "else": {
+                    "actions": {
+                      "Set-Scope-Update-Status-Extract-Fail": {
+                        "inputs": {
+                          "name": "Control-Error",
+                          "value": "@int('__ERROR__')"
+                        },
+                        "runAfter": {
+                          "Set-Scope-Update-Status-Extract-Fail-Message": [
+                            "Succeeded"
+                          ]
+                        },
+                        "type": "SetVariable"
+                      },
+                      "Set-Scope-Update-Status-Extract-Fail-Message": {
+                        "inputs": {
+                          "name": "Control-Error-Message",
+                          "value": "Failed to record task progress status to extract."
+                        },
+                        "runAfter": {},
+                        "type": "SetVariable"
+                      }
+                    }
+                  },
+                  "expression": {
+                    "and": [
+                      {
+                        "equals": [
+                          "",
+                          ""
+                        ]
+                      }
+                    ]
+                  },
+                  "runAfter": {
+                    "Record-Control-Status-Extract": [
+                      "Succeeded"
+                    ]
+                  },
+                  "type": "If"
                 }
               },
-              "runAfter": { "Scope-Entities": [ "Succeeded" ] },
+              "runAfter": {
+                "Scope-Entities": [
+                  "Succeeded"
+                ]
+              },
               "type": "Scope"
             },
             "Scope-Update-Status-Source-Login": {
@@ -1150,7 +1919,11 @@
                     "method": "PATCH",
                     "uri": "@parameters('TargetControlEndpoint')"
                   },
-                  "runAfter": { "Set-Control-Status-Source-Login": [ "Succeeded" ] },
+                  "runAfter": {
+                    "Set-Control-Status-Source-Login": [
+                      "Succeeded"
+                    ]
+                  },
                   "type": "Http"
                 },
                 "Set-Control-Status-Source-Login": {
@@ -1170,25 +1943,46 @@
                           "name": "Control-Error",
                           "value": "@int('__ERROR__')"
                         },
-                        "runAfter": { "Scope-Update-Status-Source-Login-Message": [ "Succeeded" ] },
+                        "runAfter": {
+                          "Scope-Update-Status-Source-Login-Message": [
+                            "Succeeded"
+                          ]
+                        },
                         "type": "SetVariable"
                       },
                       "Scope-Update-Status-Source-Login-Message": {
                         "inputs": {
                           "name": "Control-Error-Message",
-                          "value": "Failed to Record Login Status"
+                          "value": "Failed to Record task progress to Login"
                         },
                         "runAfter": {},
                         "type": "SetVariable"
                       }
                     }
                   },
-                  "expression": { "and": [ { "equals": [ "@outputs('Record-Control-Status-Source-Login')['statusCode']", 202 ] } ] },
-                  "runAfter": { "Record-Control-Status-Source-Login": [ "Succeeded" ] },
+                  "expression": {
+                    "and": [
+                      {
+                        "equals": [
+                          "@outputs('Record-Control-Status-Source-Login')['statusCode']",
+                          202
+                        ]
+                      }
+                    ]
+                  },
+                  "runAfter": {
+                    "Record-Control-Status-Source-Login": [
+                      "Succeeded"
+                    ]
+                  },
                   "type": "If"
                 }
               },
-              "runAfter": { "Scope-Start-Status": [ "Succeeded" ] },
+              "runAfter": {
+                "Scope-Start-Status": [
+                  "Succeeded"
+                ]
+              },
               "type": "Scope"
             },
             "Scope-Update-Status-Transform": {
@@ -1205,7 +1999,11 @@
                     "method": "PUT",
                     "uri": "@parameters('TargetControlEndpoint')"
                   },
-                  "runAfter": { "Set-Control-Status-Transform": [ "Succeeded" ] },
+                  "runAfter": {
+                    "Set-Control-Status-Transform": [
+                      "Succeeded"
+                    ]
+                  },
                   "type": "Http"
                 },
                 "Set-Control-Status-Transform": {
@@ -1234,26 +2032,47 @@
                           "name": "Control-Error",
                           "value": "@int('__ERROR__')"
                         },
-                        "runAfter": { "Scope-Update-Status-Transform-Fail-Message": [ "Succeeded" ] },
+                        "runAfter": {
+                          "Scope-Update-Status-Transform-Fail-Message": [
+                            "Succeeded"
+                          ]
+                        },
                         "type": "SetVariable"
                       },
                       "Scope-Update-Status-Transform-Fail-Message": {
                         "inputs": {
                           "name": "Control-Error-Message",
-                          "value": "Failed to record status as Transforming"
+                          "value": "Failed to record status as Transforming.\n@{outputs('Record-Control-Status-Transform')['headers']}\n@{body('Record-Control-Status-Transform')}\n@{outputs('Record-Control-Status-Transform')['statusCode']}"
                         },
                         "runAfter": {},
                         "type": "SetVariable"
                       }
                     }
                   },
-                  "expression": { "and": [ { "equals": [ "@outputs('Record-Control-Status-Transform')['statusCode']", 202 ] } ] },
-                  "runAfter": { "Record-Control-Status-Transform": [ "Succeeded" ] },
+                  "expression": {
+                    "and": [
+                      {
+                        "equals": [
+                          "@outputs('Record-Control-Status-Transform')['statusCode']",
+                          202
+                        ]
+                      }
+                    ]
+                  },
+                  "runAfter": {
+                    "Record-Control-Status-Transform": [
+                      "Succeeded"
+                    ]
+                  },
                   "type": "If"
                 }
               },
               "description": "Trigger the transformation of the changes",
-              "runAfter": { "Scope-Attachments": [ "Succeeded" ] },
+              "runAfter": {
+                "Scope-Attachments": [
+                  "Succeeded"
+                ]
+              },
               "type": "Scope"
             }
           },
@@ -1264,27 +2083,35 @@
               "type": "String"
             },
             "SourceEndpoint": {
-              "defaultValue": "[variables('dataPathUri')]",
+              "defaultValue": "https://uatcdc2.kykloud.com/api/data/",
               "type": "String"
             },
             "SourceEntities": {
-              "defaultValue": [ "users", "portfolios", "sites", "surveys", "surveysections", "surveysectionelements", "deleted" ],
+              "defaultValue": [
+                "users",
+                "portfolios",
+                "sites",
+                "surveys",
+                "surveysections",
+                "surveysectionelements",
+                "deleted"
+              ],
               "type": "Array"
             },
             "SourceOAUTHEndpoint": {
-              "defaultValue": "[variables('loginUri')]",
+              "defaultValue": "https://uatcdc2.kykloud.com/api/user/login",
               "type": "String"
             },
             "SourceOAUTHId": {
-              "defaultValue": "[parameters('kycloudApiEmail')]",
+              "defaultValue": "eapim.support@education.gov.uk",
               "type": "String"
             },
             "SourceOAUTHKeyUri": {
-              "defaultValue": "[variables('keyVaultSecretKycloudApiToken')]",
+              "defaultValue": "https://s153d01-kv-01.vault.azure.net/secrets/kycloud-api-token/e2bac005ae6a4486827dfebdabadb7d8?api-version=2016-10-01",
               "type": "String"
             },
             "SourceOAUTHSecretUri": {
-              "defaultValue": "[variables('keyVaultSecretKycloudApiPassword')]",
+              "defaultValue": "https://s153d01-kv-01.vault.azure.net/secrets/kycloud-api-password/fbecc50e32e243379e76941dc37085b7?api-version=2016-10-01",
               "type": "String"
             },
             "StatusAttachments": {
@@ -1316,23 +2143,23 @@
               "type": "Int"
             },
             "TargetControlEndpoint": {
-              "defaultValue": "[concat(variables('dataPathUri'),'/','load')]",
+              "defaultValue": "https://dev-api-customerengagement.platform.education.gov.uk/v1/cdc-events/load",
               "type": "String"
             },
             "TargetEndpoint": {
-              "defaultValue": "[variables('dataPathUri')]",
+              "defaultValue": "https://dev-api-customerengagement.platform.education.gov.uk/v1/cdc-events/",
               "type": "String"
             },
             "TargetOAUTHCredentialsUri": {
-              "defaultValue": "[variables('keyVaultSecretCdcEventsTokenRequestPayload')]",
+              "defaultValue": "https://s153d01-kv-01.vault.azure.net/secrets/cdc-events-token-request-payload/d53b247212ea4367961ec3ebecbc98ee?api-version=2016-10-01",
               "type": "String"
             },
             "TargetOAUTHEndpoint": {
-              "defaultValue": "[parameters('internalOAuthTokenEndpoint')]",
+              "defaultValue": "https://login.microsoftonline.com/9c7d9dd3-840c-4b3f-818e-552865082e16/oauth2/token",
               "type": "String"
             },
             "TargetOAUTHKeyUri": {
-              "defaultValue": "[variables('keyVaultSecretCdcEventsSubscriptionKey')]",
+              "defaultValue": "https://s153d01-kv-01.vault.azure.net/secrets/cdc-events-subscription-key/9fd022fecaac4ff2a7c3c6adb980a428?api-version=2016-10-01",
               "type": "String"
             }
           },
@@ -1341,7 +2168,11 @@
               "recurrence": {
                 "frequency": "Day",
                 "interval": 1,
-                "schedule": { "hours": [ "0" ] }
+                "schedule": {
+                  "hours": [
+                    "0"
+                  ]
+                }
               },
               "type": "Recurrence"
             }
