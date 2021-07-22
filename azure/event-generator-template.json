@@ -443,7 +443,7 @@
                                         "Set-Get-Blob-Reauthenticate-Fail-Message": {
                                           "inputs": {
                                             "name": "Control-Error-Message",
-                                            "value": "Failed to re-authenticate with source API. @{outputs('Get-Blob-Reauthenticate')['headers']} @{body('Get-Blob-Reauthenticate')} @{outputs('Get-Blob-Reauthenticate')['statusCode']}"
+                                            "value": "Failed to re-authenticate with source API."
                                           },
                                           "runAfter": {},
                                           "type": "SetVariable"
@@ -468,7 +468,7 @@
                                     "Set-Scope-Attachments-Fail-Message": {
                                       "inputs": {
                                         "name": "Control-Error-Message",
-                                        "value": "Failed attempting to obtain attachment data. @{outputs('Get-Blob')['headers']} @{body('Get-Blob')} @{outputs('Get-Blob')['statusCode']}"
+                                        "value": "Failed attempting to obtain attachment data."
                                       },
                                       "runAfter": {},
                                       "type": "SetVariable"
@@ -663,7 +663,7 @@
                                   "Set-Post-Entity-Page-Fail-Message": {
                                     "inputs": {
                                       "name": "Control-Error-Message",
-                                      "value": "Failed posting entities (@{items('For-Each-Entity')}) to Target API: @{outputs('Post-Entity-Page')['headers']} @{body('Post-Entity-Page')} @{outputs('Post-Entity-Page')['statusCode']}"
+                                      "value": "Failed posting entities (@{items('For-Each-Entity')}) to Target API."
                                     },
                                     "runAfter": {},
                                     "type": "SetVariable"
@@ -893,20 +893,64 @@
               "runAfter": { "Init-Control-Attachments": [ "Succeeded" ] },
               "type": "Scope"
             },
-            "Get_sessionId": {
+            "Scope-Report": {
               "actions": {
-                "Check_if_logging_in_was_a_success": {
+                "Validate-Scope-Report": {
                   "actions": {
-                    "Login_was_a_success_-_continuing_with_execution": {
-                      "actions": {},
+                    "Record-Control-Status-Report": {
+                      "description": "Record the final status that marks this task as completed.",
+                      "inputs": {
+                        "headers": {
+                          "Authorization": "Bearer @{variables('TargetOAUTHToken')}",
+                          "Content-Type": "application/json",
+                          "Ocp-Apim-Subscription-Key": "@variables('TargetOAUTHKey')",
+                          "X-Run-Identifier": "@variables('Control-Started')",
+                          "X-Run-Status": "@{variables('Control-Status')}"
+                        },
+                        "method": "PUT",
+                        "uri": "@parameters('TargetControlEndpoint')"
+                      },
                       "runAfter": {},
-                      "type": "Scope"
+                      "type": "Http"
+                    },
+                    "Validate-Record-Control-Status-Report": {
+                      "actions": {
+                        "Success": {
+                          "inputs": { "runStatus": "Succeeded" },
+                          "runAfter": {},
+                          "type": "Terminate"
+                        }
+                      },
+                      "else": {
+                        "actions": {
+                          "Record-Control-Status-Report-Failed": {
+                            "inputs": {
+                              "runError": {
+                                "code": "1",
+                                "message": "Failed to record success."
+                              },
+                              "runStatus": "Failed"
+                            },
+                            "runAfter": {},
+                            "type": "Terminate"
+                          }
+                        }
+                      },
+                      "expression": { "and": [ { "equals": [ "", 202 ] } ] },
+                      "runAfter": { "Record-Control-Status-Report": [ "Succeeded" ] },
+                      "type": "If"
                     }
                   },
                   "else": {
                     "actions": {
-                      "Terminate_-_couldn't_log_in,_for_whatever_reason": {
-                        "inputs": { "runStatus": "Failed" },
+                      "Fail": {
+                        "inputs": {
+                          "runError": {
+                            "code": "1",
+                            "message": "Termianted after failure: @{variables('Control-Error-Message')}"
+                          },
+                          "runStatus": "Failed"
+                        },
                         "runAfter": {},
                         "type": "Terminate"
                       }
@@ -992,64 +1036,100 @@
               "runAfter": { "Scope-Update-Status-Source-Login": [ "Succeeded" ] },
               "type": "Scope"
             },
-            "Initialise_currentPage": {
-              "inputs": {
-                "variables": [
-                  {
-                    "name": "currentPage",
-                    "type": "integer"
-                  }
-                ]
-              },
-              "runAfter": { "Initialise_continuePaging": [ "Succeeded" ] },
-              "type": "InitializeVariable"
-            },
-            "Initialise_nowDateTime": {
-              "inputs": {
-                "variables": [
-                  {
-                    "name": "nowDateTime",
-                    "type": "string",
-                    "value": "@{utcNow()}"
-                  }
-                ]
-              },
-              "runAfter": { "Obtain_CDC_Events_OAuth_Token": [ "Succeeded" ] },
-              "type": "InitializeVariable"
-            },
-            "Initialise_parentId": {
-              "inputs": {
-                "variables": [
-                  {
-                    "name": "parentId",
-                    "type": "string"
-                  }
-                ]
-              },
-              "runAfter": { "Update_load_Status_to_Entities": [ "Succeeded" ] },
-              "type": "InitializeVariable"
-            },
-            "Initialize_AttachmentSessionId": {
-              "inputs": {
-                "variables": [
-                  {
-                    "name": "AttachmentsSessionId",
-                    "type": "string"
-                  }
-                ]
-              },
-              "runAfter": { "Initialize_variable_reloginCount": [ "Succeeded" ] },
-              "type": "InitializeVariable"
-            },
-            "Initialize_attachments_OK": {
-              "inputs": {
-                "variables": [
-                  {
-                    "name": "continueAttachments",
-                    "type": "boolean",
-                    "value": true
-                  }
-                ]
+            "Scope-Source-OAUTH-Refresh": {
+              "actions": {
+                "Source-OAUTH-Refresh": {
+                  "inputs": {
+                    "headers": { "Accept": "application/json" },
+                    "method": "POST",
+                    "queries": {
+                      "ApiToken": "@variables('SourceOAUTHKey')",
+                      "Email": "@parameters('SourceOAUTHId')",
+                      "Password": "@variables('SourceOAUTHSecret')"
+                    },
+                    "uri": "@parameters('SourceOAUTHEndpoint')"
+                  },
+                  "runAfter": {},
+                  "type": "Http"
+                },
+                "Validate-Scope-Source-OAUTH-Refresh": {
+                  "actions": {
+                    "Parse-Source-OAUTH-Refresh": {
+                      "inputs": {
+                        "content": "@body('Source-OAUTH-Refresh')",
+                        "schema": {
+                          "properties": {
+                            "SessionId": { "type": "string" },
+                            "Success": { "type": "boolean" }
+                          },
+                          "type": "object"
+                        }
+                      },
+                      "runAfter": {},
+                      "type": "ParseJson"
+                    },
+                    "Validate-Parse-Source-OAUTH-Refresh": {
+                      "actions": {
+                        "Set-SourceOAUTHToken-Again": {
+                          "inputs": {
+                            "name": "SourceOAUTHToken",
+                            "value": "@body('Parse-Source-OAUTH-Refresh')?['SessionId']"
+                          },
+                          "runAfter": {},
+                          "type": "SetVariable"
+                        }
+                      },
+                      "else": {
+                        "actions": {
+                          "Set-Parse-Source-OAUTH-Refresh-Fail": {
+                            "description": "Throw error because re login parse of data failed",
+                            "inputs": {
+                              "name": "Control-Error",
+                              "value": "@int('__FAIL__')"
+                            },
+                            "runAfter": { "Set-Parse-Source-OAUTH-Refresh-Fail-Message": [ "Succeeded" ] },
+                            "type": "SetVariable"
+                          },
+                          "Set-Parse-Source-OAUTH-Refresh-Fail-Message": {
+                            "inputs": {
+                              "name": "Control-Error-Message",
+                              "value": "Failed to parse the source login token."
+                            },
+                            "runAfter": {},
+                            "type": "SetVariable"
+                          }
+                        }
+                      },
+                      "expression": { "and": [ { "equals": [ "@body('Parse-Source-OAUTH-Refresh')?['Success']", "@true" ] } ] },
+                      "runAfter": { "Parse-Source-OAUTH-Refresh": [ "Succeeded" ] },
+                      "type": "If"
+                    }
+                  },
+                  "else": {
+                    "actions": {
+                      "Set-Scope-Source-OAUTH-Refresh-Fail": {
+                        "description": "Throw and error because the re login failed with bad http status",
+                        "inputs": {
+                          "name": "Control-Error",
+                          "value": "@int('__ERROR__')"
+                        },
+                        "runAfter": { "Set-Scope-Source-OAUTH-Refresh-Fail-Message": [ "Succeeded" ] },
+                        "type": "SetVariable"
+                      },
+                      "Set-Scope-Source-OAUTH-Refresh-Fail-Message": {
+                        "inputs": {
+                          "name": "Control-Error-Message",
+                          "value": "Failed to re-authenticate with the source API."
+                        },
+                        "runAfter": {},
+                        "type": "SetVariable"
+                      }
+                    }
+                  },
+                  "expression": { "and": [ { "equals": [ "@outputs('Source-OAUTH-Refresh')['statusCode']", 200 ] } ] },
+                  "runAfter": { "Source-OAUTH-Refresh": [ "Succeeded" ] },
+                  "type": "If"
+                }
               },
               "runAfter": { "Scope-Attachments-List": [ "Succeeded" ] },
               "type": "Scope"
@@ -1350,50 +1430,70 @@
               "runAfter": { "Scope-Start-Status": [ "Succeeded" ] },
               "type": "Scope"
             },
-            "Update_load_Status_to_Entities": {
-              "inputs": {
-                "headers": {
-                  "Authorization": "Bearer @{body('Parse_CDC_Events_OAuth_Token')?['access_token']}",
-                  "Content-Type": "application/json",
-                  "Ocp-Apim-Subscription-Key": "@body('Parse_cdc-events-subscription-key')?['value']",
-                  "X-Run-Identifier": "@variables('nowDateTime')",
-                  "X-Run-Status": "@{variables('runStatus')}"
+            "Scope-Update-Status-Transform": {
+              "actions": {
+                "Record-Control-Status-Transform": {
+                  "description": "This will trigger the final transform process inside the database via stored procedures",
+                  "inputs": {
+                    "headers": {
+                      "Authorization": "Bearer @{variables('TargetOAUTHToken')}",
+                      "Content-Type": "application/json",
+                      "Ocp-Apim-Subscription-Key": "@variables('TargetOAUTHKey')",
+                      "X-Run-Identifier": "@variables('Control-Started')",
+                      "X-Run-Status": "@{variables('Control-Status')}"
+                    },
+                    "method": "PUT",
+                    "uri": "@parameters('TargetControlEndpoint')"
+                  },
+                  "runAfter": { "Set-Control-Status-Transform": [ "Succeeded" ] },
+                  "type": "Http"
                 },
-                "method": "PATCH",
-                "uri": "[concat(parameters('cdcEventsApiBaseUri'), '/load')]"
-              },
-              "runAfter": { "Set_runStatus_to_Entities": [ "Succeeded" ] },
-              "type": "Http"
-            },
-            "Update_load_status_to_Login": {
-              "inputs": {
-                "headers": {
-                  "Authorization": "Bearer @{body('Parse_CDC_Events_OAuth_Token')?['access_token']}",
-                  "Content-Type": "application/json",
-                  "Ocp-Apim-Subscription-Key": "@body('Parse_cdc-events-subscription-key')?['value']",
-                  "X-Run-Identifier": "@variables('nowDateTime')",
-                  "X-Run-Status": "@{variables('runStatus')}"
+                "Set-Control-Status-Transform": {
+                  "inputs": {
+                    "name": "Control-Status",
+                    "value": "@parameters('StatusTransforming')"
+                  },
+                  "runAfter": {},
+                  "type": "SetVariable"
                 },
-                "method": "PATCH",
-                "uri": "[concat(parameters('cdcEventsApiBaseUri'), '/load')]"
+                "Validate-Scope-Update-Status-Transform": {
+                  "actions": {
+                    "Set-Control-Status-Report-Success": {
+                      "inputs": {
+                        "name": "Control-Status",
+                        "value": "@parameters('StatusReporting')"
+                      },
+                      "runAfter": {},
+                      "type": "SetVariable"
+                    }
+                  },
+                  "else": {
+                    "actions": {
+                      "Scope-Update-Status-Transform-Fail": {
+                        "inputs": {
+                          "name": "Control-Error",
+                          "value": "@int('__ERROR__')"
+                        },
+                        "runAfter": { "Scope-Update-Status-Transform-Fail-Message": [ "Succeeded" ] },
+                        "type": "SetVariable"
+                      },
+                      "Scope-Update-Status-Transform-Fail-Message": {
+                        "inputs": {
+                          "name": "Control-Error-Message",
+                          "value": "Failed to record status as Transforming."
+                        },
+                        "runAfter": {},
+                        "type": "SetVariable"
+                      }
+                    }
+                  },
+                  "expression": { "and": [ { "equals": [ "@outputs('Record-Control-Status-Transform')['statusCode']", 202 ] } ] },
+                  "runAfter": { "Record-Control-Status-Transform": [ "Succeeded" ] },
+                  "type": "If"
+                }
               },
-              "runAfter": { "Set_runStatus_Login": [ "Succeeded" ] },
-              "type": "Http"
-            },
-            "Update_load_status_to_Preparing": {
-              "inputs": {
-                "headers": {
-                  "Authorization": "Bearer @{body('Parse_CDC_Events_OAuth_Token')?['access_token']}",
-                  "Content-Type": "application/json",
-                  "Ocp-Apim-Subscription-Key": "@body('Parse_cdc-events-subscription-key')?['value']",
-                  "X-Run-Identifier": "@variables('nowDateTime')",
-                  "X-Run-Status": "@{variables('runStatus')}"
-                },
-                "method": "PATCH",
-                "uri": "[concat(parameters('cdcEventsApiBaseUri'), '/load')]"
-              },
-              "runAfter": { "Scope-Attachments": [ "Succeeded" ] },
               "description": "Trigger the transformation of the changes",
+              "runAfter": { "Scope-Attachments": [ "Succeeded" ] },
               "type": "Scope"
             }
           },
