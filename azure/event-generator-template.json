@@ -364,7 +364,7 @@
                           }
                         }
                       },
-                      "expression": { "and": [ { "equals": [ "", 202 ] } ] },
+                      "expression": { "and": [ { "equals": [ "@outputs('Post-blob')['statusCode']", 202 ] } ] },
                       "runAfter": { "Post-blob": [ "Succeeded" ] },
                       "type": "If"
                     },
@@ -453,7 +453,7 @@
                                         }
                                       }
                                     },
-                                    "expression": { "and": [ { "equals": [ "", 200 ] } ] },
+                                    "expression": { "and": [ { "equals": [ "@outputs('Get-Blob-Reauthenticate')['statusCode']", 200 ] } ] },
                                     "runAfter": { "Get-Blob-Reauthenticate": [ "Succeeded" ] },
                                     "type": "If"
                                   }
@@ -488,7 +488,7 @@
                               }
                             }
                           },
-                          "expression": { "and": [ { "equals": [ "", 200 ] } ] },
+                          "expression": { "and": [ { "equals": [ "@outputs('Get-Blob')['statusCode']", 200 ] } ] },
                           "runAfter": { "Get-Blob": [ "Succeeded" ] },
                           "type": "If"
                         }
@@ -681,7 +681,7 @@
                                   }
                                 }
                               },
-                              "expression": { "and": [ { "equals": [ "", 202 ] } ] },
+                              "expression": { "and": [ { "equals": [ "@outputs('Post-Entity-Page')['statusCode']", 202 ] } ] },
                               "runAfter": { "Post-Entity-Page": [ "Succeeded" ] },
                               "type": "If"
                             }
@@ -908,18 +908,51 @@
               "actions": {
                 "Validate-Scope-Report": {
                   "actions": {
-                    "Set-Control-Error-Message-Success": {
+                    "Record-Control-Status-Report": {
+                      "description": "Record the final status that marks this task as completed.",
                       "inputs": {
-                        "name": "Control-Error-Message",
-                        "value": "Process completed successfully."
+                        "headers": {
+                          "Authorization": "Bearer @{variables('TargetOAUTHToken')}",
+                          "Content-Type": "application/json",
+                          "Ocp-Apim-Subscription-Key": "@variables('TargetOAUTHKey')",
+                          "X-Run-Identifier": "@variables('Control-Started')",
+                          "X-Run-Status": "@{variables('Control-Status')}"
+                        },
+                        "method": "PUT",
+                        "uri": "@parameters('TargetControlEndpoint')"
                       },
                       "runAfter": {},
-                      "type": "SetVariable"
+                      "type": "Http"
                     },
-                    "Success": {
-                      "inputs": { "runStatus": "Succeeded" },
-                      "runAfter": { "Set-Control-Error-Message-Success": [ "Succeeded" ] },
-                      "type": "Terminate"
+                    "Validate-Record-Control-Status-Report": {
+                      "actions": {
+                        "Success": {
+                          "inputs": { "runStatus": "Succeeded" },
+                          "runAfter": {},
+                          "type": "Terminate"
+                        }
+                      },
+                      "else": {
+                        "actions": {
+                          "Record-Control-Status-Report-Failed": {
+                            "inputs": {
+                              "runError": {
+                                "code": "1",
+                                "message": "Failed to record success. 
+@{outputs('Record-Control-Status-Report')['headers']}
+@{body('Record-Control-Status-Report')}
+@{outputs('Record-Control-Status-Report')['statusCode']}"
+                              },
+                              "runStatus": "Failed"
+                            },
+                            "runAfter": {},
+                            "type": "Terminate"
+                          }
+                        }
+                      },
+                      "expression": { "and": [ { "equals": [ "", 202 ] } ] },
+                      "runAfter": { "Record-Control-Status-Report": [ "Succeeded" ] },
+                      "type": "If"
                     }
                   },
                   "else": {
@@ -1081,7 +1114,7 @@
                           }
                         }
                       },
-                      "expression": { "and": [ { "equals": [ "@body('Parse-Source-OAUTH-Refresh')?['Success']", true ] } ] },
+                      "expression": { "and": [ { "equals": [ "@body('Parse-Source-OAUTH-Refresh')?['Success']", "@true" ] } ] },
                       "runAfter": { "Parse-Source-OAUTH-Refresh": [ "Succeeded" ] },
                       "type": "If"
                     }
@@ -1294,7 +1327,7 @@
                       }
                     }
                   },
-                  "expression": { "and": [ { "equals": [ "", "" ] } ] },
+                  "expression": { "and": [ { "equals": [ "@outputs('Record-Control-Status-Entities')['statusCode']", 202 ] } ] },
                   "runAfter": { "Record-Control-Status-Entities": [ "Succeeded" ] },
                   "type": "If"
                 }
@@ -1350,7 +1383,7 @@
                       }
                     }
                   },
-                  "expression": { "and": [ { "equals": [ "", "" ] } ] },
+                  "expression": { "and": [ { "equals": [ "@outputs('Record-Control-Status-Extract')['statusCode']", 202 ] } ] },
                   "runAfter": { "Record-Control-Status-Extract": [ "Succeeded" ] },
                   "type": "If"
                 }
