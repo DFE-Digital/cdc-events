@@ -443,10 +443,7 @@
                                         "Set-Get-Blob-Reauthenticate-Fail-Message": {
                                           "inputs": {
                                             "name": "Control-Error-Message",
-                                            "value": "Failed to re-authenticate with source API.
-@{outputs('Get-Blob-Reauthenticate')['headers']}
-@{body('Get-Blob-Reauthenticate')}
-@{outputs('Get-Blob-Reauthenticate')['statusCode']}"
+                                            "value": "Failed to re-authenticate with source API. @{outputs('Get-Blob-Reauthenticate')['headers']} @{body('Get-Blob-Reauthenticate')} @{outputs('Get-Blob-Reauthenticate')['statusCode']}"
                                           },
                                           "runAfter": {},
                                           "type": "SetVariable"
@@ -471,11 +468,7 @@
                                     "Set-Scope-Attachments-Fail-Message": {
                                       "inputs": {
                                         "name": "Control-Error-Message",
-                                        "value": "Failed attempting to obtain attachment data.
-@{outputs('Get-Blob')['headers']}
-@{body('Get-Blob')}
-@{outputs('Get-Blob')['statusCode']}
-"
+                                        "value": "Failed attempting to obtain attachment data. @{outputs('Get-Blob')['headers']} @{body('Get-Blob')} @{outputs('Get-Blob')['statusCode']}"
                                       },
                                       "runAfter": {},
                                       "type": "SetVariable"
@@ -670,11 +663,7 @@
                                   "Set-Post-Entity-Page-Fail-Message": {
                                     "inputs": {
                                       "name": "Control-Error-Message",
-                                      "value": "Failed posting entities (@{items('For-Each-Entity')}) to Target API:
-@{outputs('Post-Entity-Page')['headers']}
-@{body('Post-Entity-Page')}
-@{outputs('Post-Entity-Page')['statusCode']}
-"
+                                      "value": "Failed posting entities (@{items('For-Each-Entity')}) to Target API: @{outputs('Post-Entity-Page')['headers']} @{body('Post-Entity-Page')} @{outputs('Post-Entity-Page')['statusCode']}"
                                     },
                                     "runAfter": {},
                                     "type": "SetVariable"
@@ -938,10 +927,7 @@
                             "inputs": {
                               "runError": {
                                 "code": "1",
-                                "message": "Failed to record success. 
-@{outputs('Record-Control-Status-Report')['headers']}
-@{body('Record-Control-Status-Report')}
-@{outputs('Record-Control-Status-Report')['statusCode']}"
+                                "message": "Failed to record success. @{outputs('Record-Control-Status-Report')['headers']} @{body('Record-Control-Status-Report')} @{outputs('Record-Control-Status-Report')['statusCode']}"
                               },
                               "runStatus": "Failed"
                             },
@@ -1133,10 +1119,7 @@
                       "Set-Scope-Source-OAUTH-Refresh-Fail-Message": {
                         "inputs": {
                           "name": "Control-Error-Message",
-                          "value": "Failed to re-authenticate with the source API.
-@{outputs('Source-OAUTH-Refresh')['headers']}
-@{body('Source-OAUTH-Refresh')}
-@{outputs('Source-OAUTH-Refresh')['statusCode']}"
+                          "value": "Failed to re-authenticate with the source API. @{outputs('Source-OAUTH-Refresh')['headers']} @{body('Source-OAUTH-Refresh')} @{outputs('Source-OAUTH-Refresh')['statusCode']}"
                         },
                         "runAfter": {},
                         "type": "SetVariable"
@@ -1497,10 +1480,7 @@
                       "Scope-Update-Status-Transform-Fail-Message": {
                         "inputs": {
                           "name": "Control-Error-Message",
-                          "value": "Failed to record status as Transforming.
-@{outputs('Record-Control-Status-Transform')['headers']}
-@{body('Record-Control-Status-Transform')}
-@{outputs('Record-Control-Status-Transform')['statusCode']}"
+                          "value": "Failed to record status as Transforming. @{outputs('Record-Control-Status-Transform')['headers']} @{body('Record-Control-Status-Transform')} @{outputs('Record-Control-Status-Transform')['statusCode']}"
                         },
                         "runAfter": {},
                         "type": "SetVariable"
