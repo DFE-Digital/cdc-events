@@ -906,28 +906,11 @@
                   "else": {
                     "actions": {
                       "Terminate_-_couldn't_log_in,_for_whatever_reason": {
-                        "inputs": {
-                          "runStatus": "Failed"
-                        },
+                        "inputs": { "runStatus": "Failed" },
                         "runAfter": {},
                         "type": "Terminate"
                       }
                     }
-                  },
-                  "expression": {
-                    "and": [
-                      {
-                        "equals": [
-                          "@body('Parse_sessionId')?['Success']",
-                          true
-                        ]
-                      }
-                    ]
-                  },
-                  "runAfter": {
-                    "Parse_sessionId": [
-                      "Succeeded"
-                    ]
                   },
                   "expression": { "and": [ { "equals": [ "@variables('Control-Status')", "@parameters('StatusReporting')" ] } ] },
                   "runAfter": {},
@@ -1018,11 +1001,7 @@
                   }
                 ]
               },
-              "runAfter": {
-                "Initialise_continuePaging": [
-                  "Succeeded"
-                ]
-              },
+              "runAfter": { "Initialise_continuePaging": [ "Succeeded" ] },
               "type": "InitializeVariable"
             },
             "Initialise_nowDateTime": {
@@ -1035,11 +1014,7 @@
                   }
                 ]
               },
-              "runAfter": {
-                "Obtain_CDC_Events_OAuth_Token": [
-                  "Succeeded"
-                ]
-              },
+              "runAfter": { "Obtain_CDC_Events_OAuth_Token": [ "Succeeded" ] },
               "type": "InitializeVariable"
             },
             "Initialise_parentId": {
@@ -1051,11 +1026,7 @@
                   }
                 ]
               },
-              "runAfter": {
-                "Update_load_Status_to_Entities": [
-                  "Succeeded"
-                ]
-              },
+              "runAfter": { "Update_load_Status_to_Entities": [ "Succeeded" ] },
               "type": "InitializeVariable"
             },
             "Initialize_AttachmentSessionId": {
@@ -1067,11 +1038,7 @@
                   }
                 ]
               },
-              "runAfter": {
-                "Initialize_variable_reloginCount": [
-                  "Succeeded"
-                ]
-              },
+              "runAfter": { "Initialize_variable_reloginCount": [ "Succeeded" ] },
               "type": "InitializeVariable"
             },
             "Initialize_attachments_OK": {
@@ -1082,11 +1049,6 @@
                     "type": "boolean",
                     "value": true
                   }
-                ]
-              },
-              "runAfter": {
-                "Parse_Attachments_JSON": [
-                  "Succeeded"
                 ]
               },
               "runAfter": { "Scope-Attachments-List": [ "Succeeded" ] },
@@ -1400,11 +1362,7 @@
                 "method": "PATCH",
                 "uri": "[concat(parameters('cdcEventsApiBaseUri'), '/load')]"
               },
-              "runAfter": {
-                "Set_runStatus_to_Entities": [
-                  "Succeeded"
-                ]
-              },
+              "runAfter": { "Set_runStatus_to_Entities": [ "Succeeded" ] },
               "type": "Http"
             },
             "Update_load_status_to_Login": {
@@ -1419,11 +1377,7 @@
                 "method": "PATCH",
                 "uri": "[concat(parameters('cdcEventsApiBaseUri'), '/load')]"
               },
-              "runAfter": {
-                "Set_runStatus_Login": [
-                  "Succeeded"
-                ]
-              },
+              "runAfter": { "Set_runStatus_Login": [ "Succeeded" ] },
               "type": "Http"
             },
             "Update_load_status_to_Preparing": {
@@ -1438,13 +1392,8 @@
                 "method": "PATCH",
                 "uri": "[concat(parameters('cdcEventsApiBaseUri'), '/load')]"
               },
-              "runAfter": {
-                "Set_runStatus_to_Preparing": [
-                  "Succeeded"
-                ]
-              },
-              "description": "Trigger the transformation of the changes",
               "runAfter": { "Scope-Attachments": [ "Succeeded" ] },
+              "description": "Trigger the transformation of the changes",
               "type": "Scope"
             }
           },
@@ -1479,31 +1428,31 @@
               "type": "String"
             },
             "StatusAttachments": {
-              "defaultValue": "5",
+              "defaultValue": 5,
               "type": "Int"
             },
             "StatusEntities": {
-              "defaultValue": "3",
+              "defaultValue": 3,
               "type": "Int"
             },
             "StatusExtracting": {
-              "defaultValue": "4",
+              "defaultValue": 4,
               "type": "Int"
             },
             "StatusLogin": {
-              "defaultValue": "2",
+              "defaultValue": 2,
               "type": "Int"
             },
             "StatusReporting": {
-              "defaultValue": "100",
+              "defaultValue": 100,
               "type": "Int"
             },
             "StatusStart": {
-              "defaultValue": "1",
+              "defaultValue": 1,
               "type": "Int"
             },
             "StatusTransforming": {
-              "defaultValue": "6",
+              "defaultValue": 6,
               "type": "Int"
             },
             "TargetControlEndpoint": {
