@@ -30,7 +30,7 @@
         /// <returns>The asynchronous task.</returns>
         Task UpdateLoadStatusAsync(
             DateTime runIdentifier,
-            short status,
+            int status,
             CancellationToken cancellationToken);
 
         /// <summary>

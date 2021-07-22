@@ -544,7 +544,7 @@
         /// <returns>
         /// A <see cref="Task"/> instance.
         /// </returns>
-        public async Task UpdateLoadStatusAsync(DateTime runIdentifier, short status)
+        public async Task UpdateLoadStatusAsync(DateTime runIdentifier, int status)
         {
             this.loggerProvider.Info($"Updating load at {runIdentifier:O} to {status}");
 

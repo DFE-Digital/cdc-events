@@ -10,12 +10,12 @@
     public static class Extensions
     {
         /// <summary>
-        /// Parses a <see cref="short"/> to an equivalent <see cref="Enum"/> member.
+        /// Parses a <see cref="int"/> to an equivalent <see cref="Enum"/> member.
         /// </summary>
         /// <typeparam name="T">The <see cref="Enum"/> <see cref="Type"/>.</typeparam>
-        /// <param name="source">The subject member value as <see cref="short"/>.</param>
+        /// <param name="source">The subject member value as <see cref="int"/>.</param>
         /// <returns>An <see cref="Enum"/> member corresponding to the value provided.</returns>
-        public static T ToEnum<T>(this short source)
+        public static T ToEnum<T>(this int source)
         {
             return (T)Enum.Parse(typeof(T), $"{source}");
         }

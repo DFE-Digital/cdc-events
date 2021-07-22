@@ -152,7 +152,7 @@
 
             DateTime? runIdentifier = this.GetRunIdentifier(headerDictionary);
 
-            short? status = this.GetStatus(headerDictionary);
+            int? status = this.GetStatus(headerDictionary);
 
             if (status.HasValue && runIdentifier.HasValue)
             {
@@ -221,7 +221,7 @@
             DateTime? runIdentifier = this.GetRunIdentifier(headerDictionary);
 
             // extract the Header for the status
-            short? status = this.GetStatus(headerDictionary);
+            int? status = this.GetStatus(headerDictionary);
 
             if (status.HasValue && runIdentifier.HasValue)
             {
@@ -328,9 +328,8 @@
             return toReturn;
         }
 
-        private short? GetStatus(IHeaderDictionary headerDictionary)
+        private int? GetStatus(IHeaderDictionary headerDictionary)
         {
-            short? status = null;
             this.loggerProvider.Debug($"Checking for header \"{HeaderNameStatus}\"...");
 
             if (headerDictionary.ContainsKey(HeaderNameStatus))
@@ -343,19 +342,19 @@
 
                 try
                 {
-                    status = short.Parse(
-                        statusString,
-                        CultureInfo.InvariantCulture);
-                    if (
-                            status.Value < (short)ControlState.Start
-                            ||
-                            status.Value > (short)ControlState.Finished)
+                    object statusObject = null;
+                    if (!Enum.TryParse(typeof(ControlState), statusString, true, out statusObject))
                     {
+
                         this.loggerProvider.Error(
-                                $"An invalid {nameof(status)} was supplied. The " +
-                                $"{nameof(status)} must be " +
-                                $"specified as a valid {nameof(Int16)} value in the range 1..64.");
+                                $"An invalid {HeaderNameRunIdentifier} was supplied. The " +
+                                $"{HeaderNameRunIdentifier} must be " +
+                                $"specified as a value in the range {ControlState.Start}..{ControlState.Transforming} or {ControlState.Reporting}.");
                         return null;
+                    }
+                    else
+                    {
+                        return (int?)statusObject;
                     }
                 }
                 catch (FormatException formatException)
@@ -363,20 +362,18 @@
                     this.loggerProvider.Warning(
                         $"Unable to parse the value of " +
                         $"\"{HeaderNameRunIdentifier}\" " +
-                        $"(\"{statusString}\") as a {nameof(Int16)}.",
+                        $"(\"{statusString}\") as a value in the range {ControlState.Start}..{ControlState.Transforming} or {ControlState.Reporting}.",
                         formatException);
                 }
-
-                return status;
             }
             else
             {
                 this.loggerProvider.Error(
-                    $"A valid {nameof(status)} was not supplied. The " +
-                    $"{nameof(status)} must be " +
-                    $"specified as a valid {nameof(Int16)} value in the range 1..32.");
-                return null;
+                    $"A valid status was not supplied. The " +
+                    $"status must be " +
+                    $"specified as a valid {nameof(ControlState)} value in the range {ControlState.Start}..{ControlState.Transforming} or {ControlState.Reporting}.");
             }
+            return null;
         }
 
         private DateTime? GetRunIdentifier(IHeaderDictionary headerDictionary)
