@@ -29,7 +29,7 @@
         /// <summary>
         /// Gets or sets the entity status.
         /// </summary>
-        public LoadStates Status
+        public ControlState Status
         {
             get;
             set;

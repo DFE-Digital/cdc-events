@@ -33,7 +33,7 @@
         /// <returns>
         /// A <see cref="Task"/> instance.
         /// </returns>
-        Task UpdateLoadStatusAsync(DateTime runIdentifier, short status);
+        Task UpdateLoadStatusAsync(DateTime runIdentifier, int status);
 
         /// <summary>
         /// Gets the <see cref="Load"/> for the specified date and time.

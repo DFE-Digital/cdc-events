@@ -194,7 +194,7 @@
         /// </returns>
         public async Task UpdateLoadStatusAsync(
             DateTime runIdentifier,
-            short status,
+            int status,
             CancellationToken cancellationToken)
         {
             this.loggerProvider.Debug($"Updating the load status...");

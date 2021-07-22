@@ -9,7 +9,6 @@
     using System.Threading;
     using System.Threading.Tasks;
     using Dfe.CdcEventApi.Application.Definitions;
-    using Dfe.CdcEventApi.Domain;
     using Dfe.CdcEventApi.Domain.Definitions;
     using Dfe.CdcEventApi.Domain.Exceptions;
     using Dfe.CdcEventApi.Domain.Models;
@@ -153,7 +152,7 @@
 
             DateTime? runIdentifier = this.GetRunIdentifier(headerDictionary);
 
-            short? status = this.GetStatus(headerDictionary);
+            int? status = this.GetStatus(headerDictionary);
 
             if (status.HasValue && runIdentifier.HasValue)
             {
@@ -222,7 +221,7 @@
             DateTime? runIdentifier = this.GetRunIdentifier(headerDictionary);
 
             // extract the Header for the status
-            short? status = this.GetStatus(headerDictionary);
+            int? status = this.GetStatus(headerDictionary);
 
             if (status.HasValue && runIdentifier.HasValue)
             {
@@ -237,47 +236,46 @@
                                         cancellationToken)
                                         .ConfigureAwait(false);
 
-                LoadStates state = load.Status;
+                ControlState state = load.Status;
 
-                // update the load with the report
-                StringBuilder reportBody = new StringBuilder("Dummy Report");
+                switch (load.Status)
+                {
+                    case ControlState.Extracting:
 
-                load.Finish_DateTime = DateTime.UtcNow;
+                        load.Finish_DateTime = DateTime.UtcNow;
+
+                        var count = await this.loadProcessor.GetLoadCountAsync(
+                            runIdentifier.Value,
+                            cancellationToken)
+                            .ConfigureAwait(false);
+
+                        load.Count = count;
+
+                        await this.loadProcessor.UpdateLoadAsync(load, cancellationToken)
+                                .ConfigureAwait(false);
+
+                        // as its a good load, extract the data into the etl data model
+                        await this.loadProcessor.ExecuteExtract(runIdentifier.Value, cancellationToken)
+                                .ConfigureAwait(false);
+
+                        break;
+                    case ControlState.Transforming:
+                        // as its a good load, transform the data into the condition data model
+                        await this.loadProcessor.ExecuteTransform(runIdentifier.Value, cancellationToken)
+                                .ConfigureAwait(false);
+                        break;
+                    default:
+                        // update the load record back to its current state with report and audience.
+                        await this.loadProcessor.UpdateLoadAsync(load, cancellationToken)
+                                .ConfigureAwait(false);
+                        break;
+                }
 
                 toReturn = new HttpResponseMessage(HttpStatusCode.Accepted)
                 {
                     // return the notification data to the caller.
                     Content = new StringContent(JsonConvert.SerializeObject(load)),
                 };
-
-                if (state == LoadStates.Suceeeded)
-                {
-                    var count = await this.loadProcessor.GetLoadCountAsync(
-                        runIdentifier.Value,
-                        cancellationToken)
-                        .ConfigureAwait(false);
-                    load.Count = count;
-                }
-
-                // update the load record back to its complete state with report and audience.
-                await this.loadProcessor.UpdateLoadAsync(load, cancellationToken)
-                        .ConfigureAwait(false);
-
-                // perform extract only if success is indicated.
-                if (load.Status == LoadStates.Suceeeded)
-                {
-                    // as its a good load, extract the data into the etl data model
-                    await this.loadProcessor.ExecuteExtract(runIdentifier.Value, cancellationToken)
-                            .ConfigureAwait(false);
-                }
-
-                // perform transform only if finished is indicated.
-                if (load.Status == LoadStates.Finished)
-                {
-                    // as its a good load, transform the data into the condition data model
-                    await this.loadProcessor.ExecuteTransform(runIdentifier.Value, cancellationToken)
-                            .ConfigureAwait(false);
-                }
             }
             else
             {
@@ -330,9 +328,8 @@
             return toReturn;
         }
 
-        private short? GetStatus(IHeaderDictionary headerDictionary)
+        private int? GetStatus(IHeaderDictionary headerDictionary)
         {
-            short? status = null;
             this.loggerProvider.Debug($"Checking for header \"{HeaderNameStatus}\"...");
 
             if (headerDictionary.ContainsKey(HeaderNameStatus))
@@ -345,19 +342,19 @@
 
                 try
                 {
-                    status = short.Parse(
-                        statusString,
-                        CultureInfo.InvariantCulture);
-                    if (
-                            status.Value < (short)LoadStates.Initialising
-                            ||
-                            status.Value > (short)LoadStates.Finished)
+                    object statusObject = null;
+                    if (!Enum.TryParse(typeof(ControlState), statusString, true, out statusObject))
                     {
+
                         this.loggerProvider.Error(
-                                $"An invalid {nameof(status)} was supplied. The " +
-                                $"{nameof(status)} must be " +
-                                $"specified as a valid {nameof(Int16)} value in the range 1..64.");
+                                $"An invalid {HeaderNameRunIdentifier} was supplied. The " +
+                                $"{HeaderNameRunIdentifier} must be " +
+                                $"specified as a value in the range {ControlState.Start}..{ControlState.Transforming} or {ControlState.Reporting}.");
                         return null;
+                    }
+                    else
+                    {
+                        return (int?)statusObject;
                     }
                 }
                 catch (FormatException formatException)
@@ -365,20 +362,18 @@
                     this.loggerProvider.Warning(
                         $"Unable to parse the value of " +
                         $"\"{HeaderNameRunIdentifier}\" " +
-                        $"(\"{statusString}\") as a {nameof(Int16)}.",
+                        $"(\"{statusString}\") as a value in the range {ControlState.Start}..{ControlState.Transforming} or {ControlState.Reporting}.",
                         formatException);
                 }
-
-                return status;
             }
             else
             {
                 this.loggerProvider.Error(
-                    $"A valid {nameof(status)} was not supplied. The " +
-                    $"{nameof(status)} must be " +
-                    $"specified as a valid {nameof(Int16)} value in the range 1..32.");
-                return null;
+                    $"A valid status was not supplied. The " +
+                    $"status must be " +
+                    $"specified as a valid {nameof(ControlState)} value in the range {ControlState.Start}..{ControlState.Transforming} or {ControlState.Reporting}.");
             }
+            return null;
         }
 
         private DateTime? GetRunIdentifier(IHeaderDictionary headerDictionary)

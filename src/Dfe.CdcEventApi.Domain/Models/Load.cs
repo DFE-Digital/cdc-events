@@ -49,7 +49,7 @@
         /// <summary>
         /// Gets or sets the load status.
         /// </summary>
-        public LoadStates Status
+        public ControlState Status
         {
             get;
             set;
