@@ -238,45 +238,44 @@
 
                 ControlState state = load.Status;
 
-                // update the load with the report
-                StringBuilder reportBody = new StringBuilder("Dummy Report");
+                switch (load.Status)
+                {
+                    case ControlState.Extracting:
 
-                load.Finish_DateTime = DateTime.UtcNow;
+                        load.Finish_DateTime = DateTime.UtcNow;
+
+                        var count = await this.loadProcessor.GetLoadCountAsync(
+                            runIdentifier.Value,
+                            cancellationToken)
+                            .ConfigureAwait(false);
+
+                        load.Count = count;
+
+                        await this.loadProcessor.UpdateLoadAsync(load, cancellationToken)
+                                .ConfigureAwait(false);
+
+                        // as its a good load, extract the data into the etl data model
+                        await this.loadProcessor.ExecuteExtract(runIdentifier.Value, cancellationToken)
+                                .ConfigureAwait(false);
+
+                        break;
+                    case ControlState.Transforming:
+                        // as its a good load, transform the data into the condition data model
+                        await this.loadProcessor.ExecuteTransform(runIdentifier.Value, cancellationToken)
+                                .ConfigureAwait(false);
+                        break;
+                    default:
+                        // update the load record back to its current state with report and audience.
+                        await this.loadProcessor.UpdateLoadAsync(load, cancellationToken)
+                                .ConfigureAwait(false);
+                        break;
+                }
 
                 toReturn = new HttpResponseMessage(HttpStatusCode.Accepted)
                 {
                     // return the notification data to the caller.
                     Content = new StringContent(JsonConvert.SerializeObject(load)),
                 };
-
-                if (state == ControlState.Extracting)
-                {
-                    var count = await this.loadProcessor.GetLoadCountAsync(
-                        runIdentifier.Value,
-                        cancellationToken)
-                        .ConfigureAwait(false);
-                    load.Count = count;
-                }
-
-                // update the load record back to its complete state with report and audience.
-                await this.loadProcessor.UpdateLoadAsync(load, cancellationToken)
-                        .ConfigureAwait(false);
-
-                // perform extract only if success is indicated.
-                if (load.Status == ControlState.Extracting)
-                {
-                    // as its a good load, extract the data into the etl data model
-                    await this.loadProcessor.ExecuteExtract(runIdentifier.Value, cancellationToken)
-                            .ConfigureAwait(false);
-                }
-
-                // perform transform only if finished is indicated.
-                if (load.Status == ControlState.Finished)
-                {
-                    // as its a good load, transform the data into the condition data model
-                    await this.loadProcessor.ExecuteTransform(runIdentifier.Value, cancellationToken)
-                            .ConfigureAwait(false);
-                }
             }
             else
             {
