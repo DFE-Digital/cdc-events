@@ -142,6 +142,32 @@
               "runAfter": { "Init-Control-Since": [ "Succeeded" ] },
               "type": "InitializeVariable"
             },
+            "Init-Control-Entity": {
+              "inputs": {
+                "variables": [
+                  {
+                    "name": "Control-Entity",
+                    "type": "string",
+                    "value": "@{null}"
+                  }
+                ]
+              },
+              "runAfter": { "Init-Control-Attachments": [ "Succeeded" ] },
+              "type": "InitializeVariable"
+            },
+            "Init-Control-Entity-Completed": {
+              "inputs": {
+                "variables": [
+                  {
+                    "name": "Control-Entity-Completed",
+                    "type": "boolean",
+                    "value": "@false"
+                  }
+                ]
+              },
+              "runAfter": { "Init-Control-Entity": [ "Succeeded" ] },
+              "type": "InitializeVariable"
+            },
             "Init-Control-Error": {
               "description": "A variable used in throw errors to stop processing",
               "inputs": {
@@ -581,142 +607,279 @@
               "actions": {
                 "For-Each-Entity": {
                   "actions": {
-                    "For-Each-Page": {
-                      "actions": {
-                        "Get-Entity-Page": {
-                          "description": "Call the entity endpoint and ask for as much as it will allow",
-                          "inputs": {
-                            "headers": { "Accept": "application/json" },
-                            "method": "GET",
-                            "queries": {
-                              "Page": "@{variables('Control-Page')}",
-                              "PageSize": "1000",
-                              "SessionId": "@variables('SourceOAUTHToken')",
-                              "UpdatedSince": "@variables('Control-Since')",
-                              "format": "json",
-                              "jsconfig": "dh:iso8601"
-                            },
-                            "retryPolicy": { "type": "none" },
-                            "uri": "@{parameters('SourceEndpoint')}@{items('For-Each-Entity')}"
-                          },
-                          "runAfter": {},
-                          "type": "Http"
-                        },
-                        "Increment-Control-Page": {
-                          "inputs": {
-                            "name": "Control-Page",
-                            "value": 1
-                          },
-                          "runAfter": { "Parse-Entity-Page": [ "Succeeded" ] },
-                          "type": "IncrementVariable"
-                        },
-                        "Parse-Entity-Page": {
-                          "inputs": {
-                            "content": "@body('Get-Entity-Page')",
-                            "schema": {
-                              "properties": {
-                                "Infos": {
-                                  "items": { "type": "object" },
-                                  "type": "array"
-                                },
-                                "Success": { "type": "boolean" }
-                              },
-                              "type": "object"
-                            }
-                          },
-                          "runAfter": { "Get-Entity-Page": [ "Succeeded" ] },
-                          "type": "ParseJson"
-                        },
-                        "Validate-Get-Entity-Page": {
-                          "actions": {
-                            "Post-Entity-Page": {
-                              "description": "Post the received entities to the target API",
-                              "inputs": {
-                                "body": "@body('Parse-Entity-Page')?['Infos']",
-                                "headers": {
-                                  "Authorization": "Bearer @{variables('TargetOAUTHToken')}",
-                                  "Content-Type": "application/octet-stream",
-                                  "Ocp-Apim-Subscription-Key": "@variables('TargetOAUTHKey')",
-                                  "X-Page": "@{variables('Control-Page')}",
-                                  "X-Run-Identifier": "@variables('Control-Started')"
-                                },
-                                "method": "POST",
-                                "retryPolicy": { "type": "none" },
-                                "uri": "@{parameters('TargetEndpoint')}@{items('For-Each-Entity')}"
-                              },
-                              "runAfter": {},
-                              "type": "Http"
-                            },
-                            "Validate-Post-Entity-Page": {
-                              "actions": {},
-                              "description": "Check the call worked",
-                              "else": {
-                                "actions": {
-                                  "Set-Post-Entity-Page-Fail": {
-                                    "inputs": {
-                                      "name": "Control-Error",
-                                      "value": "@int('__ERROR__')"
-                                    },
-                                    "runAfter": { "Set-Post-Entity-Page-Fail-Message": [ "Succeeded" ] },
-                                    "type": "SetVariable"
-                                  },
-                                  "Set-Post-Entity-Page-Fail-Message": {
-                                    "inputs": {
-                                      "name": "Control-Error-Message",
-                                      "value": "Failed posting entities (@{items('For-Each-Entity')}) to Target API."
-                                    },
-                                    "runAfter": {},
-                                    "type": "SetVariable"
-                                  }
-                                }
-                              },
-                              "expression": { "and": [ { "equals": [ "@outputs('Post-Entity-Page')['statusCode']", 202 ] } ] },
-                              "runAfter": { "Post-Entity-Page": [ "Succeeded" ] },
-                              "type": "If"
-                            }
-                          },
-                          "else": {
-                            "actions": {
-                              "Set-Control-Continue-False": {
-                                "description": "As there are no more entity members we stop processing this entity",
-                                "inputs": {
-                                  "name": "Control-Continue",
-                                  "value": "@false"
-                                },
-                                "runAfter": {},
-                                "type": "SetVariable"
-                              }
-                            }
-                          },
-                          "expression": { "and": [ { "greater": [ "@length(body('Parse-Entity-Page')['Infos'])", 0 ] } ] },
-                          "runAfter": { "Increment-Control-Page": [ "Succeeded" ] },
-                          "type": "If"
-                        }
-                      },
-                      "description": "Process the entity's pages",
-                      "expression": "@equals(variables('Control-Continue'), false)",
-                      "limit": {
-                        "count": 5000,
-                        "timeout": "PT1H"
-                      },
-                      "runAfter": { "Set-Control-Page-1": [ "Succeeded" ] },
-                      "type": "Until"
-                    },
-                    "Set-Control-Continue-True": {
+                    "Set-Control-Entity": {
                       "inputs": {
-                        "name": "Control-Continue",
-                        "value": "@true"
+                        "name": "Control-Entity",
+                        "value": "@{items('For-Each-Entity')}"
                       },
                       "runAfter": {},
                       "type": "SetVariable"
                     },
-                    "Set-Control-Page-1": {
-                      "inputs": {
-                        "name": "Control-Page",
-                        "value": 1
+                    "Until-Control-Entity-Completed": {
+                      "actions": {
+                        "For-Each-Page": {
+                          "actions": {
+                            "Get-Entity-Page": {
+                              "description": "Call the entity endpoint and ask for as much as it will allow",
+                              "inputs": {
+                                "headers": { "Accept": "application/json" },
+                                "method": "GET",
+                                "queries": {
+                                  "Page": "@{variables('Control-Page')}",
+                                  "PageSize": "1000",
+                                  "SessionId": "@variables('SourceOAUTHToken')",
+                                  "UpdatedSince": "@variables('Control-Since')",
+                                  "format": "json",
+                                  "jsconfig": "dh:iso8601"
+                                },
+                                "retryPolicy": { "type": "none" },
+                                "uri": "@{parameters('SourceEndpoint')}@{variables('Control-Entity')}"
+                              },
+                              "runAfter": {},
+                              "type": "Http"
+                            },
+                            "Validate-Get-Entity-Page": {
+                              "actions": {
+                                "Increment-Control-Page": {
+                                  "inputs": {
+                                    "name": "Control-Page",
+                                    "value": 1
+                                  },
+                                  "runAfter": { "Parse-Entity-Page": [ "Succeeded" ] },
+                                  "type": "IncrementVariable"
+                                },
+                                "Parse-Entity-Page": {
+                                  "inputs": {
+                                    "content": "@body('Get-Entity-Page')",
+                                    "schema": {
+                                      "properties": {
+                                        "Infos": {
+                                          "items": { "type": "object" },
+                                          "type": "array"
+                                        },
+                                        "Success": { "type": "boolean" }
+                                      },
+                                      "type": "object"
+                                    }
+                                  },
+                                  "runAfter": {},
+                                  "type": "ParseJson"
+                                },
+                                "Validate-Get-Entity-Data": {
+                                  "actions": {
+                                    "Post-Entity-Page": {
+                                      "description": "Post the received entities to the target API",
+                                      "inputs": {
+                                        "body": "@body('Parse-Entity-Page')?['Infos']",
+                                        "headers": {
+                                          "Authorization": "Bearer @{variables('TargetOAUTHToken')}",
+                                          "Content-Type": "application/octet-stream",
+                                          "Ocp-Apim-Subscription-Key": "@variables('TargetOAUTHKey')",
+                                          "X-Page": "@{variables('Control-Page')}",
+                                          "X-Run-Identifier": "@variables('Control-Started')"
+                                        },
+                                        "method": "POST",
+                                        "retryPolicy": { "type": "none" },
+                                        "uri": "@{parameters('TargetEndpoint')}@{variables('Control-Entity')}"
+                                      },
+                                      "runAfter": {},
+                                      "type": "Http"
+                                    },
+                                    "Validate-Post-Entity-Page": {
+                                      "actions": {},
+                                      "description": "Check the call worked",
+                                      "else": {
+                                        "actions": {
+                                          "Set-Post-Entity-Page-Fail": {
+                                            "inputs": {
+                                              "name": "Control-Error",
+                                              "value": "@int('__ERROR__')"
+                                            },
+                                            "runAfter": { "Set-Post-Entity-Page-Fail-Message": [ "Succeeded" ] },
+                                            "type": "SetVariable"
+                                          },
+                                          "Set-Post-Entity-Page-Fail-Message": {
+                                            "inputs": {
+                                              "name": "Control-Error-Message",
+                                              "value": "Failed posting entities (@{items('For-Each-Entity')}) to Target API."
+                                            },
+                                            "runAfter": {},
+                                            "type": "SetVariable"
+                                          }
+                                        }
+                                      },
+                                      "expression": { "and": [ { "equals": [ "@outputs('Post-Entity-Page')['statusCode']", 202 ] } ] },
+                                      "runAfter": { "Post-Entity-Page": [ "Succeeded" ] },
+                                      "type": "If"
+                                    }
+                                  },
+                                  "else": {
+                                    "actions": {
+                                      "Set-Control-Continue-False": {
+                                        "description": "As there are no more entity members we stop processing this entity",
+                                        "inputs": {
+                                          "name": "Control-Continue",
+                                          "value": "@false"
+                                        },
+                                        "runAfter": {},
+                                        "type": "SetVariable"
+                                      },
+                                      "Set-Control-Entity-Completed-True": {
+                                        "description": "And ask for the next one",
+                                        "inputs": {
+                                          "name": "Control-Entity-Completed",
+                                          "value": "@true"
+                                        },
+                                        "runAfter": { "Set-Control-Continue-False": [ "Succeeded" ] },
+                                        "type": "SetVariable"
+                                      }
+                                    }
+                                  },
+                                  "expression": { "and": [ { "greater": [ "@length(body('Parse-Entity-Page')['Infos'])", 0 ] } ] },
+                                  "runAfter": { "Increment-Control-Page": [ "Succeeded" ] },
+                                  "type": "If"
+                                }
+                              },
+                              "else": {
+                                "actions": {
+                                  "Validate-Get-Entity-Page-Unauthorised": {
+                                    "actions": {
+                                      "Scope-Source-OAUTH": {
+                                        "actions": {
+                                          "Get-SourceOAUTHToken": {
+                                            "description": "Perform a login API call to the source data provider",
+                                            "inputs": {
+                                              "headers": { "Accept": "application/json" },
+                                              "method": "POST",
+                                              "queries": {
+                                                "ApiToken": "@variables('SourceOAUTHKey')",
+                                                "Email": "@parameters('SourceOAUTHId')",
+                                                "Password": "@variables('SourceOAUTHSecret')"
+                                              },
+                                              "uri": "@parameters('SourceOAUTHEndpoint')"
+                                            },
+                                            "runAfter": {},
+                                            "type": "Http"
+                                          },
+                                          "Validate-SourceOAUTHToken-Request": {
+                                            "actions": {
+                                              "Parse-SourceOAUTHToken": {
+                                                "inputs": {
+                                                  "content": "@body('Get-SourceOAUTHToken')",
+                                                  "schema": {
+                                                    "properties": {
+                                                      "SessionId": { "type": "string" },
+                                                      "Success": { "type": "boolean" }
+                                                    },
+                                                    "type": "object"
+                                                  }
+                                                },
+                                                "runAfter": {},
+                                                "type": "ParseJson"
+                                              },
+                                              "Set-SourceOAUTHToken": {
+                                                "inputs": {
+                                                  "name": "SourceOAUTHToken",
+                                                  "value": "@body('Parse-SourceOAUTHToken')?['SessionId']"
+                                                },
+                                                "runAfter": { "Parse-SourceOAUTHToken": [ "Succeeded" ] },
+                                                "type": "SetVariable"
+                                              }
+                                            },
+                                            "else": {
+                                              "actions": {
+                                                "Set-Scope-Source-OAUTH-Fail": {
+                                                  "description": "Throws an error which deflects to last Scope",
+                                                  "inputs": {
+                                                    "name": "Control-Error",
+                                                    "value": "@int('__FAIL__')"
+                                                  },
+                                                  "runAfter": { "Set-Scope-Source-OAUTH-Fail-Message": [ "Succeeded" ] },
+                                                  "type": "SetVariable"
+                                                },
+                                                "Set-Scope-Source-OAUTH-Fail-Message": {
+                                                  "inputs": {
+                                                    "name": "Control-Error-Message",
+                                                    "value": "Failed to obtain the source API authorisation token (sessionId)"
+                                                  },
+                                                  "runAfter": {},
+                                                  "type": "SetVariable"
+                                                }
+                                              }
+                                            },
+                                            "expression": { "and": [ { "equals": [ "@outputs('Record-Control-Status-Source-Login')['statusCode']", 202 ] } ] },
+                                            "runAfter": { "Get-SourceOAUTHToken": [ "Succeeded" ] },
+                                            "type": "If"
+                                          }
+                                        },
+                                        "runAfter": {},
+                                        "type": "Scope"
+                                      }
+                                    },
+                                    "else": {
+                                      "actions": {
+                                        "Set-Validate-Get-Entity-Page-Unauthorised-Fail": {
+                                          "inputs": {
+                                            "name": "Control-Error",
+                                            "value": "@int('__ERROR__')"
+                                          },
+                                          "runAfter": { "Set-Validate-Get-Entity-Page-Unauthorised-Fail-Message": [ "Succeeded" ] },
+                                          "type": "SetVariable"
+                                        },
+                                        "Set-Validate-Get-Entity-Page-Unauthorised-Fail-Message": {
+                                          "inputs": {
+                                            "name": "Control-Error-Message",
+                                            "value": "Un-recoverable status on getting @{variables('Control-Entity')} Page@{variables('Control-Page')}"
+                                          },
+                                          "runAfter": {},
+                                          "type": "SetVariable"
+                                        }
+                                      }
+                                    },
+                                    "expression": { "and": [ { "equals": [ "@outputs('Get-Entity-Page')['statusCode']", 401 ] } ] },
+                                    "runAfter": {},
+                                    "type": "If"
+                                  }
+                                }
+                              },
+                              "expression": { "and": [ { "equals": [ "@outputs('Get-Entity-Page')['statusCode']", 200 ] } ] },
+                              "runAfter": { "Get-Entity-Page": [ "Succeeded" ] },
+                              "type": "If"
+                            }
+                          },
+                          "description": "Process the entity's pages",
+                          "expression": "@equals(variables('Control-Continue'), false)",
+                          "limit": {
+                            "count": 5000,
+                            "timeout": "PT1H"
+                          },
+                          "runAfter": { "Set-Control-Continue-True": [ "Succeeded" ] },
+                          "type": "Until"
+                        },
+                        "Set-Control-Continue-True": {
+                          "inputs": {
+                            "name": "Control-Continue",
+                            "value": "@true"
+                          },
+                          "runAfter": { "Set-Control-Page-1": [ "Succeeded" ] },
+                          "type": "SetVariable"
+                        },
+                        "Set-Control-Page-1": {
+                          "inputs": {
+                            "name": "Control-Page",
+                            "value": 1
+                          },
+                          "runAfter": {},
+                          "type": "SetVariable"
+                        }
                       },
-                      "runAfter": { "Set-Control-Continue-True": [ "Succeeded" ] },
-                      "type": "SetVariable"
+                      "expression": "@equals(variables('Control-Entity-Completed'), true)",
+                      "limit": {
+                        "count": 4,
+                        "timeout": "PT1H"
+                      },
+                      "runAfter": { "Set-Control-Entity": [ "Succeeded" ] },
+                      "type": "Until"
                     }
                   },
                   "description": "Process the entities list",
@@ -890,7 +1053,7 @@
                   "type": "If"
                 }
               },
-              "runAfter": { "Init-Control-Attachments": [ "Succeeded" ] },
+              "runAfter": { "Init-Control-Entity-Completed": [ "Succeeded" ] },
               "type": "Scope"
             },
             "Scope-Report": {
@@ -963,77 +1126,6 @@
               },
               "description": "To send notification via email on results of the run.",
               "runAfter": { "Scope-Update-Status-Transform": [ "Succeeded", "TimedOut", "Skipped", "Failed" ] },
-              "type": "Scope"
-            },
-            "Scope-Source-OAUTH": {
-              "actions": {
-                "Get-SourceOAUTHToken": {
-                  "description": "Perform a login API call to the source data provider",
-                  "inputs": {
-                    "headers": { "Accept": "application/json" },
-                    "method": "POST",
-                    "queries": {
-                      "ApiToken": "@variables('SourceOAUTHKey')",
-                      "Email": "@parameters('SourceOAUTHId')",
-                      "Password": "@variables('SourceOAUTHSecret')"
-                    },
-                    "uri": "@parameters('SourceOAUTHEndpoint')"
-                  },
-                  "runAfter": {},
-                  "type": "Http"
-                },
-                "Validate-SourceOAUTHToken-Request": {
-                  "actions": {
-                    "Parse-SourceOAUTHToken": {
-                      "inputs": {
-                        "content": "@body('Get-SourceOAUTHToken')",
-                        "schema": {
-                          "properties": {
-                            "SessionId": { "type": "string" },
-                            "Success": { "type": "boolean" }
-                          },
-                          "type": "object"
-                        }
-                      },
-                      "runAfter": {},
-                      "type": "ParseJson"
-                    },
-                    "Set-SourceOAUTHToken": {
-                      "inputs": {
-                        "name": "SourceOAUTHToken",
-                        "value": "@body('Parse-SourceOAUTHToken')?['SessionId']"
-                      },
-                      "runAfter": { "Parse-SourceOAUTHToken": [ "Succeeded" ] },
-                      "type": "SetVariable"
-                    }
-                  },
-                  "else": {
-                    "actions": {
-                      "Set-Scope-Source-OAUTH-Fail": {
-                        "description": "Throws an error which deflects to last Scope",
-                        "inputs": {
-                          "name": "Control-Error",
-                          "value": "@int('__FAIL__')"
-                        },
-                        "runAfter": { "Set-Scope-Source-OAUTH-Fail-Message": [ "Succeeded" ] },
-                        "type": "SetVariable"
-                      },
-                      "Set-Scope-Source-OAUTH-Fail-Message": {
-                        "inputs": {
-                          "name": "Control-Error-Message",
-                          "value": "Failed to obtain the source API authorisation token (sessionId)"
-                        },
-                        "runAfter": {},
-                        "type": "SetVariable"
-                      }
-                    }
-                  },
-                  "expression": { "and": [ { "equals": [ "@outputs('Record-Control-Status-Source-Login')['statusCode']", 202 ] } ] },
-                  "runAfter": { "Get-SourceOAUTHToken": [ "Succeeded" ] },
-                  "type": "If"
-                }
-              },
-              "runAfter": { "Scope-Update-Status-Source-Login": [ "Succeeded" ] },
               "type": "Scope"
             },
             "Scope-Source-OAUTH-Refresh": {
@@ -1315,7 +1407,7 @@
                   "type": "If"
                 }
               },
-              "runAfter": { "Scope-Source-OAUTH": [ "Succeeded" ] },
+              "runAfter": { "Scope-Update-Status-Source-Login": [ "Succeeded" ] },
               "type": "Scope"
             },
             "Scope-Update-Status-Extract": {
