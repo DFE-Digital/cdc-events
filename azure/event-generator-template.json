@@ -82,7 +82,7 @@
     "keyVaultSecretKycloudApiToken": "[resourceId(variables('sharedResourceGroupName'), 'Microsoft.KeyVault/vaults/secrets', variables('keyVaultName'), parameters('keyVaultSecretNameKycloudApiToken'))]",
     "keyVaultSecretCdcEventsTokenRequestPayload": "[resourceId(variables('sharedResourceGroupName'), 'Microsoft.KeyVault/vaults/secrets', variables('keyVaultName'), parameters('keyVaultSecretNameCdcEventsTokenRequestPayload'))]",
     "loginUri": "[concat(parameters('kycloudApiBaseUri'), '/', parameters('loginEndpoint'))]",
-    "dataPathUri": "[concat(parameters('kycloudApiBaseUri'), '/', parameters('dataPathPrefix'))]"
+    "dataPathUri": "[concat(parameters('kycloudApiBaseUri'), '/', parameters('dataPathPrefix'), '/')]"
   },
   "resources": [
     {
