@@ -1652,7 +1652,7 @@
               "type": "String"
             },
             "TargetEndpoint": {
-              "defaultValue": "[parameters('cdcEventsApiBaseUri')]",
+              "defaultValue": "[concat(parameters('cdcEventsApiBaseUri'), '/')]",
               "type": "String"
             },
             "TargetOAUTHCredentialsUri": {
