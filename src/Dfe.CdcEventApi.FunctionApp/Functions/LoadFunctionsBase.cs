@@ -330,49 +330,42 @@
 
         private int? GetStatus(IHeaderDictionary headerDictionary)
         {
-            this.loggerProvider.Debug($"Checking for header \"{HeaderNameStatus}\"...");
+            this.loggerProvider.Debug($"{nameof(this.GetStatus)} Checking for header \"{HeaderNameStatus}\"...");
 
             if (headerDictionary.ContainsKey(HeaderNameStatus))
             {
                 var statusString = headerDictionary[HeaderNameStatus];
 
                 this.loggerProvider.Info(
-                    $"Header \"{HeaderNameStatus}\" was specified: " +
+                    $"{nameof(this.GetStatus)} Header \"{HeaderNameStatus}\" was specified: " +
                     $"\"{statusString}\". Parsing...");
 
                 try
                 {
-                    object statusObject = null;
-                    if (!Enum.TryParse(typeof(ControlState), statusString, true, out statusObject))
-                    {
+                    var status = (ControlState)Enum.Parse(typeof(ControlState), statusString, true);
 
-                        this.loggerProvider.Error(
-                                $"An invalid {HeaderNameRunIdentifier} was supplied. The " +
-                                $"{HeaderNameRunIdentifier} must be " +
-                                $"specified as a value in the range {ControlState.Start}..{ControlState.Transforming} or {ControlState.Reporting}.");
-                        return null;
-                    }
-                    else
-                    {
-                        return (int?)statusObject;
-                    }
+                    this.loggerProvider.Info($"{nameof(GetStatus)} Supplied Status is {status}.");
+
+                    return (int)status;
                 }
-                catch (FormatException formatException)
+#pragma warning disable CA1031 // Do not catch general exception types
+                catch
+#pragma warning restore CA1031 // Do not catch general exception types
                 {
-                    this.loggerProvider.Warning(
-                        $"Unable to parse the value of " +
+                    this.loggerProvider.Error(
+                        $"{nameof(this.GetStatus)} Unable to parse the value of " +
                         $"\"{HeaderNameRunIdentifier}\" " +
-                        $"(\"{statusString}\") as a value in the range {ControlState.Start}..{ControlState.Transforming} or {ControlState.Reporting}.",
-                        formatException);
+                        $"(\"{statusString}\") as a value in the range {ControlState.Start}..{ControlState.Transforming} or {ControlState.Reporting}.");
                 }
             }
             else
             {
                 this.loggerProvider.Error(
-                    $"A valid status was not supplied. The " +
+                    $"{nameof(this.GetStatus)} A valid status was not supplied. The " +
                     $"status must be " +
                     $"specified as a valid {nameof(ControlState)} value in the range {ControlState.Start}..{ControlState.Transforming} or {ControlState.Reporting}.");
             }
+
             return null;
         }
 
