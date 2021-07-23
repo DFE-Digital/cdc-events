@@ -1520,11 +1520,11 @@
               "type": "String"
             },
             "SourceOAUTHKeyUri": {
-              "defaultValue": "[variables('keyVaultSecretKycloudApiToken')]",
+              "defaultValue": "[concat(reference(variables('keyVaultSecretKycloudApiToken'), '2019-09-01').secretUriWithVersion, '?api-version=2016-10-01')]",
               "type": "String"
             },
             "SourceOAUTHSecretUri": {
-              "defaultValue": "[variables('keyVaultSecretKycloudApiPassword')]",
+              "defaultValue": "[concat(reference(variables('keyVaultSecretKycloudApiPassword'), '2019-09-01').secretUriWithVersion, '?api-version=2016-10-01')]",
               "type": "String"
             },
             "StatusAttachments": {
@@ -1564,7 +1564,7 @@
               "type": "String"
             },
             "TargetOAUTHCredentialsUri": {
-              "defaultValue": "[variables('keyVaultSecretCdcEventsTokenRequestPayload')]",
+              "defaultValue": "[concat(reference(variables('keyVaultSecretCdcEventsTokenRequestPayload'), '2019-09-01').secretUriWithVersion, '?api-version=2016-10-01')]",
               "type": "String"
             },
             "TargetOAUTHEndpoint": {
@@ -1572,7 +1572,7 @@
               "type": "String"
             },
             "TargetOAUTHKeyUri": {
-              "defaultValue": "[variables('keyVaultSecretCdcEventsSubscriptionKey')]",
+              "defaultValue": "[concat(reference(variables('keyVaultSecretCdcEventsSubscriptionKey'), '2019-09-01').secretUriWithVersion, '?api-version=2016-10-01')]",
               "type": "String"
             }
           },
