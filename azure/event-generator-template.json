@@ -1017,7 +1017,7 @@
                           }
                         }
                       },
-                      "expression": { "and": [ { "equals": [ "", 202 ] } ] },
+                      "expression": { "and": [ { "equals": [ "@outputs('Record-Control-Status-Report')['statusCode']", 202 ] } ] },
                       "runAfter": { "Record-Control-Status-Report": [ "Succeeded" ] },
                       "type": "If"
                     }
