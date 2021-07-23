@@ -37,12 +37,12 @@
         private const string EXTRACTGetAttachments = "EXTRACT-Get-Attachments";
         private const string TRANSFORMAll = "TRANSFORM-All";
         private const string ProcessHandlerFileNameFormat = "{0}.sql";
+        private const int CommandTimeoutAsLongAsItTakes = 0;
         private readonly ILoggerProvider loggerProvider;
         private readonly Assembly assembly;
         private readonly string controlHandlersPath;
         private readonly string rawDbConnectionString;
         private readonly IBlobConvertor blobConvertor;
-
         /// <summary>
         /// Initialises a new instance of the
         /// <see cref="LoadStorageAdapter" /> class.
@@ -173,7 +173,7 @@
 
                     // add it as a known blob
                     await sqlConnection
-                        .ExecuteAsync(insertSql, blobs, transaction)
+                        .ExecuteAsync(insertSql, blobs, transaction, CommandTimeoutAsLongAsItTakes)
                         .ConfigureAwait(false);
 
                     this.loggerProvider.Info($"Stored Blob Key 'obtained' reference");
@@ -193,7 +193,7 @@
                     this.loggerProvider.Info($"Updating evidence with file Url.");
 
                     await sqlConnection
-                        .ExecuteAsync(updateSql, blob, transaction)
+                        .ExecuteAsync(updateSql, blob, transaction, CommandTimeoutAsLongAsItTakes)
                         .ConfigureAwait(false);
 
                     this.loggerProvider.Info($"Updated evidence with file Url.");
@@ -280,7 +280,7 @@
                 stopwatch.Start();
 
                 await sqlConnection
-                        .ExecuteAsync(insertSql, new { runIdentifier })
+                        .ExecuteAsync(insertSql, new { runIdentifier }, null, CommandTimeoutAsLongAsItTakes)
                         .ConfigureAwait(false);
 
                 stopwatch.Stop();
@@ -299,7 +299,10 @@
 
                 IEnumerable<Load> loads = sqlConnection.Query<Load>(
                     querySql,
-                    new { runIdentifier });
+                    new { runIdentifier },
+                    null,
+                    true,
+                    CommandTimeoutAsLongAsItTakes);
 
                 stopwatch.Stop();
 
@@ -331,10 +334,8 @@
 
                 stopwatch.Start();
 
-                int commandTimeoutAsLongAsItTakes = 0;
-
                 await sqlConnection
-                        .ExecuteAsync(procedureSql, new { runIdentifier }, null, commandTimeoutAsLongAsItTakes)
+                        .ExecuteAsync(procedureSql, new { runIdentifier }, null, CommandTimeoutAsLongAsItTakes)
                         .ConfigureAwait(false);
 
                 stopwatch.Stop();
@@ -402,7 +403,7 @@
 
                 stopwatch.Start();
 
-                var attachments = sqlConnection.Query<Attachment>(querySql, new { runIdentifier });
+                var attachments = sqlConnection.Query<Attachment>(querySql, new { runIdentifier }, null, true, CommandTimeoutAsLongAsItTakes);
 
                 stopwatch.Stop();
 
@@ -439,7 +440,10 @@
 
                 Load load = sqlConnection.Query<Load>(
                                     querySql,
-                                    new { runIdentifier })
+                                    new { runIdentifier },
+                                    null,
+                                    true,
+                                    CommandTimeoutAsLongAsItTakes)
                                     .FirstOrDefault();
 
                 stopwatch.Stop();
@@ -476,7 +480,7 @@
 
                 stopwatch.Start();
 
-                var results = sqlConnection.Query<int>(querySql, new { runIdentifier })
+                var results = sqlConnection.Query<int>(querySql, new { runIdentifier }, null, true, CommandTimeoutAsLongAsItTakes)
                                                 .FirstOrDefault();
 
                 stopwatch.Stop();
@@ -519,7 +523,7 @@
 
                 stopwatch.Start();
 
-                await sqlConnection.ExecuteAsync(udpateSql, item)
+                await sqlConnection.ExecuteAsync(udpateSql, item, null, CommandTimeoutAsLongAsItTakes)
                     .ConfigureAwait(false);
 
                 stopwatch.Stop();
@@ -566,7 +570,9 @@
                         runIdentifier,
                         status,
                         reportTitle = $"Current step: {state}",
-                    })
+                    },
+                    null,
+                    CommandTimeoutAsLongAsItTakes)
                         .ConfigureAwait(false);
 
                 stopwatch.Stop();
