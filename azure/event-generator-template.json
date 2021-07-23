@@ -742,103 +742,21 @@
                               },
                               "else": {
                                 "actions": {
-                                  "Validate-Get-Entity-Page-Unauthorised": {
-                                    "actions": {
-                                      "Scope-Source-OAUTH": {
-                                        "actions": {
-                                          "Get-SourceOAUTHToken": {
-                                            "description": "Perform a login API call to the source data provider",
-                                            "inputs": {
-                                              "headers": { "Accept": "application/json" },
-                                              "method": "POST",
-                                              "queries": {
-                                                "ApiToken": "@variables('SourceOAUTHKey')",
-                                                "Email": "@parameters('SourceOAUTHId')",
-                                                "Password": "@variables('SourceOAUTHSecret')"
-                                              },
-                                              "uri": "@parameters('SourceOAUTHEndpoint')"
-                                            },
-                                            "runAfter": {},
-                                            "type": "Http"
-                                          },
-                                          "Validate-SourceOAUTHToken-Request": {
-                                            "actions": {
-                                              "Parse-SourceOAUTHToken": {
-                                                "inputs": {
-                                                  "content": "@body('Get-SourceOAUTHToken')",
-                                                  "schema": {
-                                                    "properties": {
-                                                      "SessionId": { "type": "string" },
-                                                      "Success": { "type": "boolean" }
-                                                    },
-                                                    "type": "object"
-                                                  }
-                                                },
-                                                "runAfter": {},
-                                                "type": "ParseJson"
-                                              },
-                                              "Set-SourceOAUTHToken": {
-                                                "inputs": {
-                                                  "name": "SourceOAUTHToken",
-                                                  "value": "@body('Parse-SourceOAUTHToken')?['SessionId']"
-                                                },
-                                                "runAfter": { "Parse-SourceOAUTHToken": [ "Succeeded" ] },
-                                                "type": "SetVariable"
-                                              }
-                                            },
-                                            "else": {
-                                              "actions": {
-                                                "Set-Scope-Source-OAUTH-Fail": {
-                                                  "description": "Throws an error which deflects to last Scope",
-                                                  "inputs": {
-                                                    "name": "Control-Error",
-                                                    "value": "@int('__FAIL__')"
-                                                  },
-                                                  "runAfter": { "Set-Scope-Source-OAUTH-Fail-Message": [ "Succeeded" ] },
-                                                  "type": "SetVariable"
-                                                },
-                                                "Set-Scope-Source-OAUTH-Fail-Message": {
-                                                  "inputs": {
-                                                    "name": "Control-Error-Message",
-                                                    "value": "Failed to obtain the source API authorisation token (sessionId)"
-                                                  },
-                                                  "runAfter": {},
-                                                  "type": "SetVariable"
-                                                }
-                                              }
-                                            },
-                                            "expression": { "and": [ { "equals": [ "@outputs('Record-Control-Status-Source-Login')['statusCode']", 202 ] } ] },
-                                            "runAfter": { "Get-SourceOAUTHToken": [ "Succeeded" ] },
-                                            "type": "If"
-                                          }
-                                        },
-                                        "runAfter": {},
-                                        "type": "Scope"
-                                      }
+                                  "Set-Validate-Get-Entity-Page-Fail": {
+                                    "inputs": {
+                                      "name": "Control-Error",
+                                      "value": "@int('__ERROR__')"
                                     },
-                                    "else": {
-                                      "actions": {
-                                        "Set-Validate-Get-Entity-Page-Unauthorised-Fail": {
-                                          "inputs": {
-                                            "name": "Control-Error",
-                                            "value": "@int('__ERROR__')"
-                                          },
-                                          "runAfter": { "Set-Validate-Get-Entity-Page-Unauthorised-Fail-Message": [ "Succeeded" ] },
-                                          "type": "SetVariable"
-                                        },
-                                        "Set-Validate-Get-Entity-Page-Unauthorised-Fail-Message": {
-                                          "inputs": {
-                                            "name": "Control-Error-Message",
-                                            "value": "Un-recoverable status on getting @{variables('Control-Entity')} Page@{variables('Control-Page')}"
-                                          },
-                                          "runAfter": {},
-                                          "type": "SetVariable"
-                                        }
-                                      }
+                                    "runAfter": { "Set-Validate-Get-Entity-Page-Fail-Message": [ "Succeeded" ] },
+                                    "type": "SetVariable"
+                                  },
+                                  "Set-Validate-Get-Entity-Page-Fail-Message": {
+                                    "inputs": {
+                                      "name": "Control-Error-Message",
+                                      "value": "Un-recoverable status on getting @{variables('Control-Entity')} Page@{variables('Control-Page')}"
                                     },
-                                    "expression": { "and": [ { "equals": [ "@outputs('Get-Entity-Page')['statusCode']", 401 ] } ] },
                                     "runAfter": {},
-                                    "type": "If"
+                                    "type": "SetVariable"
                                   }
                                 }
                               },
@@ -1128,6 +1046,77 @@
               "runAfter": { "Scope-Update-Status-Transform": [ "Succeeded", "TimedOut", "Skipped", "Failed" ] },
               "type": "Scope"
             },
+            "Scope-Source-OAUTH": {
+              "actions": {
+                "Get-SourceOAUTHToken": {
+                  "description": "Perform a login API call to the source data provider",
+                  "inputs": {
+                    "headers": { "Accept": "application/json" },
+                    "method": "POST",
+                    "queries": {
+                      "ApiToken": "@variables('SourceOAUTHKey')",
+                      "Email": "@parameters('SourceOAUTHId')",
+                      "Password": "@variables('SourceOAUTHSecret')"
+                    },
+                    "uri": "@parameters('SourceOAUTHEndpoint')"
+                  },
+                  "runAfter": {},
+                  "type": "Http"
+                },
+                "Validate-SourceOAUTHToken-Request": {
+                  "actions": {
+                    "Parse-SourceOAUTHToken": {
+                      "inputs": {
+                        "content": "@body('Get-SourceOAUTHToken')",
+                        "schema": {
+                          "properties": {
+                            "SessionId": { "type": "string" },
+                            "Success": { "type": "boolean" }
+                          },
+                          "type": "object"
+                        }
+                      },
+                      "runAfter": {},
+                      "type": "ParseJson"
+                    },
+                    "Set-SourceOAUTHToken": {
+                      "inputs": {
+                        "name": "SourceOAUTHToken",
+                        "value": "@body('Parse-SourceOAUTHToken')?['SessionId']"
+                      },
+                      "runAfter": { "Parse-SourceOAUTHToken": [ "Succeeded" ] },
+                      "type": "SetVariable"
+                    }
+                  },
+                  "else": {
+                    "actions": {
+                      "Set-Scope-Source-OAUTH-Fail": {
+                        "description": "Throws an error which deflects to last Scope",
+                        "inputs": {
+                          "name": "Control-Error",
+                          "value": "@int('__FAIL__')"
+                        },
+                        "runAfter": { "Set-Scope-Source-OAUTH-Fail-Message": [ "Succeeded" ] },
+                        "type": "SetVariable"
+                      },
+                      "Set-Scope-Source-OAUTH-Fail-Message": {
+                        "inputs": {
+                          "name": "Control-Error-Message",
+                          "value": "Failed to obtain the source API authorisation token (sessionId)"
+                        },
+                        "runAfter": {},
+                        "type": "SetVariable"
+                      }
+                    }
+                  },
+                  "expression": { "and": [ { "equals": [ "@outputs('Record-Control-Status-Source-Login')['statusCode']", 202 ] } ] },
+                  "runAfter": { "Get-SourceOAUTHToken": [ "Succeeded" ] },
+                  "type": "If"
+                }
+              },
+              "runAfter": { "Scope-Update-Status-Source-Login": [ "Succeeded" ] },
+              "type": "Scope"
+            },
             "Scope-Source-OAUTH-Refresh": {
               "actions": {
                 "Source-OAUTH-Refresh": {
@@ -1407,7 +1396,7 @@
                   "type": "If"
                 }
               },
-              "runAfter": { "Scope-Update-Status-Source-Login": [ "Succeeded" ] },
+              "runAfter": { "Scope-Source-OAUTH": [ "Succeeded" ] },
               "type": "Scope"
             },
             "Scope-Update-Status-Extract": {
