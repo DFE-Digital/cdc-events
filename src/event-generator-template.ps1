@@ -12,6 +12,8 @@ $a.resources[0].properties.definition.parameters.TargetOAUTHKeyUri.defaultValue 
 $a.resources[0].properties.definition.parameters.TargetEndpoint.defaultValue = "[concat(parameters('cdcEventsApiBaseUri'), '/')]"
 $a.resources[0].properties.definition.parameters.TargetControlEndpoint.defaultValue = "[concat(parameters('cdcEventsApiBaseUri'), '/load')]"
 $a.resources[0].properties.definition.parameters.TargetOAUTHEndpoint.defaultValue = "[parameters('internalOAuthTokenEndpoint')]"
+$a.resources[0].properties.definition.parameters.CDC2NotifyAPIKeySecretUri.defaultValue  = "[resourceId(variables('sharedResourceGroupName'), 'Microsoft.KeyVault/vaults/secrets', variables('keyVaultName'), parameters('keyVaultSecretNameCDC2NotifyAPIKey'))]"
+
 #
 # PLEASE NOTE: the values of the Status* Properties are dependent on the Dfe.CdcEventApi.Domain.Models.ControlState Enum values
 #

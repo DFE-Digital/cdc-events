@@ -49,6 +49,10 @@
       "type": "string",
       "defaultValue": "cdc-events-token-request-payload"
     },
+    "keyVaultSecretNameCDC2NotifyAPIKey": {
+      "type": "string",
+      "defaultValue": "CDC2NotifyAPIKey"
+    },
     "cdcEventsApiBaseUri": { "type": "string" },
     "kycloudApiBaseUri": { "type": "string" },
     "kycloudApiEmail": { "type": "string" },
@@ -81,6 +85,7 @@
     "keyVaultSecretKycloudApiPassword": "[resourceId(variables('sharedResourceGroupName'), 'Microsoft.KeyVault/vaults/secrets', variables('keyVaultName'), parameters('keyVaultSecretNameKycloudApiPassword'))]",
     "keyVaultSecretKycloudApiToken": "[resourceId(variables('sharedResourceGroupName'), 'Microsoft.KeyVault/vaults/secrets', variables('keyVaultName'), parameters('keyVaultSecretNameKycloudApiToken'))]",
     "keyVaultSecretCdcEventsTokenRequestPayload": "[resourceId(variables('sharedResourceGroupName'), 'Microsoft.KeyVault/vaults/secrets', variables('keyVaultName'), parameters('keyVaultSecretNameCdcEventsTokenRequestPayload'))]",
+    "keyVaultSecretCDC2NotifyAPIKey": "[resourceId(variables('sharedResourceGroupName'), 'Microsoft.KeyVault/vaults/secrets', variables('keyVaultName'), parameters('keyVaultSecretNameCDC2NotifyAPIKey'))]",
     "loginUri": "[concat(parameters('kycloudApiBaseUri'), '/', parameters('loginEndpoint'))]",
     "dataPathUri": "[concat(parameters('kycloudApiBaseUri'), '/', parameters('dataPathPrefix'), '/')]"
   },
@@ -207,6 +212,19 @@
                 ]
               },
               "runAfter": { "Init-Control-Error": [ "Succeeded" ] },
+              "type": "InitializeVariable"
+            },
+            "Init-Control-NotifyAPIKey": {
+              "inputs": {
+                "variables": [
+                  {
+                    "name": "Control-NotifyAPIKey",
+                    "type": "string",
+                    "value": "@{null}"
+                  }
+                ]
+              },
+              "runAfter": { "Init-Control-Attachment-Count": [ "Succeeded" ] },
               "type": "InitializeVariable"
             },
             "Init-Control-Page": {
@@ -1282,7 +1300,7 @@
                   "type": "If"
                 }
               },
-              "runAfter": { "Init-Control-Attachment-Count": [ "Succeeded" ] },
+              "runAfter": { "Init-Control-NotifyAPIKey": [ "Succeeded" ] },
               "type": "Scope"
             },
             "Scope-Report": {
@@ -1666,6 +1684,22 @@
           },
           "contentVersion": "1.0.0.0",
           "parameters": {
+            "CDC2NotifyAPIKeySecretUri": {
+              "defaultValue": "[resourceId(variables('sharedResourceGroupName'), 'Microsoft.KeyVault/vaults/secrets', variables('keyVaultName'), parameters('keyVaultSecretNameCDC2NotifyAPIKey'))]",
+              "type": "String"
+            },
+            "NotifyFailureAddresses": {
+              "defaultValue": "iain.stevenson@education.gov.uk",
+              "type": "String"
+            },
+            "NotifySuccessAddresses": {
+              "defaultValue": "jake.wood@education.gov.uk",
+              "type": "String"
+            },
+            "NotifyUri": {
+              "defaultValue": "https://dev-api-customerengagement.platform.education.gov.uk/notifications/email",
+              "type": "String"
+            },
             "ReAuthenticateEvery": {
               "defaultValue": 25,
               "type": "Int"
