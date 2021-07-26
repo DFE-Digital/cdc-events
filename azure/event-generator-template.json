@@ -100,6 +100,19 @@
         "definition": {
           "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
           "actions": {
+            "Init-Control-Attachment-Count": {
+              "inputs": {
+                "variables": [
+                  {
+                    "name": "Control-Attachment-Count",
+                    "type": "integer",
+                    "value": 0
+                  }
+                ]
+              },
+              "runAfter": { "Init-Control-Entity-Completed": [ "Succeeded" ] },
+              "type": "InitializeVariable"
+            },
             "Init-Control-Attachments": {
               "description": "The received collection of attachments to obtain",
               "inputs": {
@@ -340,6 +353,14 @@
               "actions": {
                 "For-Each-Attachment": {
                   "actions": {
+                    "Increment-Control-Attachment-Count": {
+                      "inputs": {
+                        "name": "Control-Attachment-Count",
+                        "value": 1
+                      },
+                      "runAfter": { "Validate-Post-blob": [ "Succeeded" ] },
+                      "type": "IncrementVariable"
+                    },
                     "Post-blob": {
                       "inputs": {
                         "body": [
@@ -366,6 +387,168 @@
                       "runAfter": { "While-Control-Continue-Step-True": [ "Succeeded" ] },
                       "runtimeConfiguration": { "contentTransfer": { "transferMode": "Chunked" } },
                       "type": "Http"
+                    },
+                    "Re-Authenticate-Attachments": {
+                      "actions": {
+                        "Scope-Re-Authenticate-Attachments": {
+                          "actions": {
+                            "Re-Authenticate-Source-Attachment": {
+                              "inputs": {
+                                "headers": { "Accept": "application/json" },
+                                "method": "POST",
+                                "queries": {
+                                  "ApiToken": "@variables('SourceOAUTHKey')",
+                                  "Email": "@parameters('SourceOAUTHId')",
+                                  "Password": "@variables('SourceOAUTHSecret')"
+                                },
+                                "uri": "@parameters('SourceOAUTHEndpoint')"
+                              },
+                              "runAfter": {},
+                              "type": "Http"
+                            },
+                            "Re-Authenticate-Target-Attachment": {
+                              "inputs": {
+                                "body": "@variables('TargetOAUTHCredentials')",
+                                "headers": { "Content-Type": "application/x-www-form-urlencoded" },
+                                "method": "POST",
+                                "uri": "@parameters('TargetOAUTHEndpoint')"
+                              },
+                              "runAfter": { "Validate-Re-Authenticate-Source-Attachment": [ "Succeeded" ] },
+                              "type": "Http"
+                            },
+                            "Validate-Re-Authenticate-Source-Attachment": {
+                              "actions": {
+                                "Parse-Re-Authenticate-Source-Attachment": {
+                                  "inputs": {
+                                    "content": "@body('Re-Authenticate-Source-Attachment')",
+                                    "schema": {
+                                      "properties": {
+                                        "SessionId": { "type": "string" },
+                                        "Success": { "type": "boolean" }
+                                      },
+                                      "type": "object"
+                                    }
+                                  },
+                                  "runAfter": {},
+                                  "type": "ParseJson"
+                                },
+                                "Validate-Parse-Re-Authenticate-Source-Attachment": {
+                                  "actions": {
+                                    "Set-SourceOAUTHToken-Again": {
+                                      "inputs": {
+                                        "name": "SourceOAUTHToken",
+                                        "value": "@body('Parse-Re-Authenticate-Source-Attachment')?['SessionId']"
+                                      },
+                                      "runAfter": {},
+                                      "type": "SetVariable"
+                                    }
+                                  },
+                                  "else": {
+                                    "actions": {
+                                      "Set-Parse-Source-OAUTH-Refresh-Fail": {
+                                        "description": "Throw error because re login parse of data failed",
+                                        "inputs": {
+                                          "name": "Control-Error",
+                                          "value": "@int('__FAIL__')"
+                                        },
+                                        "runAfter": { "Set-Parse-Source-OAUTH-Refresh-Fail-Message": [ "Succeeded" ] },
+                                        "type": "SetVariable"
+                                      },
+                                      "Set-Parse-Source-OAUTH-Refresh-Fail-Message": {
+                                        "inputs": {
+                                          "name": "Control-Error-Message",
+                                          "value": "Failed to parse the source login token."
+                                        },
+                                        "runAfter": {},
+                                        "type": "SetVariable"
+                                      }
+                                    }
+                                  },
+                                  "expression": { "and": [ { "equals": [ "@body('Parse-Re-Authenticate-Source-Attachment')?['Success']", "@true" ] } ] },
+                                  "runAfter": { "Parse-Re-Authenticate-Source-Attachment": [ "Succeeded" ] },
+                                  "type": "If"
+                                }
+                              },
+                              "else": {
+                                "actions": {
+                                  "Set-Re-Authenticate-Source-Attachment-Fail": {
+                                    "description": "Throw and error because the re login failed with bad http status",
+                                    "inputs": {
+                                      "name": "Control-Error",
+                                      "value": "@int('__ERROR__')"
+                                    },
+                                    "runAfter": { "Set-Re-Authenticate-Source-Attachment-Fail-Message": [ "Succeeded" ] },
+                                    "type": "SetVariable"
+                                  },
+                                  "Set-Re-Authenticate-Source-Attachment-Fail-Message": {
+                                    "inputs": {
+                                      "name": "Control-Error-Message",
+                                      "value": "Failed to re-authenticate with the source API for attachments"
+                                    },
+                                    "runAfter": {},
+                                    "type": "SetVariable"
+                                  }
+                                }
+                              },
+                              "expression": { "and": [ { "equals": [ "@outputs('Re-Authenticate-Source-Attachment')['statusCode']", 200 ] } ] },
+                              "runAfter": { "Re-Authenticate-Source-Attachment": [ "Succeeded" ] },
+                              "type": "If"
+                            },
+                            "Validate-Re-Authenticate-Target-Attachment": {
+                              "actions": {
+                                "Parse-Re-Authenticate-Target-Attachment": {
+                                  "inputs": {
+                                    "content": "@body('Re-Authenticate-Target-Attachment')",
+                                    "schema": {
+                                      "properties": { "access_token": { "type": "string" } },
+                                      "type": "object"
+                                    }
+                                  },
+                                  "runAfter": {},
+                                  "type": "ParseJson"
+                                },
+                                "Set-Re-Authenticate-Target-Attachment": {
+                                  "inputs": {
+                                    "name": "TargetOAUTHToken",
+                                    "value": "@body('Parse-Re-Authenticate-Target-Attachment')?['access_token']"
+                                  },
+                                  "runAfter": { "Parse-Re-Authenticate-Target-Attachment": [ "Succeeded" ] },
+                                  "type": "SetVariable"
+                                }
+                              },
+                              "else": {
+                                "actions": {
+                                  "Set-Re-Authenticate-Target-Attachment-Fail": {
+                                    "inputs": {
+                                      "name": "Control-Error",
+                                      "value": "@int('__ERROR__')"
+                                    },
+                                    "runAfter": { "Set-Re-Authenticate-Target-Attachment-Fail-Message": [ "Succeeded" ] },
+                                    "type": "SetVariable"
+                                  },
+                                  "Set-Re-Authenticate-Target-Attachment-Fail-Message": {
+                                    "inputs": {
+                                      "name": "Control-Error-Message",
+                                      "value": "Failed to re-authenticate target for attachment "
+                                    },
+                                    "runAfter": {},
+                                    "type": "SetVariable"
+                                  }
+                                }
+                              },
+                              "expression": { "and": [ { "equals": [ "@outputs('Re-Authenticate-Target-Attachment')['statusCode']", 200 ] } ] },
+                              "runAfter": { "Re-Authenticate-Target-Attachment": [ "Succeeded" ] },
+                              "type": "If"
+                            }
+                          },
+                          "runAfter": {},
+                          "type": "Scope"
+                        }
+                      },
+                      "description": "Re-Authenticate again at start and every x attachments.",
+                      "expression": { "and": [ { "equals": [ "@mod(variables('Control-Attachment-Count'),parameters('ReAuthenticateEvery'))", 0 ] } ] },
+                      "runAfter": {},
+                      "type": "If"
                     },
                     "Validate-Post-blob": {
                       "actions": {},
@@ -513,7 +696,7 @@
                         }
                       },
                       "expression": { "and": [ { "equals": [ "@variables('Control-Continue-Step')", "@true" ] } ] },
-                      "runAfter": {},
+                      "runAfter": { "Re-Authenticate-Attachments": [ "Succeeded" ] },
                       "type": "If"
                     }
                   },
@@ -524,7 +707,7 @@
                 }
               },
               "description": "Obtain all of the attachments on the list and post the data and metadata to the blobs endpoint to store the file and update the database.",
-              "runAfter": { "Scope-Source-OAUTH-Refresh": [ "Succeeded" ] },
+              "runAfter": { "Scope-Attachments-List": [ "Succeeded" ] },
               "type": "Scope"
             },
             "Scope-Attachments-List": {
@@ -607,6 +790,134 @@
               "actions": {
                 "For-Each-Entity": {
                   "actions": {
+                    "Scope-Re-Authenticate": {
+                      "actions": {
+                        "Re-Authenticate-Source": {
+                          "description": "Sign in to the source authentication endpoint and get a new token",
+                          "inputs": {
+                            "headers": { "Accept": "application/json" },
+                            "method": "POST",
+                            "queries": {
+                              "ApiToken": "@variables('SourceOAUTHKey')",
+                              "Email": "@parameters('SourceOAUTHId')",
+                              "Password": "@variables('SourceOAUTHSecret')"
+                            },
+                            "uri": "@parameters('SourceOAUTHEndpoint')"
+                          },
+                          "runAfter": {},
+                          "type": "Http"
+                        },
+                        "Re-Authenticate-Target": {
+                          "description": "Sign into the target endpoint",
+                          "inputs": {
+                            "body": "@variables('TargetOAUTHCredentials')",
+                            "headers": { "Content-Type": "application/x-www-form-urlencoded" },
+                            "method": "POST",
+                            "uri": "@parameters('TargetOAUTHEndpoint')"
+                          },
+                          "runAfter": { "Validate-Re-Authenticate-Source": [ "Succeeded" ] },
+                          "type": "Http"
+                        },
+                        "Validate-Re-Authenticate-Source": {
+                          "actions": {
+                            "Parse-Re-Authenticate-Source": {
+                              "inputs": {
+                                "content": "@body('Re-Authenticate-Source')",
+                                "schema": {
+                                  "properties": {
+                                    "SessionId": { "type": "string" },
+                                    "Success": { "type": "boolean" }
+                                  },
+                                  "type": "object"
+                                }
+                              },
+                              "runAfter": {},
+                              "type": "ParseJson"
+                            },
+                            "Set-Re-Authenticate-Source": {
+                              "inputs": {
+                                "name": "SourceOAUTHToken",
+                                "value": "@body('Parse-Re-Authenticate-Source')?['SessionId']"
+                              },
+                              "runAfter": { "Parse-Re-Authenticate-Source": [ "Succeeded" ] },
+                              "type": "SetVariable"
+                            }
+                          },
+                          "else": {
+                            "actions": {
+                              "Set-Re-Authenticate-Source-Fail": {
+                                "inputs": {
+                                  "name": "Control-Error",
+                                  "value": "@int('__ERROR__')"
+                                },
+                                "runAfter": { "Set-Re-Authenticate-Source-Fail-Message": [ "Succeeded" ] },
+                                "type": "SetVariable"
+                              },
+                              "Set-Re-Authenticate-Source-Fail-Message": {
+                                "inputs": {
+                                  "name": "Control-Error-Message",
+                                  "value": "Failed to re-authenticate the source endpoint."
+                                },
+                                "runAfter": {},
+                                "type": "SetVariable"
+                              }
+                            }
+                          },
+                          "expression": { "and": [ { "equals": [ "@outputs('Re-Authenticate-Source')['statusCode']", 200 ] } ] },
+                          "runAfter": { "Re-Authenticate-Source": [ "Succeeded" ] },
+                          "type": "If"
+                        },
+                        "Validate-Re-Authenticate-Target": {
+                          "actions": {
+                            "Parse-Re-Authenticate-Target": {
+                              "inputs": {
+                                "content": "@body('Re-Authenticate-Target')",
+                                "schema": {
+                                  "properties": { "access_token": { "type": "string" } },
+                                  "type": "object"
+                                }
+                              },
+                              "runAfter": {},
+                              "type": "ParseJson"
+                            },
+                            "Set-Re-Authenticate-Target": {
+                              "inputs": {
+                                "name": "TargetOAUTHToken",
+                                "value": "@body('Parse-Re-Authenticate-Target')?['access_token']"
+                              },
+                              "runAfter": { "Parse-Re-Authenticate-Target": [ "Succeeded" ] },
+                              "type": "SetVariable"
+                            }
+                          },
+                          "else": {
+                            "actions": {
+                              "Set-Re-Authenticate-Target-Fail": {
+                                "inputs": {
+                                  "name": "Control-Error",
+                                  "value": "@int('__ERROR__')"
+                                },
+                                "runAfter": { "Set-Re-Authenticate-Target-Faile-Message": [ "Succeeded" ] },
+                                "type": "SetVariable"
+                              },
+                              "Set-Re-Authenticate-Target-Faile-Message": {
+                                "inputs": {
+                                  "name": "Control-Error-Message",
+                                  "value": "Failed to re-authenticate target endpoint."
+                                },
+                                "runAfter": {},
+                                "type": "SetVariable"
+                              }
+                            }
+                          },
+                          "expression": { "and": [ { "equals": [ "@outputs('Re-Authenticate-Target')['statusCode']", 200 ] } ] },
+                          "runAfter": { "Re-Authenticate-Target": [ "Succeeded" ] },
+                          "type": "If"
+                        }
+                      },
+                      "description": "This copes with the potential expiration of OAUTH tokens at either end point.",
+                      "runAfter": { "Set-Control-Entity": [ "Succeeded" ] },
+                      "type": "Scope"
+                    },
                     "Set-Control-Entity": {
                       "inputs": {
                         "name": "Control-Entity",
@@ -796,7 +1107,7 @@
                         "count": 4,
                         "timeout": "PT1H"
                       },
-                      "runAfter": { "Set-Control-Entity": [ "Succeeded" ] },
+                      "runAfter": { "Scope-Re-Authenticate": [ "Succeeded" ] },
                       "type": "Until"
                     }
                   },
@@ -971,7 +1282,7 @@
                   "type": "If"
                 }
               },
-              "runAfter": { "Init-Control-Entity-Completed": [ "Succeeded" ] },
+              "runAfter": { "Init-Control-Attachment-Count": [ "Succeeded" ] },
               "type": "Scope"
             },
             "Scope-Report": {
@@ -1018,7 +1329,7 @@
                         }
                       },
                       "expression": { "and": [ { "equals": [ "@outputs('Record-Control-Status-Report')['statusCode']", 202 ] } ] },
-                      "runAfter": { "Record-Control-Status-Report": [ "Succeeded" ] },
+                      "runAfter": { "Record-Control-Status-Report": [ "Succeeded", "Failed", "TimedOut" ] },
                       "type": "If"
                     }
                   },
@@ -1044,175 +1355,6 @@
               },
               "description": "To send notification via email on results of the run.",
               "runAfter": { "Scope-Update-Status-Transform": [ "Succeeded", "TimedOut", "Skipped", "Failed" ] },
-              "type": "Scope"
-            },
-            "Scope-Source-OAUTH": {
-              "actions": {
-                "Get-SourceOAUTHToken": {
-                  "description": "Perform a login API call to the source data provider",
-                  "inputs": {
-                    "headers": { "Accept": "application/json" },
-                    "method": "POST",
-                    "queries": {
-                      "ApiToken": "@variables('SourceOAUTHKey')",
-                      "Email": "@parameters('SourceOAUTHId')",
-                      "Password": "@variables('SourceOAUTHSecret')"
-                    },
-                    "uri": "@parameters('SourceOAUTHEndpoint')"
-                  },
-                  "runAfter": {},
-                  "type": "Http"
-                },
-                "Validate-SourceOAUTHToken-Request": {
-                  "actions": {
-                    "Parse-SourceOAUTHToken": {
-                      "inputs": {
-                        "content": "@body('Get-SourceOAUTHToken')",
-                        "schema": {
-                          "properties": {
-                            "SessionId": { "type": "string" },
-                            "Success": { "type": "boolean" }
-                          },
-                          "type": "object"
-                        }
-                      },
-                      "runAfter": {},
-                      "type": "ParseJson"
-                    },
-                    "Set-SourceOAUTHToken": {
-                      "inputs": {
-                        "name": "SourceOAUTHToken",
-                        "value": "@body('Parse-SourceOAUTHToken')?['SessionId']"
-                      },
-                      "runAfter": { "Parse-SourceOAUTHToken": [ "Succeeded" ] },
-                      "type": "SetVariable"
-                    }
-                  },
-                  "else": {
-                    "actions": {
-                      "Set-Scope-Source-OAUTH-Fail": {
-                        "description": "Throws an error which deflects to last Scope",
-                        "inputs": {
-                          "name": "Control-Error",
-                          "value": "@int('__FAIL__')"
-                        },
-                        "runAfter": { "Set-Scope-Source-OAUTH-Fail-Message": [ "Succeeded" ] },
-                        "type": "SetVariable"
-                      },
-                      "Set-Scope-Source-OAUTH-Fail-Message": {
-                        "inputs": {
-                          "name": "Control-Error-Message",
-                          "value": "Failed to obtain the source API authorisation token (sessionId)"
-                        },
-                        "runAfter": {},
-                        "type": "SetVariable"
-                      }
-                    }
-                  },
-                  "expression": { "and": [ { "equals": [ "@outputs('Record-Control-Status-Source-Login')['statusCode']", 202 ] } ] },
-                  "runAfter": { "Get-SourceOAUTHToken": [ "Succeeded" ] },
-                  "type": "If"
-                }
-              },
-              "runAfter": { "Scope-Update-Status-Source-Login": [ "Succeeded" ] },
-              "type": "Scope"
-            },
-            "Scope-Source-OAUTH-Refresh": {
-              "actions": {
-                "Source-OAUTH-Refresh": {
-                  "inputs": {
-                    "headers": { "Accept": "application/json" },
-                    "method": "POST",
-                    "queries": {
-                      "ApiToken": "@variables('SourceOAUTHKey')",
-                      "Email": "@parameters('SourceOAUTHId')",
-                      "Password": "@variables('SourceOAUTHSecret')"
-                    },
-                    "uri": "@parameters('SourceOAUTHEndpoint')"
-                  },
-                  "runAfter": {},
-                  "type": "Http"
-                },
-                "Validate-Scope-Source-OAUTH-Refresh": {
-                  "actions": {
-                    "Parse-Source-OAUTH-Refresh": {
-                      "inputs": {
-                        "content": "@body('Source-OAUTH-Refresh')",
-                        "schema": {
-                          "properties": {
-                            "SessionId": { "type": "string" },
-                            "Success": { "type": "boolean" }
-                          },
-                          "type": "object"
-                        }
-                      },
-                      "runAfter": {},
-                      "type": "ParseJson"
-                    },
-                    "Validate-Parse-Source-OAUTH-Refresh": {
-                      "actions": {
-                        "Set-SourceOAUTHToken-Again": {
-                          "inputs": {
-                            "name": "SourceOAUTHToken",
-                            "value": "@body('Parse-Source-OAUTH-Refresh')?['SessionId']"
-                          },
-                          "runAfter": {},
-                          "type": "SetVariable"
-                        }
-                      },
-                      "else": {
-                        "actions": {
-                          "Set-Parse-Source-OAUTH-Refresh-Fail": {
-                            "description": "Throw error because re login parse of data failed",
-                            "inputs": {
-                              "name": "Control-Error",
-                              "value": "@int('__FAIL__')"
-                            },
-                            "runAfter": { "Set-Parse-Source-OAUTH-Refresh-Fail-Message": [ "Succeeded" ] },
-                            "type": "SetVariable"
-                          },
-                          "Set-Parse-Source-OAUTH-Refresh-Fail-Message": {
-                            "inputs": {
-                              "name": "Control-Error-Message",
-                              "value": "Failed to parse the source login token."
-                            },
-                            "runAfter": {},
-                            "type": "SetVariable"
-                          }
-                        }
-                      },
-                      "expression": { "and": [ { "equals": [ "@body('Parse-Source-OAUTH-Refresh')?['Success']", "@true" ] } ] },
-                      "runAfter": { "Parse-Source-OAUTH-Refresh": [ "Succeeded" ] },
-                      "type": "If"
-                    }
-                  },
-                  "else": {
-                    "actions": {
-                      "Set-Scope-Source-OAUTH-Refresh-Fail": {
-                        "description": "Throw and error because the re login failed with bad http status",
-                        "inputs": {
-                          "name": "Control-Error",
-                          "value": "@int('__ERROR__')"
-                        },
-                        "runAfter": { "Set-Scope-Source-OAUTH-Refresh-Fail-Message": [ "Succeeded" ] },
-                        "type": "SetVariable"
-                      },
-                      "Set-Scope-Source-OAUTH-Refresh-Fail-Message": {
-                        "inputs": {
-                          "name": "Control-Error-Message",
-                          "value": "Failed to re-authenticate with the source API."
-                        },
-                        "runAfter": {},
-                        "type": "SetVariable"
-                      }
-                    }
-                  },
-                  "expression": { "and": [ { "equals": [ "@outputs('Source-OAUTH-Refresh')['statusCode']", 200 ] } ] },
-                  "runAfter": { "Source-OAUTH-Refresh": [ "Succeeded" ] },
-                  "type": "If"
-                }
-              },
-              "runAfter": { "Scope-Attachments-List": [ "Succeeded" ] },
               "type": "Scope"
             },
             "Scope-Start-Status": {
@@ -1396,7 +1538,7 @@
                   "type": "If"
                 }
               },
-              "runAfter": { "Scope-Source-OAUTH": [ "Succeeded" ] },
+              "runAfter": { "Scope-Start-Status": [ "Succeeded" ] },
               "type": "Scope"
             },
             "Scope-Update-Status-Extract": {
@@ -1453,62 +1595,6 @@
                 }
               },
               "runAfter": { "Scope-Entities": [ "Succeeded" ] },
-              "type": "Scope"
-            },
-            "Scope-Update-Status-Source-Login": {
-              "actions": {
-                "Record-Control-Status-Source-Login": {
-                  "description": "Record that an attempt to login to the provider API endpoint and obtain their token is about to start",
-                  "inputs": {
-                    "headers": {
-                      "Authorization": "Bearer @{variables('TargetOAUTHToken')}",
-                      "Content-Type": "application/json",
-                      "Ocp-Apim-Subscription-Key": "@variables('TargetOAUTHKey')",
-                      "X-Run-Identifier": "@variables('Control-Started')",
-                      "X-Run-Status": "@{variables('Control-Status')}"
-                    },
-                    "method": "PATCH",
-                    "uri": "@parameters('TargetControlEndpoint')"
-                  },
-                  "runAfter": { "Set-Control-Status-Source-Login": [ "Succeeded" ] },
-                  "type": "Http"
-                },
-                "Set-Control-Status-Source-Login": {
-                  "inputs": {
-                    "name": "Control-Status",
-                    "value": "@parameters('StatusLogin')"
-                  },
-                  "runAfter": {},
-                  "type": "SetVariable"
-                },
-                "Validate-Scope-Update-Status-Source-Login": {
-                  "actions": {},
-                  "else": {
-                    "actions": {
-                      "Scope-Update-Status-Source-Login-Fail": {
-                        "inputs": {
-                          "name": "Control-Error",
-                          "value": "@int('__ERROR__')"
-                        },
-                        "runAfter": { "Scope-Update-Status-Source-Login-Message": [ "Succeeded" ] },
-                        "type": "SetVariable"
-                      },
-                      "Scope-Update-Status-Source-Login-Message": {
-                        "inputs": {
-                          "name": "Control-Error-Message",
-                          "value": "Failed to Record task progress to Login"
-                        },
-                        "runAfter": {},
-                        "type": "SetVariable"
-                      }
-                    }
-                  },
-                  "expression": { "and": [ { "equals": [ "@outputs('Record-Control-Status-Source-Login')['statusCode']", 202 ] } ] },
-                  "runAfter": { "Record-Control-Status-Source-Login": [ "Succeeded" ] },
-                  "type": "If"
-                }
-              },
-              "runAfter": { "Scope-Start-Status": [ "Succeeded" ] },
               "type": "Scope"
             },
             "Scope-Update-Status-Transform": {
@@ -1580,6 +1666,10 @@
           },
           "contentVersion": "1.0.0.0",
           "parameters": {
+            "ReAuthenticateEvery": {
+              "defaultValue": 25,
+              "type": "Int"
+            },
             "SecretsAudience": {
               "defaultValue": "https://vault.azure.net",
               "type": "String"
@@ -1618,10 +1708,6 @@
             },
             "StatusExtracting": {
               "defaultValue": 4,
-              "type": "Int"
-            },
-            "StatusLogin": {
-              "defaultValue": 2,
               "type": "Int"
             },
             "StatusReporting": {

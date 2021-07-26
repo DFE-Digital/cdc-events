@@ -4,7 +4,7 @@
     using System.ComponentModel;
 
     /// <summary>
-    /// An enumeration of possible control states.
+    /// An enumeration of possible control states. These values are depended upon by the Events-Generator-Api.
     /// </summary>
     public enum ControlState : int
     {
@@ -21,37 +21,31 @@
         Start = 1,
 
         /// <summary>
-        /// The load is logging in.
-        /// </summary>
-        [Description("Source OAUTH login")]
-        Login = 2,
-
-        /// <summary>
         /// The load is downloading raw data entities.
         /// </summary>
         [Description("Processing Entities")]
-        Entities = 3,
+        Entities = 2,
 
         /// <summary>
         /// The task is extracting the loaded raw data
         /// </summary>
         [Description("Extracting")]
-        Extracting = 4,
+        Extracting = 3,
 
         /// <summary>
         /// The task is obtaining the attachments
         /// </summary>
-        [Description("Attachments")]
-        Attachments = 5,
+        [Description("Processing Attachments")]
+        Attachments = 4,
 
         /// <summary>
         /// The transform has finished.
         /// </summary>
-        [Description("Finished")]
-        Transforming = 6,
+        [Description("Transforming")]
+        Transforming = 5,
 
         /// <summary>
-        /// The task is reporting results
+        /// The task is reporting results. This value is depended upon by SQL Code in teh ETL Process.
         /// </summary>
         [Description("Reporting results")]
         Reporting = 100,
