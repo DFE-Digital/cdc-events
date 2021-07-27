@@ -2,6 +2,7 @@
 $pathToJson = "..\azure\event-generator-template.json"
 $a = Get-Content $pathToJson | ConvertFrom-Json
 # Set the default values of the various parameters inside the Logic app to the Build parameter functions that set them.
+$a.resources[0].properties.definition.parameters.Environment.defaultValue  = "[concat(parameters('environmentName'), '-', parameters('environmentInstance'))]"
 $a.resources[0].properties.definition.parameters.SourceEndpoint.defaultValue = "[variables('dataPathUri')]"
 $a.resources[0].properties.definition.parameters.SourceOAUTHEndpoint.defaultValue = "[variables('loginUri')]"
 $a.resources[0].properties.definition.parameters.SourceOAUTHId.defaultValue = "[parameters('kycloudApiEmail')]"
@@ -12,6 +13,7 @@ $a.resources[0].properties.definition.parameters.TargetOAUTHKeyUri.defaultValue 
 $a.resources[0].properties.definition.parameters.TargetEndpoint.defaultValue = "[concat(parameters('cdcEventsApiBaseUri'), '/')]"
 $a.resources[0].properties.definition.parameters.TargetControlEndpoint.defaultValue = "[concat(parameters('cdcEventsApiBaseUri'), '/load')]"
 $a.resources[0].properties.definition.parameters.TargetOAUTHEndpoint.defaultValue = "[parameters('internalOAuthTokenEndpoint')]"
+$a.resources[0].properties.definition.parameters.CDC2NotifyAPIKeySecretUri.defaultValue  = "[concat(reference(variables('keyVaultSecretCDC2NotifyAPIKey'), '2019-09-01').secretUriWithVersion, '?api-version=2016-10-01')]"
 #
 # PLEASE NOTE: the values of the Status* Properties are dependent on the Dfe.CdcEventApi.Domain.Models.ControlState Enum values
 #

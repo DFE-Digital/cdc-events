@@ -49,6 +49,10 @@
       "type": "string",
       "defaultValue": "cdc-events-token-request-payload"
     },
+    "keyVaultSecretNameCDC2NotifyAPIKey": {
+      "type": "string",
+      "defaultValue": "CDC2NotifyAPIKey"
+    },
     "cdcEventsApiBaseUri": { "type": "string" },
     "kycloudApiBaseUri": { "type": "string" },
     "kycloudApiEmail": { "type": "string" },
@@ -81,6 +85,7 @@
     "keyVaultSecretKycloudApiPassword": "[resourceId(variables('sharedResourceGroupName'), 'Microsoft.KeyVault/vaults/secrets', variables('keyVaultName'), parameters('keyVaultSecretNameKycloudApiPassword'))]",
     "keyVaultSecretKycloudApiToken": "[resourceId(variables('sharedResourceGroupName'), 'Microsoft.KeyVault/vaults/secrets', variables('keyVaultName'), parameters('keyVaultSecretNameKycloudApiToken'))]",
     "keyVaultSecretCdcEventsTokenRequestPayload": "[resourceId(variables('sharedResourceGroupName'), 'Microsoft.KeyVault/vaults/secrets', variables('keyVaultName'), parameters('keyVaultSecretNameCdcEventsTokenRequestPayload'))]",
+    "keyVaultSecretCDC2NotifyAPIKey": "[resourceId(variables('sharedResourceGroupName'), 'Microsoft.KeyVault/vaults/secrets', variables('keyVaultName'), parameters('keyVaultSecretNameCDC2NotifyAPIKey'))]",
     "loginUri": "[concat(parameters('kycloudApiBaseUri'), '/', parameters('loginEndpoint'))]",
     "dataPathUri": "[concat(parameters('kycloudApiBaseUri'), '/', parameters('dataPathPrefix'), '/')]"
   },
@@ -207,6 +212,19 @@
                 ]
               },
               "runAfter": { "Init-Control-Error": [ "Succeeded" ] },
+              "type": "InitializeVariable"
+            },
+            "Init-Control-NotifyAPIKey": {
+              "inputs": {
+                "variables": [
+                  {
+                    "name": "Control-NotifyAPIKey",
+                    "type": "string",
+                    "value": "@{null}"
+                  }
+                ]
+              },
+              "runAfter": { "Init-Control-Attachment-Count": [ "Succeeded" ] },
               "type": "InitializeVariable"
             },
             "Init-Control-Page": {
@@ -369,6 +387,7 @@
                             "BlobFilename": "@{items('For-Each-Attachment')['BlobKey']}@{items('For-Each-Attachment')['Extension']}",
                             "BlobFolder": "@{items('For-Each-Attachment')['Folder']}",
                             "BlobKey": "@items('For-Each-Attachment')['BlobKey']",
+                            "BlobEntity": "@items('For-Each-Attachment')['BlobEntity']",
                             "BlobMimeType": "@items('For-Each-Attachment')['MimeType']",
                             "BlobObtained": "@variables('Control-Started')",
                             "BlobShare": "cdcdocuments",
@@ -736,11 +755,12 @@
                             "properties": {
                               "BlobKey": { "type": "string" },
                               "Extension": { "type": "string" },
+                              "Entity": { "type": "string" },
                               "Folder": { "type": "string" },
                               "MimeType": { "type": "string" },
                               "SiteUniqueId": { "type": "string" }
                             },
-                            "required": [ "BlobKey", "MimeType", "Extension", "Folder", "SiteUniqueId" ],
+                            "required": [ "BlobKey", "Entity", "MimeType", "Extension", "Folder", "SiteUniqueId" ],
                             "type": "object"
                           },
                           "type": "array"
@@ -1124,6 +1144,18 @@
             },
             "Scope-Get-Secrets": {
               "actions": {
+                "Get-NotifyApiKey": {
+                  "inputs": {
+                    "authentication": {
+                      "audience": "@parameters('SecretsAudience')",
+                      "type": "ManagedServiceIdentity"
+                    },
+                    "method": "GET",
+                    "uri": "@parameters('CDC2NotifyAPIKeySecretUri')"
+                  },
+                  "runAfter": { "Set-TargetOAUTHCredentials": [ "Succeeded" ] },
+                  "type": "Http"
+                },
                 "Get-SourceOAUTHKey": {
                   "inputs": {
                     "authentication": {
@@ -1172,6 +1204,17 @@
                   "runAfter": { "Set-SourceOAUTHSecret": [ "Succeeded" ] },
                   "type": "Http"
                 },
+                "Parse-NotifyApiKey": {
+                  "inputs": {
+                    "content": "@body('Get-NotifyApiKey')",
+                    "schema": {
+                      "properties": { "value": { "type": "string" } },
+                      "type": "object"
+                    }
+                  },
+                  "runAfter": { "Get-NotifyApiKey": [ "Succeeded" ] },
+                  "type": "ParseJson"
+                },
                 "Parse-SourceOAUTHKey": {
                   "inputs": {
                     "content": "@body('Get-SourceOAUTHKey')",
@@ -1215,6 +1258,14 @@
                   },
                   "runAfter": { "Get-TargetOAUTHKey": [ "Succeeded" ] },
                   "type": "ParseJson"
+                },
+                "Set-NotifyApiKey": {
+                  "inputs": {
+                    "name": "Control-NotifyAPIKey",
+                    "value": "@body('Parse-NotifyApiKey')?['value']"
+                  },
+                  "runAfter": { "Parse-NotifyApiKey": [ "Succeeded" ] },
+                  "type": "SetVariable"
                 },
                 "Set-SourceOAUTHKey": {
                   "inputs": {
@@ -1273,16 +1324,17 @@
                   "expression": {
                     "and": [
                       { "not": { "equals": [ "@variables('SourceOAUTHKey')", "@null" ] } },
-                      { "not": { "equals": [ "@variables('SourceOAUTHSecret')", "" ] } },
-                      { "not": { "equals": [ "@variables('TargetOAUTHKey')", "" ] } },
-                      { "not": { "equals": [ "@variables('TargetOAUTHCredentials')", "" ] } }
+                      { "not": { "equals": [ "@variables('SourceOAUTHSecret')", "@null" ] } },
+                      { "not": { "equals": [ "@variables('TargetOAUTHKey')", "@null" ] } },
+                      { "not": { "equals": [ "@variables('TargetOAUTHCredentials')", "@null" ] } },
+                      { "not": { "equals": [ "@variables('Control-NotifyAPIKey')", "@null" ] } }
                     ]
                   },
-                  "runAfter": { "Set-TargetOAUTHCredentials": [ "Succeeded" ] },
+                  "runAfter": { "Set-NotifyApiKey": [ "Succeeded" ] },
                   "type": "If"
                 }
               },
-              "runAfter": { "Init-Control-Attachment-Count": [ "Succeeded" ] },
+              "runAfter": { "Init-Control-NotifyAPIKey": [ "Succeeded" ] },
               "type": "Scope"
             },
             "Scope-Report": {
@@ -1666,6 +1718,34 @@
           },
           "contentVersion": "1.0.0.0",
           "parameters": {
+            "CDC2NotifyAPIKeySecretUri": {
+              "defaultValue": "[concat(reference(variables('keyVaultSecretCDC2NotifyAPIKey'), '2019-09-01').secretUriWithVersion, '?api-version=2016-10-01')]",
+              "type": "String"
+            },
+            "Environment": {
+              "defaultValue": "[concat(parameters('environmentName'), '-', parameters('environmentInstance'))]",
+              "type": "String"
+            },
+            "NotifyFailureAddresses": {
+              "defaultValue": "iain.stevenson@education.gov.uk",
+              "type": "String"
+            },
+            "NotifyFailureTemplateId": {
+              "defaultValue": "8afdcd06-7a33-4c84-adba-6e3bdd14df63",
+              "type": "String"
+            },
+            "NotifySuccessAddresses": {
+              "defaultValue": "jake.wood@education.gov.uk",
+              "type": "String"
+            },
+            "NotifySuccessTemplateId": {
+              "defaultValue": "ab76055c-6476-4805-9de1-f9226b76b2d1",
+              "type": "String"
+            },
+            "NotifyUri": {
+              "defaultValue": "https://dev-api-customerengagement.platform.education.gov.uk/notifications/email",
+              "type": "String"
+            },
             "ReAuthenticateEvery": {
               "defaultValue": 25,
               "type": "Int"
