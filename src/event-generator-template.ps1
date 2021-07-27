@@ -18,10 +18,10 @@ $a.resources[0].properties.definition.parameters.CDC2NotifyAPIKeySecretUri.defau
 # PLEASE NOTE: the values of the Status* Properties are dependent on the Dfe.CdcEventApi.Domain.Models.ControlState Enum values
 #
 $a.resources[0].properties.definition.parameters.StatusStart.defaultValue = 1
-$a.resources[0].properties.definition.parameters.StatusEntities.defaultValue = 3
-$a.resources[0].properties.definition.parameters.StatusExtracting.defaultValue = 4
-$a.resources[0].properties.definition.parameters.StatusAttachments.defaultValue = 5
-$a.resources[0].properties.definition.parameters.StatusTransforming.defaultValue = 6
+$a.resources[0].properties.definition.parameters.StatusEntities.defaultValue = 2
+$a.resources[0].properties.definition.parameters.StatusExtracting.defaultValue = 3
+$a.resources[0].properties.definition.parameters.StatusAttachments.defaultValue = 4
+$a.resources[0].properties.definition.parameters.StatusTransforming.defaultValue = 5
 $a.resources[0].properties.definition.parameters.StatusReporting.defaultValue = 100
 # Finally write it back to the same file
 $a | ConvertTo-Json -Compress -Depth 32 | % { [System.Text.RegularExpressions.Regex]::Unescape($_) }  | set-content $pathToJson 

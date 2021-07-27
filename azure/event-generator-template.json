@@ -1779,15 +1779,15 @@
               "type": "String"
             },
             "StatusAttachments": {
-              "defaultValue": 5,
+              "defaultValue": 4,
               "type": "Int"
             },
             "StatusEntities": {
-              "defaultValue": 3,
+              "defaultValue": 2,
               "type": "Int"
             },
             "StatusExtracting": {
-              "defaultValue": 4,
+              "defaultValue": 3,
               "type": "Int"
             },
             "StatusReporting": {
@@ -1799,7 +1799,7 @@
               "type": "Int"
             },
             "StatusTransforming": {
-              "defaultValue": 6,
+              "defaultValue": 5,
               "type": "Int"
             },
             "TargetControlEndpoint": {
