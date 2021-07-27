@@ -387,7 +387,7 @@
                             "BlobFilename": "@{items('For-Each-Attachment')['BlobKey']}@{items('For-Each-Attachment')['Extension']}",
                             "BlobFolder": "@{items('For-Each-Attachment')['Folder']}",
                             "BlobKey": "@items('For-Each-Attachment')['BlobKey']",
-                            "BlobEntity": "@items('For-Each-Attachment')['BlobEntity']",
+                            "BlobEntity": "@items('For-Each-Attachment')['Entity']",
                             "BlobMimeType": "@items('For-Each-Attachment')['MimeType']",
                             "BlobObtained": "@variables('Control-Started')",
                             "BlobShare": "cdcdocuments",
