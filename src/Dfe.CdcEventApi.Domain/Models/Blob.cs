@@ -53,5 +53,10 @@
         /// </summary>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1056:URI-like properties should not be strings", Justification = "Its a DTO")]
         public string BlobUrl { get; set; }
+
+        /// <summary>
+        /// Gets or sets the blob usage Entity.
+        /// </summary>
+        public string BlobEntity { get; set; }
     }
 }

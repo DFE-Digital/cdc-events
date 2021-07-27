@@ -387,6 +387,7 @@
                             "BlobFilename": "@{items('For-Each-Attachment')['BlobKey']}@{items('For-Each-Attachment')['Extension']}",
                             "BlobFolder": "@{items('For-Each-Attachment')['Folder']}",
                             "BlobKey": "@items('For-Each-Attachment')['BlobKey']",
+                            "BlobEntity": "@items('For-Each-Attachment')['BlobEntity']",
                             "BlobMimeType": "@items('For-Each-Attachment')['MimeType']",
                             "BlobObtained": "@variables('Control-Started')",
                             "BlobShare": "cdcdocuments",
@@ -754,11 +755,12 @@
                             "properties": {
                               "BlobKey": { "type": "string" },
                               "Extension": { "type": "string" },
+                              "Entity": { "type": "string" },
                               "Folder": { "type": "string" },
                               "MimeType": { "type": "string" },
                               "SiteUniqueId": { "type": "string" }
                             },
-                            "required": [ "BlobKey", "MimeType", "Extension", "Folder", "SiteUniqueId" ],
+                            "required": [ "BlobKey", "Entity", "MimeType", "Extension", "Folder", "SiteUniqueId" ],
                             "type": "object"
                           },
                           "type": "array"
