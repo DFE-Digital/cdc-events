@@ -173,7 +173,7 @@
 
                     // add it as a known blob
                     await sqlConnection
-                        .ExecuteAsync(insertSql, blobs, transaction, CommandTimeoutAsLongAsItTakes)
+                        .ExecuteAsync(insertSql, blob, transaction, CommandTimeoutAsLongAsItTakes)
                         .ConfigureAwait(false);
 
                     this.loggerProvider.Info($"Stored Blob Key 'obtained' reference");
@@ -191,6 +191,8 @@
                     this.loggerProvider.Info($"Generated file share readonly SAS");
 
                     this.loggerProvider.Info($"Updating evidence with file Url.");
+
+                    blob.BlobFolder = folderToUse;
 
                     await sqlConnection
                         .ExecuteAsync(updateSql, blob, transaction, CommandTimeoutAsLongAsItTakes)
