@@ -1142,6 +1142,18 @@
             },
             "Scope-Get-Secrets": {
               "actions": {
+                "Get-NotifyApiKey": {
+                  "inputs": {
+                    "authentication": {
+                      "audience": "@parameters('SecretsAudience')",
+                      "type": "ManagedServiceIdentity"
+                    },
+                    "method": "GET",
+                    "uri": "@parameters('CDC2NotifyAPIKeySecretUri')"
+                  },
+                  "runAfter": { "Set-TargetOAUTHCredentials": [ "Succeeded" ] },
+                  "type": "Http"
+                },
                 "Get-SourceOAUTHKey": {
                   "inputs": {
                     "authentication": {
@@ -1190,6 +1202,17 @@
                   "runAfter": { "Set-SourceOAUTHSecret": [ "Succeeded" ] },
                   "type": "Http"
                 },
+                "Parse-NotifyApiKey": {
+                  "inputs": {
+                    "content": "@body('Get-NotifyApiKey')",
+                    "schema": {
+                      "properties": { "value": { "type": "string" } },
+                      "type": "object"
+                    }
+                  },
+                  "runAfter": { "Get-NotifyApiKey": [ "Succeeded" ] },
+                  "type": "ParseJson"
+                },
                 "Parse-SourceOAUTHKey": {
                   "inputs": {
                     "content": "@body('Get-SourceOAUTHKey')",
@@ -1233,6 +1256,14 @@
                   },
                   "runAfter": { "Get-TargetOAUTHKey": [ "Succeeded" ] },
                   "type": "ParseJson"
+                },
+                "Set-NotifyApiKey": {
+                  "inputs": {
+                    "name": "Control-NotifyAPIKey",
+                    "value": "@body('Parse-NotifyApiKey')?['value']"
+                  },
+                  "runAfter": { "Parse-NotifyApiKey": [ "Succeeded" ] },
+                  "type": "SetVariable"
                 },
                 "Set-SourceOAUTHKey": {
                   "inputs": {
@@ -1291,12 +1322,13 @@
                   "expression": {
                     "and": [
                       { "not": { "equals": [ "@variables('SourceOAUTHKey')", "@null" ] } },
-                      { "not": { "equals": [ "@variables('SourceOAUTHSecret')", "" ] } },
-                      { "not": { "equals": [ "@variables('TargetOAUTHKey')", "" ] } },
-                      { "not": { "equals": [ "@variables('TargetOAUTHCredentials')", "" ] } }
+                      { "not": { "equals": [ "@variables('SourceOAUTHSecret')", "@null" ] } },
+                      { "not": { "equals": [ "@variables('TargetOAUTHKey')", "@null" ] } },
+                      { "not": { "equals": [ "@variables('TargetOAUTHCredentials')", "@null" ] } },
+                      { "not": { "equals": [ "@variables('Control-NotifyAPIKey')", "@null" ] } }
                     ]
                   },
-                  "runAfter": { "Set-TargetOAUTHCredentials": [ "Succeeded" ] },
+                  "runAfter": { "Set-NotifyApiKey": [ "Succeeded" ] },
                   "type": "If"
                 }
               },
