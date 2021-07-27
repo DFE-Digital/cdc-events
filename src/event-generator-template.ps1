@@ -2,6 +2,7 @@
 $pathToJson = "..\azure\event-generator-template.json"
 $a = Get-Content $pathToJson | ConvertFrom-Json
 # Set the default values of the various parameters inside the Logic app to the Build parameter functions that set them.
+$a.resources[0].properties.definition.parameters.Environment.defaultValue  = "[concat(parameters('environmentName'), '-', parameters('environmentInstance'))]"
 $a.resources[0].properties.definition.parameters.SourceEndpoint.defaultValue = "[variables('dataPathUri')]"
 $a.resources[0].properties.definition.parameters.SourceOAUTHEndpoint.defaultValue = "[variables('loginUri')]"
 $a.resources[0].properties.definition.parameters.SourceOAUTHId.defaultValue = "[parameters('kycloudApiEmail')]"

@@ -1720,12 +1720,24 @@
               "defaultValue": "[concat(reference(variables('keyVaultSecretCDC2NotifyAPIKey'), '2019-09-01').secretUriWithVersion, '?api-version=2016-10-01')]",
               "type": "String"
             },
+            "Environment": {
+              "defaultValue": "[concat(parameters('environmentName'), '-', parameters('environmentInstance'))]",
+              "type": "String"
+            },
             "NotifyFailureAddresses": {
               "defaultValue": "iain.stevenson@education.gov.uk",
               "type": "String"
             },
+            "NotifyFailureTemplateId": {
+              "defaultValue": "8afdcd06-7a33-4c84-adba-6e3bdd14df63",
+              "type": "String"
+            },
             "NotifySuccessAddresses": {
               "defaultValue": "jake.wood@education.gov.uk",
+              "type": "String"
+            },
+            "NotifySuccessTemplateId": {
+              "defaultValue": "ab76055c-6476-4805-9de1-f9226b76b2d1",
               "type": "String"
             },
             "NotifyUri": {
