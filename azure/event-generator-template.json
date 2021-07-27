@@ -1685,7 +1685,7 @@
           "contentVersion": "1.0.0.0",
           "parameters": {
             "CDC2NotifyAPIKeySecretUri": {
-              "defaultValue": "[resourceId(variables('sharedResourceGroupName'), 'Microsoft.KeyVault/vaults/secrets', variables('keyVaultName'), parameters('keyVaultSecretNameCDC2NotifyAPIKey'))]",
+              "defaultValue": "[concat(reference(variables('keyVaultSecretCDC2NotifyAPIKey'), '2019-09-01').secretUriWithVersion, '?api-version=2016-10-01')]",
               "type": "String"
             },
             "NotifyFailureAddresses": {
