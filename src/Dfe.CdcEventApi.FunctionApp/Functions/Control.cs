@@ -10,35 +10,35 @@
     using Microsoft.Azure.WebJobs.Extensions.Http;
 
     /// <summary>
-    /// Base class for the <see cref="Load"/> function.
+    /// Base class for the <see cref="Control"/> function.
     /// </summary>
-    public class Load : LoadFunctionsBase
+    public class Control : ControlFunctionsBase
     {
         private readonly ILoggerProvider loggerProvider;
 
         /// <summary>
         /// Initialises a new instance of the
-        /// <see cref="Load" /> class.
+        /// <see cref="Control" /> class.
         /// </summary>
-        /// <param name="loadProcessor">
-        /// An instance of type <see cref="ILoadProcessor" />.
+        /// <param name="controlProcessor">
+        /// An instance of type <see cref="IControlProcessor" />.
         /// </param>
         /// <param name="loggerProvider">
         /// An instance of type <see cref="ILoggerProvider" />.
         /// </param>
-        public Load(
-            ILoadProcessor loadProcessor,
+        public Control(
+            IControlProcessor controlProcessor,
             ILoggerProvider loggerProvider)
             : base(
-                  loadProcessor,
+                  controlProcessor,
                   loggerProvider)
         {
             this.loggerProvider = loggerProvider;
         }
 
         /// <summary>
-        /// Entry method for the <c>load</c> function.
-        /// Creates and returns a load event record.
+        /// Entry method for the <see cref="Control"/> function.
+        /// Creates and returns a control event record.
         /// </summary>
         /// <param name="httpRequest">
         /// An instance of type <see cref="HttpRequest" />.
@@ -49,15 +49,15 @@
         /// <returns>
         /// An instance of type <see cref="HttpResponseMessage" />.
         /// </returns>
-        [FunctionName("load")]
-        public async Task<HttpResponseMessage> LoadAsync(
+        [FunctionName("control")]
+        public async Task<HttpResponseMessage> ControlAsync(
             [HttpTrigger(AuthorizationLevel.Function, "POST", "PATCH", "PUT")]
             HttpRequest httpRequest,
             CancellationToken cancellationToken)
         {
             try
             {
-                switch (httpRequest?.Method ?? "BAD")
+                switch (httpRequest?.Method ?? "UNSUPPORTED")
                 {
                     case "POST":
                         HttpResponseMessage postReturn =
@@ -92,8 +92,7 @@
             }
             catch (System.Exception ex)
             {
-
-                this.loggerProvider.Error($"Exception in {nameof(Load)} endpoint.", ex);
+                this.loggerProvider.Error($"Exception in {nameof(Control)} {httpRequest?.Method ?? "UNSUPPORTED"} endpoint.", ex);
                 throw;
             }
         }

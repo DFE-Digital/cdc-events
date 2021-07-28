@@ -5,6 +5,7 @@ namespace Dfe.CdcEventApi.FunctionApp.Functions
     using System.Threading.Tasks;
     using Dfe.CdcEventApi.Application.Definitions;
     using Dfe.CdcEventApi.Domain.Definitions;
+    using Dfe.CdcEventApi.Domain.Definitions.SettingsProviders;
     using Microsoft.AspNetCore.Http;
     using Microsoft.Azure.WebJobs;
     using Microsoft.Azure.WebJobs.Extensions.Http;
@@ -12,23 +13,26 @@ namespace Dfe.CdcEventApi.FunctionApp.Functions
     /// <summary>
     /// Entry point for the <see cref="Attachments"/> function.
     /// </summary>
-    public class Attachments : LoadFunctionsBase
+    public class Attachments : AttachmentsFunctionBase
     {
         private readonly ILoggerProvider loggerProvider;
 
         /// <summary>
         /// Initialises a new instance of the <see cref="Attachments" /> class.
         /// </summary>
-        /// <param name="loadProcessor">
-        /// An instance of type <see cref="IEntityProcessor" />.
+        /// <param name="attachmentProcessor">
+        /// An instance of type <see cref="IAttachmentProcessor" />.
         /// </param>
+        /// <param name="attachmentSettingsProvider">
+        /// An isntance of <see cref="IAttachmentSettingsProvider"/>.</param>
         /// <param name="loggerProvider">
         /// An instance of type <see cref="ILoggerProvider" />.
         /// </param>
         public Attachments(
-            ILoadProcessor loadProcessor,
+            IAttachmentProcessor attachmentProcessor,
+            IAttachmentSettingsProvider attachmentSettingsProvider,
             ILoggerProvider loggerProvider)
-            : base(loadProcessor, loggerProvider)
+            : base(attachmentProcessor, attachmentSettingsProvider, loggerProvider)
         {
             this.loggerProvider = loggerProvider;
         }
@@ -47,23 +51,34 @@ namespace Dfe.CdcEventApi.FunctionApp.Functions
         /// </returns>
         [FunctionName("attachments")]
         public async Task<HttpResponseMessage> Run(
-            [HttpTrigger(AuthorizationLevel.Function, "GET")] HttpRequest httpRequest,
+            [HttpTrigger(AuthorizationLevel.Function, "GET", "POST")] HttpRequest httpRequest,
             CancellationToken cancellationToken)
         {
             try
             {
-                HttpResponseMessage toReturn =
-                await this.GetAttachments(
-                    httpRequest,
-                    cancellationToken)
-                .ConfigureAwait(false);
-
-                return toReturn;
+                switch (httpRequest?.Method ?? "UNSUPPORTED")
+                {
+                    case "GET":
+                        HttpResponseMessage getReturn =
+                               await this.GetAsync(
+                                   httpRequest,
+                                   cancellationToken)
+                               .ConfigureAwait(false);
+                        return getReturn;
+                    case "POST":
+                        HttpResponseMessage postReturn =
+                              await this.PostAsync(
+                                  httpRequest,
+                                  cancellationToken)
+                              .ConfigureAwait(false);
+                        return postReturn;
+                    default:
+                        return new HttpResponseMessage(System.Net.HttpStatusCode.BadRequest);
+                }
             }
             catch (System.Exception ex)
             {
-
-                this.loggerProvider.Error($"Exception in {nameof(Attachments)} endpoint.", ex);
+                this.loggerProvider.Error($"Exception in {nameof(Attachments)} {httpRequest?.Method ?? "UNSUPPORTED"} endpoint.", ex);
                 throw;
             }
         }

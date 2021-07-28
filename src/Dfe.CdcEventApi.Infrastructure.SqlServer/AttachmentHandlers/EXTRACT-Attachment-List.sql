@@ -1,0 +1,1 @@
+EXECUTE [etl].[p_EXTRACT-Attachment-List]

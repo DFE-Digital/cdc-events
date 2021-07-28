@@ -3,7 +3,7 @@
     /// <summary>
     /// Represents an attachment entity.
     /// </summary>
-    public class Attachment
+    public class AttachmentRequest
     {
         /// <summary>
         /// Gets or sets a value for the SiteUniqueId.

@@ -6,7 +6,7 @@
     /// <summary>
     /// Represents an individual <c>blob</c> entity.
     /// </summary>
-    public class Blob : LoadBase
+    public class AttachmentResponse : ControlBase
     {
         /// <summary>
         /// Gets or sets the blob key.

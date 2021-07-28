@@ -57,7 +57,7 @@
 
             this.assembly = type.Assembly;
 
-            this.dataHandlersPath = $"{type.Namespace}.DataHandlers";
+            this.dataHandlersPath = $"{type.Namespace}.EntityHandlers";
 
             this.rawDbConnectionString =
                 entityStorageAdapterSettingsProvider.RawDbConnectionString;

@@ -8,59 +8,11 @@
   "basePath": "/api",
   "host": "__function_app_host__",
   "paths": {
-    "/activities": {
-      "post": {
-        "summary": "Activities Created",
-        "description": "Accepts event data for the activities collection.",
-        "operationId": "activities-created",
-        "parameters": [
-          {
-            "in": "header",
-            "type": "string",
-            "name": "Authorization",
-            "description": "Bearer token authorization.",
-            "required": true
-          }
-        ],
-        "responses": {
-          "202": {
-            "description": "The event data was accepted and processed."
-          },
-          "500": {
-            "description": "An unexpected error has occurred - please get in touch with us so we can check our logs!"
-          }
-        }
-      }
-    },
-    "/actuals": {
-      "post": {
-        "summary": "Actuals Created",
-        "description": "Accepts event data for the actuals collection.",
-        "operationId": "actuals-created",
-        "parameters": [
-          {
-            "in": "header",
-            "type": "string",
-            "name": "Authorization",
-            "description": "Bearer token authorization.",
-            "required": true
-          }
-        ],
-        "responses": {
-          "202": {
-            "description": "The event data was accepted and processed."
-          },
-          "500": {
-            "description": "An unexpected error has occurred - please get in touch with us so we can check our logs!"
-          }
-        }
-      }
-    },
     "/attachments": {
       "get": {
-        "summary": "Attachments Retrieve",
-        "description": "Retrieves teh load runes attachments collection.",
-        "operationId": "attachmetns-get",
+        "summary": "Attachment List",
+        "description": "Retrieves the list of requried attachments.",
+        "operationId": "attachments-get",
         "parameters": [
           {
             "in": "header",
@@ -78,13 +30,11 @@
             "description": "An unexpected error has occurred - please get in touch with us so we can check our logs!"
           }
         }
-      }
-    },
-    "/blobs": {
+      },
       "post": {
-        "summary": "Blobs Created",
-        "description": "Accepts event data for the blobs collection.",
-        "operationId": "blobs-created",
+        "summary": "Attachment Create",
+        "description": "Accepts file data for the attachment creation.",
+        "operationId": "attachments-create",
         "parameters": [
           {
             "in": "header",
@@ -109,54 +59,6 @@
         "summary": "Deleted Created",
         "description": "Accepts event data for the deleted collection.",
         "operationId": "deleted-created",
-        "parameters": [
-          {
-            "in": "header",
-            "type": "string",
-            "name": "Authorization",
-            "description": "Bearer token authorization.",
-            "required": true
-          }
-        ],
-        "responses": {
-          "202": {
-            "description": "The event data was accepted and processed."
-          },
-          "500": {
-            "description": "An unexpected error has occurred - please get in touch with us so we can check our logs!"
-          }
-        }
-      }
-    },
-    "/oncosts": {
-      "post": {
-        "summary": "OnCosts Created",
-        "description": "Accepts event data for the oncosts collection.",
-        "operationId": "oncosts-created",
-        "parameters": [
-          {
-            "in": "header",
-            "type": "string",
-            "name": "Authorization",
-            "description": "Bearer token authorization.",
-            "required": true
-          }
-        ],
-        "responses": {
-          "202": {
-            "description": "The event data was accepted and processed."
-          },
-          "500": {
-            "description": "An unexpected error has occurred - please get in touch with us so we can check our logs!"
-          }
-        }
-      }
-    },
-    "/plans": {
-      "post": {
-        "summary": "Plans Created",
-        "description": "Accepts event data for the plans collection.",
-        "operationId": "plans-created",
         "parameters": [
           {
             "in": "header",
@@ -205,30 +107,6 @@
         "summary": "Sites Created",
         "description": "Accepts event data for the sites collection.",
         "operationId": "sites-created",
-        "parameters": [
-          {
-            "in": "header",
-            "type": "string",
-            "name": "Authorization",
-            "description": "Bearer token authorization.",
-            "required": true
-          }
-        ],
-        "responses": {
-          "202": {
-            "description": "The event data was accepted and processed."
-          },
-          "500": {
-            "description": "An unexpected error has occurred - please get in touch with us so we can check our logs!"
-          }
-        }
-      }
-    },
-    "/spends": {
-      "post": {
-        "summary": "Spends Created",
-        "description": "Accepts event data for the spends collection.",
-        "operationId": "spends-created",
         "parameters": [
           {
             "in": "header",
@@ -380,11 +258,11 @@
         }
       }
     },
-    "/load": {
+    "/control": {
       "post": {
-        "summary": "Load Start",
-        "description": "Creates a load event record.",
-        "operationId": "load-start",
+        "summary": "Control Post",
+        "description": "Creates a control record.",
+        "operationId": "control-post",
         "parameters": [
           {
             "in": "header",
@@ -396,7 +274,7 @@
         ],
         "responses": {
           "201": {
-            "description": "The load event request was accepted and processed."
+            "description": "The control event request was accepted and processed."
           },
           "500": {
             "description": "An unexpected error has occurred - please get in touch with us so we can check our logs!"
@@ -404,9 +282,9 @@
         }
       },
       "patch": {
-        "summary": "Load Update",
+        "summary": "Control Patch",
         "description": "Modifies a load event record.",
-        "operationId": "load-update",
+        "operationId": "control-patch",
         "parameters": [
           {
             "in": "header",
@@ -426,9 +304,9 @@
         }
       },
       "put": {
-        "summary": "Load Finish",
-        "description": "Completes a load event record.",
-        "operationId": "load-finish",
+        "summary": "Control Finish",
+        "description": "Completes a control event record.",
+        "operationId": "control-finish",
         "parameters": [
           {
             "in": "header",
@@ -440,13 +318,13 @@
         ],
         "responses": {
           "202": {
-            "description": "The load event request was accepted and processed."
+            "description": "The control event request was accepted and processed."
           },
           "500": {
             "description": "An unexpected error has occurred - please get in touch with us so we can check our logs!"
           }
         }
       }
-    }
+    }    
   }
 } 

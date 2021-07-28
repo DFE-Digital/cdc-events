@@ -56,7 +56,6 @@
         {
             try
             {
-
                 HttpResponseMessage toReturn =
                     await this.PostAsync<Survey>(
                         httpRequest,

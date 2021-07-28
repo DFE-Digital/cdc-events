@@ -21,38 +21,69 @@
     /// <summary>
     /// Abstract base class for all entity based functions.
     /// </summary>
-    public abstract class BlobsFunctionBase
+    public abstract class AttachmentsFunctionBase : FunctionBase
     {
-        private const string HeaderNameRunIdentifier = "X-Run-Identifier";
-        private readonly IBlobSettingsProvider blobSettingsProvider;
-        private readonly IBlobProcessor blobProcessor;
+        private readonly IAttachmentSettingsProvider attachmentSettingsProvider;
+        private readonly IAttachmentProcessor attachmentProcessor;
         private readonly ILoggerProvider loggerProvider;
 
         /// <summary>
-        /// Initialises a new instance of the <see cref="BlobsFunctionBase" />
+        /// Initialises a new instance of the <see cref="AttachmentsFunctionBase" />
         /// class.
         /// </summary>
-        /// <param name="blobProcessor">
-        /// An instance of type <see cref="IBlobProcessor" />.
+        /// <param name="attachmentProcessor">
+        /// An instance of type <see cref="IAttachmentProcessor" />.
         /// </param>
-        /// <param name="blobSettingsProvider">
-        /// An instance of <see cref="IBlobSettingsProvider"/>.
+        /// <param name="attachmentSettingsProvider">
+        /// An instance of <see cref="IAttachmentSettingsProvider"/>.
         /// </param>
         /// <param name="loggerProvider">
         /// An instance of type <see cref="ILoggerProvider" />.
         /// </param>
-        public BlobsFunctionBase(
-            IBlobProcessor blobProcessor,
-            IBlobSettingsProvider blobSettingsProvider,
+        public AttachmentsFunctionBase(
+            IAttachmentProcessor attachmentProcessor,
+            IAttachmentSettingsProvider attachmentSettingsProvider,
             ILoggerProvider loggerProvider)
+            : base(loggerProvider)
         {
-            this.blobSettingsProvider = blobSettingsProvider;
-            this.blobProcessor = blobProcessor;
+            this.attachmentSettingsProvider = attachmentSettingsProvider;
+            this.attachmentProcessor = attachmentProcessor;
             this.loggerProvider = loggerProvider;
         }
 
         /// <summary>
-        /// Base entry method for all functions.
+        /// Gets the required attachments collection.
+        /// </summary>
+        /// <param name="httpRequest">
+        /// The <see cref="HttpRequest"/> being processed.</param>
+        /// <param name="cancellationToken">
+        /// The asynchronous <see cref="CancellationToken"/>.
+        /// </param>
+        /// <returns>
+        /// A <see cref="Task"/> wrapping the <see cref="HttpResponseMessage"/>.
+        /// </returns>
+        protected async Task<HttpResponseMessage> GetAsync(HttpRequest httpRequest, CancellationToken cancellationToken)
+        {
+            if (httpRequest == null)
+            {
+                throw new ArgumentNullException(nameof(httpRequest));
+            }
+
+            HttpResponseMessage toReturn;
+            var attachtments = await this.attachmentProcessor
+                                            .GetAsync(cancellationToken)
+                                            .ConfigureAwait(false);
+
+            toReturn = new HttpResponseMessage(HttpStatusCode.OK)
+            {
+                Content = new StringContent(JsonConvert.SerializeObject(attachtments)),
+            };
+
+            return toReturn;
+        }
+
+        /// <summary>
+        /// Creates an attachment file and updates the database metadata about the file.
         /// </summary>
         /// <param name="httpRequest">
         /// An instance of <see cref="HttpRequest" />.
@@ -120,32 +151,32 @@
 
                     this.loggerProvider.Debug(
                         $"Deserialising received body: into an array " +
-                        $"of {nameof(IEnumerable<Blob>)} instance(s)...");
+                        $"of {nameof(IEnumerable<AttachmentResponse>)} instance(s)...");
 
-                    var models = JsonConvert.DeserializeObject<IEnumerable<Blob>>(body);
+                    var models = JsonConvert.DeserializeObject<IEnumerable<AttachmentResponse>>(body);
                     this.loggerProvider.Info(
-                        $"{models.Count()} {nameof(Blob)} instance(s) " +
+                        $"{models.Count()} {nameof(AttachmentResponse)} instance(s) " +
                         $"deserialised.");
 
                     this.loggerProvider.Debug(
                         $"Passing {models.Count()} entities to the entity " +
                         $"processor...");
 
-                    await this.blobProcessor.CreateBlobsAsync(
-                        runIdentifier.Value,
-                        models,
-                        this.blobSettingsProvider.BlobStorageConnectionString,
-                        this.blobSettingsProvider.BlobStorageAccountName,
-                        this.blobSettingsProvider.BlobStorageAccountKey,
-                        cancellationToken)
-                        .ConfigureAwait(false);
+                    await this.attachmentProcessor.PostAsync(
+                                            runIdentifier.Value,
+                                            models,
+                                            this.attachmentSettingsProvider.AttachmentStorageConnectionString,
+                                            this.attachmentSettingsProvider.AttachmentStorageAccountName,
+                                            this.attachmentSettingsProvider.AttachmentStorageAccountKey,
+                                            cancellationToken)
+                                            .ConfigureAwait(false);
 
                     this.loggerProvider.Info(
                         $"All {models.Count()} entities processed.");
 
                     // Everything good? Return accepted.
                     toReturn =
-                        new HttpResponseMessage(HttpStatusCode.Accepted);
+                        new HttpResponseMessage(HttpStatusCode.Created);
 
                     // Also return the run identifier.
                     runIdentifierStr = runIdentifier.ToString();

@@ -6,7 +6,7 @@
     /// <summary>
     /// Represents the Load reporting entity.
     /// </summary>
-    public class LoadNotification : LoadBase
+    public class LoadNotification : ControlBase
     {
         /// <summary>
         /// Gets or sets the entity id.

@@ -212,16 +212,16 @@
               "value": "[concat('Server=tcp:', variables('sqlServerName'), '.database.windows.net,1433;Initial Catalog=', variables('sqlDatabaseName'), ';Persist Security Info=False;User ID=', parameters('sqlServerUsername'), ';Password=', parameters('sqlServerPassword'), ';MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;')]"
             },
             {
-              "name": "BlobStorageConnectionString",
+              "name": "AttachmentStorageConnectionString",
               "value": "[concat('@Microsoft.KeyVault(VaultName=', variables('keyVaultName'), ';SecretName=BlobStorageConnectionString)')]"
             },
 
             {
-              "name": "BlobStorageAccountName",
+              "name": "AttachmentStorageAccountName",
               "value": "[concat(variables('namePrefix'), 'cdcdocssa01' )]"
             },
             {
-              "name": "BlobStorageAccountKey",
+              "name": "AttachmentStorageAccountKey",
               "value": "[concat('@Microsoft.KeyVault(VaultName=', variables('keyVaultName'), ';SecretName=BlobStorageAccountKey)')]"
             }
 

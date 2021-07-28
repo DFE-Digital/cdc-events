@@ -1,11 +1,9 @@
 ﻿namespace Dfe.CdcEventApi.FunctionApp.Functions
 {
     using System;
-    using System.Globalization;
     using System.Linq;
     using System.Net;
     using System.Net.Http;
-    using System.Text;
     using System.Threading;
     using System.Threading.Tasks;
     using Dfe.CdcEventApi.Application.Definitions;
@@ -16,36 +14,34 @@
     using Newtonsoft.Json;
 
     /// <summary>
-    /// Abstract base class for all load control functions.
+    /// Abstract base class for all control functions.
     /// </summary>
-    public abstract class LoadFunctionsBase
+    public abstract class ControlFunctionsBase : FunctionBase
     {
-        private const string HeaderNameRunIdentifier = "X-Run-Identifier";
-        private const string HeaderNameStatus = "X-Run-Status";
-        private const string HeaderNameSince = "X-Run-Since";
         private readonly ILoggerProvider loggerProvider;
-        private readonly ILoadProcessor loadProcessor;
+        private readonly IControlProcessor controlProcessor;
         private readonly DateTime dafaultSinceDate = new DateTime(2000, 1, 1);
 
         /// <summary>
-        /// Initialises a new instance of the <see cref="LoadFunctionsBase"/> class.
+        /// Initialises a new instance of the <see cref="ControlFunctionsBase"/> class.
         /// </summary>
-        /// <param name="loggerProvider">An instance of type <see cref="ILoadProcessor"/>.
+        /// <param name="loggerProvider">An instance of type <see cref="IControlProcessor"/>.
         /// </param>
-        /// <param name="loadProcessor">
+        /// <param name="controlProcessor">
         /// An instance of type <see cref="ILoggerProvider"/>.
         /// </param>
-        public LoadFunctionsBase(
-            ILoadProcessor loadProcessor,
+        public ControlFunctionsBase(
+            IControlProcessor controlProcessor,
             ILoggerProvider loggerProvider)
+            : base(loggerProvider)
         {
             this.loggerProvider = loggerProvider;
-            this.loadProcessor = loadProcessor;
+            this.controlProcessor = controlProcessor;
         }
 
         /// <summary>
         /// Method for starting a load.
-        /// The load is started by simply passing the Run Identifier date and time in the header.
+        /// The control instance is started by simply passing the Run Identifier date and time in the header.
         /// </summary>
         /// <param name="httpRequest">
         /// An instance of <see cref="HttpRequest" />.
@@ -76,13 +72,13 @@
             {
                 try
                 {
-                    var loads = await this.loadProcessor.CreateLoadAsync(
+                    var loads = await this.controlProcessor.CreateAsync(
                                         runIdentifier.Value,
                                         cancellationToken)
                                         .ConfigureAwait(false);
 
                     this.loggerProvider.Info(
-                        $"{nameof(this.loadProcessor.CreateLoadAsync)} processed.");
+                        $"{nameof(this.controlProcessor.CreateAsync)} processed.");
 
                     // Everything good? Return accepted.
                     toReturn =
@@ -97,7 +93,7 @@
 
                     var currentLoad = loads.First();
                     currentLoad.Since_DateTime = sinceDateTime;
-                    await this.loadProcessor.UpdateLoadAsync(
+                    await this.controlProcessor.UpdateAsync(
                                 currentLoad,
                                 cancellationToken).ConfigureAwait(false);
 
@@ -158,14 +154,14 @@
             {
                 try
                 {
-                    await this.loadProcessor.UpdateLoadStatusAsync(
+                    await this.controlProcessor.UpdateStatusAsync(
                                                         runIdentifier.Value,
                                                         status.Value,
                                                         cancellationToken)
                                                         .ConfigureAwait(false);
 
                     this.loggerProvider.Info(
-                        $"{nameof(this.loadProcessor.UpdateLoadStatusAsync)} processed.");
+                        $"{nameof(this.controlProcessor.UpdateStatusAsync)} processed.");
 
                     // Everything good? Return ok.
                     toReturn =
@@ -208,7 +204,7 @@
             HttpRequest httpRequest,
             CancellationToken cancellationToken)
         {
-            HttpResponseMessage toReturn = null;
+            HttpResponseMessage toReturn;
 
             if (httpRequest == null)
             {
@@ -225,55 +221,29 @@
 
             if (status.HasValue && runIdentifier.HasValue)
             {
-                await this.loadProcessor.UpdateLoadStatusAsync(
+                await this.controlProcessor.UpdateStatusAsync(
                     runIdentifier.Value,
                     status.Value,
                     cancellationToken)
                     .ConfigureAwait(false);
 
-                var load = await this.loadProcessor.GetLoadAsync(
+                var load = await this.controlProcessor.GetAsync(
                                         runIdentifier.Value,
                                         cancellationToken)
                                         .ConfigureAwait(false);
 
-                ControlState state = load.Status;
-
-                switch (load.Status)
-                {
-                    case ControlState.Extracting:
-
-                        load.Finish_DateTime = DateTime.UtcNow;
-
-                        var count = await this.loadProcessor.GetLoadCountAsync(
+                load.Status = (ControlState)Enum.Parse(typeof(ControlState), $"{status}");
+                load.Finished_DateTime = DateTime.UtcNow;
+                load.Count = await this.controlProcessor.GetCountAsync(
                             runIdentifier.Value,
                             cancellationToken)
                             .ConfigureAwait(false);
 
-                        load.Count = count;
-
-                        await this.loadProcessor.UpdateLoadAsync(load, cancellationToken)
-                                .ConfigureAwait(false);
-
-                        // as its a good load, extract the data into the etl data model
-                        await this.loadProcessor.ExecuteExtract(runIdentifier.Value, cancellationToken)
-                                .ConfigureAwait(false);
-
-                        break;
-                    case ControlState.Transforming:
-                        // as its a good load, transform the data into the condition data model
-                        await this.loadProcessor.ExecuteTransform(runIdentifier.Value, cancellationToken)
-                                .ConfigureAwait(false);
-                        break;
-                    default:
-                        // update the load record back to its current state with report and audience.
-                        await this.loadProcessor.UpdateLoadAsync(load, cancellationToken)
-                                .ConfigureAwait(false);
-                        break;
-                }
+                // update the load record back to its current state with report and audience.
+                await this.controlProcessor.UpdateAsync(load, cancellationToken).ConfigureAwait(false);
 
                 toReturn = new HttpResponseMessage(HttpStatusCode.Accepted)
                 {
-                    // return the notification data to the caller.
                     Content = new StringContent(JsonConvert.SerializeObject(load)),
                 };
             }
@@ -283,124 +253,6 @@
             }
 
             return toReturn;
-        }
-
-        /// <summary>
-        /// Gets the resulting attachments for a load run.
-        /// </summary>
-        /// <param name="httpRequest">
-        /// The <see cref="HttpRequest"/> being processed.</param>
-        /// <param name="cancellationToken">
-        /// The asynchronous <see cref="CancellationToken"/>.
-        /// </param>
-        /// <returns>
-        /// A <see cref="Task"/> wrapping the <see cref="HttpRequestMessage"/>.
-        /// </returns>
-        protected async Task<HttpResponseMessage> GetAttachments(HttpRequest httpRequest, CancellationToken cancellationToken)
-        {
-            if (httpRequest == null)
-            {
-                throw new ArgumentNullException(nameof(httpRequest));
-            }
-
-            IHeaderDictionary headerDictionary = httpRequest.Headers;
-
-            // extract the Header for the runIdentifier
-            DateTime? runIdentifier = this.GetRunIdentifier(headerDictionary);
-
-            HttpResponseMessage toReturn;
-            if (runIdentifier.HasValue)
-            {
-                var attachtments = await this.loadProcessor
-                        .GetAttachments(runIdentifier.Value, cancellationToken)
-                        .ConfigureAwait(false);
-
-                toReturn = new HttpResponseMessage(HttpStatusCode.OK)
-                {
-                    Content = new StringContent(JsonConvert.SerializeObject(attachtments)),
-                };
-            }
-            else
-            {
-                toReturn = new HttpResponseMessage(HttpStatusCode.BadRequest);
-            }
-
-            return toReturn;
-        }
-
-        private int? GetStatus(IHeaderDictionary headerDictionary)
-        {
-            this.loggerProvider.Debug($"{nameof(this.GetStatus)} Checking for header \"{HeaderNameStatus}\"...");
-
-            if (headerDictionary.ContainsKey(HeaderNameStatus))
-            {
-                var statusString = headerDictionary[HeaderNameStatus];
-
-                this.loggerProvider.Info(
-                    $"{nameof(this.GetStatus)} Header \"{HeaderNameStatus}\" was specified: " +
-                    $"\"{statusString}\". Parsing...");
-
-                try
-                {
-                    var status = (ControlState)Enum.Parse(typeof(ControlState), statusString, true);
-
-                    this.loggerProvider.Info($"{nameof(GetStatus)} Supplied Status is {status}.");
-
-                    return (int)status;
-                }
-#pragma warning disable CA1031 // Do not catch general exception types
-                catch
-#pragma warning restore CA1031 // Do not catch general exception types
-                {
-                    this.loggerProvider.Error(
-                        $"{nameof(this.GetStatus)} Unable to parse the value of " +
-                        $"\"{HeaderNameRunIdentifier}\" " +
-                        $"(\"{statusString}\") as a value in the range {ControlState.Start}..{ControlState.Transforming} or {ControlState.Reporting}.");
-                }
-            }
-            else
-            {
-                this.loggerProvider.Error(
-                    $"{nameof(this.GetStatus)} A valid status was not supplied. The " +
-                    $"status must be " +
-                    $"specified as a valid {nameof(ControlState)} value in the range {ControlState.Start}..{ControlState.Transforming} or {ControlState.Reporting}.");
-            }
-
-            return null;
-        }
-
-        private DateTime? GetRunIdentifier(IHeaderDictionary headerDictionary)
-        {
-            DateTime? runIdentifier = null;
-            string runIdentifierStr = null;
-
-            this.loggerProvider.Debug($"Checking for header \"{HeaderNameRunIdentifier}\"...");
-
-            if (headerDictionary.ContainsKey(HeaderNameRunIdentifier))
-            {
-                runIdentifierStr = headerDictionary[HeaderNameRunIdentifier];
-
-                this.loggerProvider.Info(
-                    $"Header \"{HeaderNameRunIdentifier}\" was specified: " +
-                    $"\"{runIdentifierStr}\". Parsing...");
-
-                try
-                {
-                    runIdentifier = DateTime.Parse(
-                        runIdentifierStr,
-                        CultureInfo.InvariantCulture);
-                }
-                catch (FormatException)
-                {
-                    this.loggerProvider.Error(
-                        $"A valid {nameof(runIdentifier)} was not usable. The " +
-                        $"{nameof(runIdentifier)} must be " +
-                        $"specified as a valid {nameof(DateTime)} value.");
-                    return null;
-                }
-            }
-
-            return runIdentifier;
         }
     }
 }

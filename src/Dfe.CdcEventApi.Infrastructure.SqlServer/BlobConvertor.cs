@@ -11,13 +11,13 @@
     public class BlobConvertor : IBlobConvertor
     {
         /// <summary>
-        /// Converts a collection of <see cref="Blob"/> data bytes.
+        /// Converts a collection of <see cref="AttachmentResponse"/> data bytes.
         /// </summary>
-        /// <param name="blob">The <see cref="Blob"/>.</param>
+        /// <param name="blob">The <see cref="AttachmentResponse"/>.</param>
         /// <returns>
         /// An instance of <see cref="Task"/> wrapping a collection of <see cref="byte"/> according to the blob data object type.
         /// </returns>
-        public byte[] Convert(Blob blob)
+        public byte[] Convert(AttachmentResponse blob)
         {
             if (blob == null)
             {

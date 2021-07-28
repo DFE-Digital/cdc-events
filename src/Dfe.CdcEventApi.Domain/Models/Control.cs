@@ -5,7 +5,7 @@
     /// <summary>
     /// Represents the LoadControl entity.
     /// </summary>
-    public class Load : LoadBase
+    public class Control : ControlBase
     {
         /// <summary>
         /// Gets or sets the Load Date Time.
@@ -31,7 +31,7 @@
         /// Gets or sets the Finish time.
         /// </summary>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Naming", "CA1707:Identifiers should not contain underscores", Justification = "This is a DTO")]
-        public DateTime? Finish_DateTime
+        public DateTime? Finished_DateTime
         {
             get;
             set;
