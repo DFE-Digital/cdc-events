@@ -29,5 +29,10 @@
         /// Gets or sets a value for the Extension.
         /// </summary>
         public string Extension { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value for the entity.
+        /// </summary>
+        public string Entity { get; set; }
     }
 }
