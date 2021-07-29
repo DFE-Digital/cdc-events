@@ -43,7 +43,8 @@
 
         /// <inheritdoc/>
         public string ArchiveContainerName
-        { get
+        {
+            get
             {
                 string toReturn = Environment.GetEnvironmentVariable("ArchiveContainerName");
 

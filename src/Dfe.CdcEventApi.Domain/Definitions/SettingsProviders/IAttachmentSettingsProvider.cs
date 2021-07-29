@@ -6,7 +6,7 @@
     public interface IAttachmentSettingsProvider
     {
         /// <summary>
-        /// The name of the conainer for entity archival.
+        /// Gets the name of the conainer for entity archival.
         /// </summary>
         string ArchiveContainerName { get; }
 

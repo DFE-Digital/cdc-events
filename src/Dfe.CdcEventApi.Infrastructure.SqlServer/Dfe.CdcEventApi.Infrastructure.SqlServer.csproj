@@ -46,6 +46,7 @@
     <!-- Microsoft -->
     <PackageReference Include="Azure.Storage.Blobs" Version="12.9.1" />
     <PackageReference Include="Azure.Storage.Files.Shares" Version="12.7.0" />
+    <PackageReference Include="GovukNotify" Version="4.0.1" />
     <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
     <PackageReference Include="System.Data.SqlClient" Version="4.8.2" />
 
