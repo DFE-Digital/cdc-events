@@ -24,15 +24,18 @@
         /// <param name="entityProcessor">
         /// An instance of type <see cref="IEntityProcessor" />.
         /// </param>
+        /// <param name="entityArchiveProcessor">An instance of <see cref="IEntityArchiveProcessor"/>.</param>
         /// <param name="loggerProvider">
         /// An instance of type <see cref="ILoggerProvider" />.
         /// </param>
         public Portfolios(
             IEntityProcessor entityProcessor,
+            IEntityArchiveProcessor entityArchiveProcessor,
             ILoggerProvider loggerProvider)
             : base(
-                  entityProcessor,
-                  loggerProvider)
+                    entityProcessor,
+                    entityArchiveProcessor,
+                    loggerProvider)
         {
             this.loggerProvider = loggerProvider;
         }

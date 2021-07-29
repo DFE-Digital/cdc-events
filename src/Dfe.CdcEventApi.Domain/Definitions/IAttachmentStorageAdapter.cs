@@ -22,16 +22,10 @@
         /// Creats new <see cref="AttachmentResponse"/> records.
         /// </summary>
         /// <param name="runIdentifier">The load run identifier.</param>
-        /// <param name="blobStorageConnectionString">The file share connection string.</param>
-        /// <param name="blobStorageAccountName">The file storage account name.</param>
-        /// <param name="blobStorageAccountKey">The file storage Shared Access Signature (SAS) key.</param>
         /// <param name="attachments">The collection of <see cref="AttachmentResponse"/> entities.</param>
         /// <returns>An <see cref="Task"/>.</returns>
         Task CreateAsync(
             DateTime runIdentifier,
-            string blobStorageConnectionString,
-            string blobStorageAccountName,
-            string blobStorageAccountKey,
             IEnumerable<AttachmentResponse> attachments);
     }
 }

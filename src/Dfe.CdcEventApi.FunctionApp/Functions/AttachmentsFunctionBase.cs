@@ -23,7 +23,6 @@
     /// </summary>
     public abstract class AttachmentsFunctionBase : FunctionBase
     {
-        private readonly IAttachmentSettingsProvider attachmentSettingsProvider;
         private readonly IAttachmentProcessor attachmentProcessor;
         private readonly ILoggerProvider loggerProvider;
 
@@ -34,19 +33,14 @@
         /// <param name="attachmentProcessor">
         /// An instance of type <see cref="IAttachmentProcessor" />.
         /// </param>
-        /// <param name="attachmentSettingsProvider">
-        /// An instance of <see cref="IAttachmentSettingsProvider"/>.
-        /// </param>
         /// <param name="loggerProvider">
         /// An instance of type <see cref="ILoggerProvider" />.
         /// </param>
         public AttachmentsFunctionBase(
             IAttachmentProcessor attachmentProcessor,
-            IAttachmentSettingsProvider attachmentSettingsProvider,
             ILoggerProvider loggerProvider)
             : base(loggerProvider)
         {
-            this.attachmentSettingsProvider = attachmentSettingsProvider;
             this.attachmentProcessor = attachmentProcessor;
             this.loggerProvider = loggerProvider;
         }
@@ -165,9 +159,6 @@
                     await this.attachmentProcessor.PostAsync(
                                             runIdentifier.Value,
                                             models,
-                                            this.attachmentSettingsProvider.AttachmentStorageConnectionString,
-                                            this.attachmentSettingsProvider.AttachmentStorageAccountName,
-                                            this.attachmentSettingsProvider.AttachmentStorageAccountKey,
                                             cancellationToken)
                                             .ConfigureAwait(false);
 

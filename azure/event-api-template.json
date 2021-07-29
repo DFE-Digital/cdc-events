@@ -70,6 +70,10 @@
       "type": "string",
       "defaultValue": "CDC-Raw-Data"
     },
+    "sqlMasteredDatabaseNameSuffix": {
+      "type": "string",
+      "defaultValue": "CDC-Mastered-Data"
+    },
     "sqlServerUsername": {
       "type": "string",
       "minLength": 6,
@@ -78,7 +82,7 @@
     "sqlServerPassword": {
       "type": "securestring",
       "minLength": 12
-    },
+    },   
     "websiteRunFromPackage": {
       "type": "string",
       "defaultValue": "0"
@@ -86,7 +90,13 @@
     "appName": {
       "type": "string",
       "maxLength": 8
+    },
+    "archiveContainerName": {
+      "type": "string",
+      "maxLength": 255,
+      "defaultValue": "entityarchive"
     }
+
   },
   "variables": {
 
@@ -101,6 +111,7 @@
     "appInsightsName": "[concat(variables('namePrefix'), '-ai-', parameters('appInsightsInstance'))]",
     "appInsightsId": "[resourceId(variables('sharedResourceGroupName'), 'Microsoft.Insights/components', variables('appInsightsName'))]",
 
+    "archiveContainerName": "[parameters('archiveContainerName')]",
     "storageAccountName": "[concat(variables('namePrefix'), parameters('appName'), 'sa01')]",
     "storageAccountId": "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName'))]",
     "storageAccountConnStr": "[concat('DefaultEndpointsProtocol=https;AccountName=', variables('storageAccountName'), ';AccountKey=')]",
@@ -114,7 +125,8 @@
     "functionAppId": "[resourceId('Microsoft.Web/sites/', variables('functionAppName'))]",
 
     "sqlServerName": "[concat(variables('namePrefix'), '-', parameters('cdcDataSqlAppName'), '-sql-01')]",
-    "sqlDatabaseName": "[concat(variables('namePrefix'), '-', parameters('sqlDatabaseNameSuffix'))]"
+    "sqlDatabaseName": "[concat(variables('namePrefix'), '-', parameters('sqlDatabaseNameSuffix'))]",
+    "sqlMasteredDatabaseName": "[concat(variables('namePrefix'), '-', parameters('sqlMasteredDatabaseNameSuffix'))]"
   },
   "resources": [
 
@@ -212,6 +224,10 @@
               "value": "[concat('Server=tcp:', variables('sqlServerName'), '.database.windows.net,1433;Initial Catalog=', variables('sqlDatabaseName'), ';Persist Security Info=False;User ID=', parameters('sqlServerUsername'), ';Password=', parameters('sqlServerPassword'), ';MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;')]"
             },
             {
+              "name": "MasteredDbConnectionString",
+              "value": "[concat('Server=tcp:', variables('sqlServerName'), '.database.windows.net,1433;Initial Catalog=', variables('sqlMasteredDatabaseName'), ';Persist Security Info=False;User ID=', parameters('sqlServerUsername'), ';Password=', parameters('sqlServerPassword'), ';MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;')]"
+            },
+            {
               "name": "AttachmentStorageConnectionString",
               "value": "[concat('@Microsoft.KeyVault(VaultName=', variables('keyVaultName'), ';SecretName=BlobStorageConnectionString)')]"
             },
@@ -223,6 +239,10 @@
             {
               "name": "AttachmentStorageAccountKey",
               "value": "[concat('@Microsoft.KeyVault(VaultName=', variables('keyVaultName'), ';SecretName=BlobStorageAccountKey)')]"
+            },
+            {
+              "name": "ArchiveContainerName",
+              "value": "[variables('archiveContainerName')]"
             }
 
           ],

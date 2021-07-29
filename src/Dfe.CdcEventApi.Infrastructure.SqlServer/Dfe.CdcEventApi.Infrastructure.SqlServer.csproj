@@ -13,6 +13,7 @@
 
   <ItemGroup>
     <None Remove="AttachmentHandlers\EXTRACT-Attachment-List.sql" />
+    <None Remove="AttachmentHandlers\EXTRACT-Attachment-Merge.sql" />
     <None Remove="EntityHandlers\Create_Raw_Blob.sql" />
     <None Remove="EntityHandlers\Create_Raw_Deleted.sql" />
     <None Remove="EntityHandlers\Create_Raw_Load.sql" />
@@ -43,6 +44,7 @@
   <ItemGroup>
 
     <!-- Microsoft -->
+    <PackageReference Include="Azure.Storage.Blobs" Version="12.9.1" />
     <PackageReference Include="Azure.Storage.Files.Shares" Version="12.7.0" />
     <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
     <PackageReference Include="System.Data.SqlClient" Version="4.8.2" />
@@ -68,12 +70,13 @@
 
   <ItemGroup>
     <EmbeddedResource Include="AttachmentHandlers\EXTRACT-Attachment-List.sql" />
+    <EmbeddedResource Include="AttachmentHandlers\EXTRACT-Attachment-Merge.sql" />
     <EmbeddedResource Include="ControlHandlers\CONTROL-Get-Count.sql" />
     <EmbeddedResource Include="ControlHandlers\CONTROL-Since.sql" />
     <EmbeddedResource Include="ControlHandlers\CONTROL-Status-Update.sql" />
     <EmbeddedResource Include="ControlHandlers\CONTROL-Update.sql" />
     <EmbeddedResource Include="ControlHandlers\CONTROL-Get.sql" />
-    <EmbeddedResource Include="AttachmentHandlers\EXTRACT-Attachment-Merge.sql" />
+    <EmbeddedResource Include="AttachmentHandlers\EXTRACT-Attachment-File-Info.sql" />
     <EmbeddedResource Include="EntityHandlers\Create_Raw_Deleted.sql" />
     <EmbeddedResource Include="EntityHandlers\Create_Raw_Portfolio.sql" />
     <EmbeddedResource Include="EntityHandlers\Create_Raw_Portfolio_Field.sql" />

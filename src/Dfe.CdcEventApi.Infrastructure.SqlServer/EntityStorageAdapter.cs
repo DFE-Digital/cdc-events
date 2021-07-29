@@ -64,7 +64,7 @@
         }
 
         /// <inheritdoc />
-        public async Task StoreEntitiesAsync(
+        public async Task StoreAsync(
             string dataHandlerIdentifier,
             DateTime runIdentifier,
             XDocument xDocument,
@@ -121,7 +121,7 @@
                 }
                 catch (Exception ex)
                 {
-                    this.loggerProvider.Error($"Unexpected error during {nameof(this.StoreEntitiesAsync)} for type {dataHandlerIdentifier}; {ex.Message} {ex.InnerException?.Message ?? string.Empty}", ex);
+                    this.loggerProvider.Error($"Unexpected error during {nameof(this.StoreAsync)} for type {dataHandlerIdentifier}; {ex.Message} {ex.InnerException?.Message ?? string.Empty}", ex);
                     throw;
                 }
                 finally

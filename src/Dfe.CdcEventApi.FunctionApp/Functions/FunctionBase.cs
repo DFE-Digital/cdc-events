@@ -79,7 +79,7 @@
                     this.loggerProvider.Error(
                         $"{nameof(this.GetStatus)} Unable to parse the value of " +
                         $"\"{HeaderNameRunIdentifier}\" " +
-                        $"(\"{statusString}\") as a value in the range {ControlState.Start}..{ControlState.Attachments} or {ControlState.Reporting}.");
+                        $"(\"{statusString}\") as a value in the range {ControlState.Start}..{ControlState.Attachments} or {ControlState.Delivered}.");
                 }
             }
             else
@@ -87,7 +87,7 @@
                 this.loggerProvider.Error(
                     $"{nameof(this.GetStatus)} A valid status was not supplied. The " +
                     $"status must be " +
-                    $"specified as a valid {nameof(ControlState)} value in the range {ControlState.Start}..{ControlState.Attachments} or {ControlState.Reporting}.");
+                    $"specified as a valid {nameof(ControlState)} value in the range {ControlState.Start}..{ControlState.Attachments} or {ControlState.Delivered}.");
             }
 
             return null;

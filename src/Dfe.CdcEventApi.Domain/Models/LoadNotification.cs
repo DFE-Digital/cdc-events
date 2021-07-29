@@ -1,8 +1,5 @@
 ﻿namespace Dfe.CdcEventApi.Domain.Models
 {
-    using Dfe.CdcEventApi.Application.Definitions;
-    using Dfe.CdcEventApi.Domain.Definitions;
-
     /// <summary>
     /// Represents the Load reporting entity.
     /// </summary>

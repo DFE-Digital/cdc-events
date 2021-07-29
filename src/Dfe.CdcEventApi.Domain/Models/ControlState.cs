@@ -1,6 +1,5 @@
 ﻿namespace Dfe.CdcEventApi.Domain.Models
 {
-    using System;
     using System.ComponentModel;
 
     /// <summary>
@@ -27,9 +26,13 @@
         Attachments = 2,
 
         /// <summary>
-        /// The task is reporting results. This value is depended upon by SQL Code in teh ETL Process.
+        /// The orchestrator task is reporting delivery results.
+        /// This value is depended upon by SQL Code in the downstream ETL Process.
+        /// IMPORTANT NOTE:
+        /// Further step values in the etl.Control table Status column are Extract = 4, transform = 5, Finished = 6
+        /// which are handled by the ETL extract and Transform process in other system components.
         /// </summary>
-        [Description("Completed")]
-        Reporting = 3,
+        [Description("Delivered")]
+        Delivered = 3,
     }
 }

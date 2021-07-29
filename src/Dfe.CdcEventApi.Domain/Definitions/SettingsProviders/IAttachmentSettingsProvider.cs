@@ -6,6 +6,11 @@
     public interface IAttachmentSettingsProvider
     {
         /// <summary>
+        /// The name of the conainer for entity archival.
+        /// </summary>
+        string ArchiveContainerName { get; }
+
+        /// <summary>
         /// Gets the file share connection stirng.
         /// </summary>
         string AttachmentStorageConnectionString { get; }

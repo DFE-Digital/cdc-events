@@ -42,7 +42,7 @@
         }
 
         /// <inheritdoc />
-        public async Task CreateEntitiesAsync<TModelsBase>(
+        public async Task CreateAsync<TModelsBase>(
             DateTime runIdentifier,
             IEnumerable<TModelsBase> modelsBases,
             CancellationToken cancellationToken)
@@ -66,7 +66,7 @@
             XDocument xDocument = this.ConvertToXDocument(modelsBases);
 
             // 3) Invoke the data-layer with the script and the DataTable.
-            await this.entityStorageAdapter.StoreEntitiesAsync(
+            await this.entityStorageAdapter.StoreAsync(
                 identifier,
                 runIdentifier,
                 xDocument,
@@ -192,7 +192,7 @@
                 $"Storing {subCollection.Count()} entities using data " +
                 $"handler identifier \"{identifier}\"...");
 
-            await this.entityStorageAdapter.StoreEntitiesAsync(
+            await this.entityStorageAdapter.StoreAsync(
                 identifier,
                 runIdentifier,
                 xDocument,

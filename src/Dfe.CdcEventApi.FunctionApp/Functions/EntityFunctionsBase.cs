@@ -25,6 +25,7 @@
         private const string HeaderNameRunIdentifier = "X-Run-Identifier";
 
         private readonly IEntityProcessor entityProcessor;
+        private readonly IEntityArchiveProcessor entityArchiveProcessor;
         private readonly ILoggerProvider loggerProvider;
 
         /// <summary>
@@ -34,14 +35,17 @@
         /// <param name="entityProcessor">
         /// An instance of type <see cref="IEntityProcessor" />.
         /// </param>
+        /// <param name="entityArchiveProcessor">An instance of <see cref="IEntityArchiveProcessor"/>.</param>
         /// <param name="loggerProvider">
         /// An instance of type <see cref="ILoggerProvider" />.
         /// </param>
         public EntityFunctionsBase(
             IEntityProcessor entityProcessor,
+            IEntityArchiveProcessor entityArchiveProcessor,
             ILoggerProvider loggerProvider)
         {
             this.entityProcessor = entityProcessor;
+            this.entityArchiveProcessor = entityArchiveProcessor;
             this.loggerProvider = loggerProvider;
         }
 
@@ -131,17 +135,27 @@
                     $"{modelsBases.Count()} {modelsBaseType} instance(s) " +
                     $"deserialised.");
 
-                this.loggerProvider.Debug(
-                    $"Passing {modelsBases.Count()} entities to the entity " +
-                    $"processor...");
-
                 try
                 {
-                    await this.entityProcessor.CreateEntitiesAsync<TModelsBase>(
-                        runIdentifier.Value,
-                        modelsBases,
-                        cancellationToken)
-                        .ConfigureAwait(false);
+                    this.loggerProvider.Debug(
+                        $"Passing {modelsBases.Count()} entities to the entity archive " +
+                        $"processor...");
+                    await this.entityArchiveProcessor.CreateAsync(
+                                            typeof(TModelsBase).Name,
+                                            runIdentifier.Value,
+                                            body,
+                                            cancellationToken)
+                                            .ConfigureAwait(false);
+
+                    this.loggerProvider.Debug(
+                        $"Passing {modelsBases.Count()} entities to the entity " +
+                        $"processor...");
+
+                    await this.entityProcessor.CreateAsync<TModelsBase>(
+                                            runIdentifier.Value,
+                                            modelsBases,
+                                            cancellationToken)
+                                            .ConfigureAwait(false);
 
                     this.loggerProvider.Info(
                         $"All {modelsBases.Count()} entities processed.");

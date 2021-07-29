@@ -12,7 +12,7 @@
         /// <summary>
         /// Gets the mastered DB connection string.
         /// </summary>
-        public static string MasteredDbConnectionString
+        public string MasteredDbConnectionString
         {
             get
             {

@@ -20,14 +20,22 @@
 
     /// <summary>
     /// Implements <see cref="IControlStorageAdapter" />.
+    /// This adapter provids two services;
+    /// Get a list of required attachment file details <see cref="AttachmentRequest"/>.
+    /// Recieve the obtained attachment data <see cref="AttachmentResponse"/>.
     /// </summary>
     public class AttachmentStorageAdapter : IAttachmentStorageAdapter
     {
         private const string EXTRACTAttachmentMerge = "EXTRACT-Attachment-Merge";
+        private const string EXTRACTAttachmentFileInfo = "EXTRACT-Attachment-File-Info";
         private const string EXTRACTAttachmentList = "EXTRACT-Attachment-List";
         private const int CommandTimeoutAsLongAsItTakes = 0;
         private const string ProcessHandlerFileNameFormat = "{0}.sql";
         private readonly string rawDbConnectionString;
+        private readonly string masteredDbConnectionString;
+        private readonly string attachmentStorageConnectionString;
+        private readonly string attachmentStorageAccountName;
+        private readonly string attachmentStorageAccountKey;
         private readonly Assembly assembly;
         private readonly ILoggerProvider loggerProvider;
         private readonly IBlobConvertor blobConvertor;
@@ -45,10 +53,12 @@
         /// <param name="loggerProvider">
         /// An instance of type <see cref="ILoggerProvider" />.
         /// </param>
+        /// <param name="attachmentSettingsProvider">An instance of <see cref="IAttachmentSettingsProvider"/>.</param>
         public AttachmentStorageAdapter(
             IEntityStorageAdapterSettingsProvider entityStorageAdapterSettingsProvider,
             IBlobConvertor blobConvertor,
-            ILoggerProvider loggerProvider)
+            ILoggerProvider loggerProvider,
+            IAttachmentSettingsProvider attachmentSettingsProvider)
         {
             if (entityStorageAdapterSettingsProvider == null)
             {
@@ -62,14 +72,23 @@
             this.loggerProvider = loggerProvider ?? throw new ArgumentNullException(
                    nameof(loggerProvider));
 
+            if (attachmentSettingsProvider == null)
+            {
+                throw new ArgumentNullException(nameof(attachmentSettingsProvider));
+            }
+
             Type type = typeof(ControlStorageAdapter);
 
             this.assembly = type.Assembly;
 
             this.controlHandlersPath = $"{type.Namespace}.AttachmentHandlers";
 
-            this.rawDbConnectionString =
-                entityStorageAdapterSettingsProvider.RawDbConnectionString;
+            this.rawDbConnectionString = entityStorageAdapterSettingsProvider.RawDbConnectionString;
+            this.masteredDbConnectionString = entityStorageAdapterSettingsProvider.MasteredDbConnectionString;
+
+            this.attachmentStorageConnectionString = attachmentSettingsProvider.AttachmentStorageConnectionString;
+            this.attachmentStorageAccountName = attachmentSettingsProvider.AttachmentStorageAccountName;
+            this.attachmentStorageAccountKey = attachmentSettingsProvider.AttachmentStorageAccountKey;
         }
 
         /// <summary>
@@ -78,9 +97,6 @@
         /// <param name="runIdentifier">
         /// The run identifier start date time value.
         /// </param>
-        /// <param name="attachmentStorageConnectionString">The file share connection string.</param>
-        /// <param name="attachmentStorageAccountName">The file storage account name.</param>
-        /// <param name="attachmentStorageAccountKey">The file storage Shared Access Signature (SAS) key.</param>
         /// <param name="attachments">
         /// A collection of <see cref="AttachmentResponse"/>.
         /// </param>
@@ -88,9 +104,6 @@
         /// An <see cref="Task"/>.</returns>
         public async Task CreateAsync(
             DateTime runIdentifier,
-            string attachmentStorageConnectionString,
-            string attachmentStorageAccountName,
-            string attachmentStorageAccountKey,
             IEnumerable<AttachmentResponse> attachments)
         {
             if (attachments == null)
@@ -103,80 +116,49 @@
             Stopwatch stopwatch = new Stopwatch();
             SqlTransaction transaction = null;
             SqlConnection sqlConnection = null;
+            SqlConnection masteredSqlConnection = null;
             try
             {
                 sqlConnection = new SqlConnection(this.rawDbConnectionString);
+#pragma warning disable CA2000 // Dispose objects before losing scope
+                masteredSqlConnection = new SqlConnection(this.masteredDbConnectionString);
+#pragma warning restore CA2000 // Dispose objects before losing scope
 
                 sqlConnection.Open();
-
-                this.loggerProvider.Info($"Opened SQL Connection");
+                masteredSqlConnection.Open();
+                this.loggerProvider.Info($"Opened 2 SQL Connections");
 
                 transaction = sqlConnection.BeginTransaction();
 
-                this.loggerProvider.Info($"Started transaction");
+                this.loggerProvider.Info($"Started transaction on primary connection");
 
                 var insertSql = this.ExtractHandler(EXTRACTAttachmentMerge);
+                var upsertSql = this.ExtractHandler(EXTRACTAttachmentFileInfo);
 
                 this.loggerProvider.Debug($"Creating Storage Blob records.");
 
                 stopwatch.Start();
 
-                // now update uses of this blob to have the correct URL
+                // despite cabability of handling a collection of objects ther eus usually only one.
                 foreach (var blob in attachments)
                 {
-                    ShareClient share = new ShareClient(attachmentStorageConnectionString, blob.BlobShare);
-                    this.loggerProvider.Info($"Created file share client for share {blob.BlobShare}.");
+                    this.loggerProvider.Info($"Storing obtained attachment data.");
+                    var item = await this.StoreAttachment(blob).ConfigureAwait(false);
+                    this.loggerProvider.Info($"Storing obtained attachment data.");
 
-                    var folderToUse = blob.BlobFolder;
-
-                    if (blob.BlobMimeType.ToUpperInvariant() == "application/pdf".ToUpperInvariant())
-                    {
-                        folderToUse += "/Site Plan";
-                    }
-                    else
-                    {
-                        folderToUse += "/Evidence";
-                    }
-
-                    var directory = share.GetDirectoryClient(folderToUse);
-                    var file = directory.GetFileClient(blob.BlobFilename);
-
-                    this.loggerProvider.Info($"Obtained file share file reference {file.Path} for file of mime type {blob.BlobMimeType}.");
-
-                    using (MemoryStream stream = new MemoryStream(this.blobConvertor.Convert(blob)))
-                    {
-                        await this.EnsureFoldersExistFor(directory, share).ConfigureAwait(false);
-
-                        this.loggerProvider.Info($"Creating file {file.Path}.");
-                        await file.CreateAsync(stream.Length).ConfigureAwait(false);
-                        this.loggerProvider.Info($"Created file {file.Path}.");
-
-                        this.loggerProvider.Info($"Creating file content for {file.Path}.");
-                        stream.Position = 0;
-                        await file.UploadRangeAsync(new HttpRange(0, stream.Length), stream).ConfigureAwait(false);
-                        this.loggerProvider.Info($"Created file content for {file.Path}.");
-                    }
-
-                    this.loggerProvider.Info($"Generating file share readonly SAS");
-
-                    blob.BlobUrl = GetFileSasUri(
-                        blob.BlobShare,
-                        file.Path,
-                        DateTime.MaxValue,
-                        attachmentStorageAccountName,
-                        attachmentStorageAccountKey,
-                        ShareFileSasPermissions.Read).ToString();
-
-                    this.loggerProvider.Info($"Generated file share readonly SAS");
-
-                    this.loggerProvider.Info($"Storing blob key 'obtained' and metadata references");
+                    // update the ETL model evidence metadata records.
+                    this.loggerProvider.Info($"Storing obtained attachment metadata and file info references");
 
                     // add it as a known blob
                     await sqlConnection
-                        .ExecuteAsync(insertSql, blob, transaction, CommandTimeoutAsLongAsItTakes)
+                        .ExecuteAsync(insertSql, item, transaction, CommandTimeoutAsLongAsItTakes)
                         .ConfigureAwait(false);
+                    this.loggerProvider.Info($"Stored obtained attachment metadata");
 
-                    this.loggerProvider.Info($"Stored Blob Key 'obtained' and metadata references");
+                    await masteredSqlConnection
+                        .ExecuteAsync(upsertSql, item, null, CommandTimeoutAsLongAsItTakes)
+                        .ConfigureAwait(false);
+                    this.loggerProvider.Info($"Stored obtained attachment file info references");
                 }
 
                 transaction.Commit();
@@ -199,11 +181,19 @@
             {
                 if (sqlConnection?.State != System.Data.ConnectionState.Closed)
                 {
-                    this.loggerProvider.Info($"Closing database connection.");
+                    this.loggerProvider.Info($"Closing primary database connection.");
                     sqlConnection?.Close();
+                    sqlConnection?.Dispose();
                 }
 
                 sqlConnection?.Dispose();
+
+                if (masteredSqlConnection?.State != System.Data.ConnectionState.Closed)
+                {
+                    this.loggerProvider.Info($"Closing secondary database connection.");
+                    masteredSqlConnection?.Close();
+                    masteredSqlConnection?.Dispose();
+                }
             }
         }
 
@@ -239,6 +229,57 @@
             }
         }
 
+        private async Task<AttachmentResponse> StoreAttachment(AttachmentResponse blob)
+        {
+            ShareClient share = new ShareClient(this.attachmentStorageConnectionString, blob.BlobShare);
+            this.loggerProvider.Info($"Created file share client for share {blob.BlobShare}.");
+
+            var folderToUse = blob.BlobFolder;
+
+            if (blob.BlobMimeType.ToUpperInvariant() == "application/pdf".ToUpperInvariant())
+            {
+                folderToUse += "/Site Plan";
+            }
+            else
+            {
+                folderToUse += "/Evidence";
+            }
+
+            var directory = share.GetDirectoryClient(folderToUse);
+            var file = directory.GetFileClient(blob.BlobFilename);
+
+            this.loggerProvider.Info($"Obtained file share file reference {file.Path} for file of mime type {blob.BlobMimeType}.");
+
+            using (MemoryStream stream = new MemoryStream(this.blobConvertor.Convert(blob)))
+            {
+                await this.EnsureFoldersExistFor(directory, share).ConfigureAwait(false);
+
+                this.loggerProvider.Info($"Creating file {file.Path}.");
+                await file.CreateAsync(stream.Length).ConfigureAwait(false);
+                this.loggerProvider.Info($"Created file {file.Path}.");
+
+                this.loggerProvider.Info($"Creating file content for {file.Path}.");
+                stream.Position = 0;
+                await file.UploadRangeAsync(new HttpRange(0, stream.Length), stream).ConfigureAwait(false);
+                this.loggerProvider.Info($"Created file content for {file.Path}.");
+            }
+
+            this.loggerProvider.Info($"Generating file share readonly SAS");
+
+            // now update this blob to have the correct URL.
+            blob.BlobUrl = this.GetFileSasUri(
+                blob.BlobShare,
+                file.Path,
+                DateTime.MaxValue,
+                this.attachmentStorageAccountName,
+                this.attachmentStorageAccountKey,
+                ShareFileSasPermissions.Read).ToString();
+
+            this.loggerProvider.Info($"Generated file share readonly SAS");
+
+            return blob;
+        }
+
         /// <summary>
         /// Create a SAS URI for a file.
         /// </summary>
@@ -251,7 +292,7 @@
         /// <returns>
         /// An instance of <see cref="Uri"/>.
         /// </returns>
-        private static Uri GetFileSasUri(
+        private Uri GetFileSasUri(
             string shareName,
             string filePath,
             DateTime expiration,
@@ -259,6 +300,8 @@
             string blobAccountKey,
             ShareFileSasPermissions permissions)
         {
+            this.loggerProvider.Debug($"Generating SAS Uri for attachment");
+
             // Get the account details from app settings
             ShareSasBuilder fileSAS = new ShareSasBuilder()
             {

@@ -9,10 +9,6 @@
     using System.Linq;
     using System.Reflection;
     using System.Threading.Tasks;
-    using Azure;
-    using Azure.Storage;
-    using Azure.Storage.Files.Shares;
-    using Azure.Storage.Sas;
     using Dapper;
     using Dfe.CdcEventApi.Domain;
     using Dfe.CdcEventApi.Domain.Definitions;

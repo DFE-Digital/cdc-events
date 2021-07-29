@@ -51,17 +51,11 @@
         /// </summary>
         /// <param name="runIdentifier">The run identifier date and time.</param>
         /// <param name="models">The models to create.</param>
-        /// <param name="blobStorageConnectionString">The file store connection string.</param>
-        /// <param name="blobStorageAccountName">The file storage account name.</param>
-        /// <param name="blobStorageAccountKey">The file storage Shared Access Signature (SAS) key.</param>
         /// <param name="cancellationToken">An instance of <see cref="CancellationToken"/>.</param>
         /// <returns>An instance of <see cref="Task"/>.</returns>
         public async Task PostAsync(
             DateTime runIdentifier,
             IEnumerable<AttachmentResponse> models,
-            string blobStorageConnectionString,
-            string blobStorageAccountName,
-            string blobStorageAccountKey,
             CancellationToken cancellationToken)
         {
             if (models == null)
@@ -73,9 +67,6 @@
 
             await this.attachmentStorageAdapter.CreateAsync(
                                             runIdentifier,
-                                            blobStorageConnectionString,
-                                            blobStorageAccountName,
-                                            blobStorageAccountKey,
                                             models)
                                             .ConfigureAwait(false);
         }

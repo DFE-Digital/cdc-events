@@ -1,37 +1,32 @@
-﻿namespace Dfe.CdcEventApi.Domain.Definitions
+﻿namespace Dfe.CdcEventApi.Application.Definitions
 {
     using System;
     using System.Threading;
     using System.Threading.Tasks;
-    using System.Xml.Linq;
 
     /// <summary>
-    /// Describes the operations of the entity storage adapter.
+    /// Processes incoming data into stored json objects.
     /// </summary>
-    public interface IEntityStorageAdapter
+    public interface IEntityArchiveProcessor
     {
         /// <summary>
-        /// Stores entities in the underlying storage.
+        /// Accepts a raw JSON object and stores it in an object store.
         /// </summary>
-        /// <param name="dataHandlerIdentifier">
-        /// The data handler identifier.
-        /// </param>
+        /// <param name="entityType">The type name of the entity data being stored.</param>
         /// <param name="runIdentifier">
         /// An identifier for the run, as a <see cref="DateTime" /> value.
         /// </param>
-        /// <param name="xDocument">
-        /// The <see cref="XDocument" /> containing the entities.
-        /// </param>
+        /// <param name="data">An instance of the json data as a string.</param>
         /// <param name="cancellationToken">
         /// An instance of <see cref="CancellationToken" />.
         /// </param>
         /// <returns>
         /// A <see cref="Task"/> representing the asynchronous operation.
         /// </returns>
-        Task StoreAsync(
-            string dataHandlerIdentifier,
+        Task CreateAsync(
+            string entityType,
             DateTime runIdentifier,
-            XDocument xDocument,
+            string data,
             CancellationToken cancellationToken);
     }
 }

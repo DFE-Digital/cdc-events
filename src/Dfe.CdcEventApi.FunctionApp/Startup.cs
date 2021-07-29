@@ -56,6 +56,7 @@
         {
             serviceCollection.AddScoped<IEntityProcessor, EntityProcessor>();
             serviceCollection.AddScoped<IAttachmentProcessor, AttachmentProcessor>();
+            serviceCollection.AddScoped<IEntityArchiveProcessor, EntityArchiveProcessor>();
             serviceCollection.AddScoped<IControlProcessor, ControlProcessor>();
         }
 
@@ -65,6 +66,7 @@
             serviceCollection.AddScoped<IEntityStorageAdapter, EntityStorageAdapter>();
             serviceCollection.AddScoped<IControlStorageAdapter, ControlStorageAdapter>();
             serviceCollection.AddScoped<IAttachmentStorageAdapter, AttachmentStorageAdapter>();
+            serviceCollection.AddScoped<IEntityArchiveAdapter, EntityArchiveAdapter>();
         }
 
         private static ILogger CreateILogger(IServiceProvider serviceProvider)

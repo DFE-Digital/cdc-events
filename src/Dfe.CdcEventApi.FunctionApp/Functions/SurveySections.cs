@@ -24,14 +24,17 @@
         /// <param name="entityProcessor">
         /// An instance of type <see cref="IEntityProcessor" />.
         /// </param>
+        /// <param name="entityArchiveProcessor">An instance of <see cref="IEntityArchiveProcessor"/>.</param>
         /// <param name="loggerProvider">
         /// An instance of type <see cref="ILoggerProvider" />.
         /// </param>
         public SurveySections(
             IEntityProcessor entityProcessor,
+            IEntityArchiveProcessor entityArchiveProcessor,
             ILoggerProvider loggerProvider)
             : base(
                   entityProcessor,
+                  entityArchiveProcessor,
                   loggerProvider)
         {
             this.loggerProvider = loggerProvider;

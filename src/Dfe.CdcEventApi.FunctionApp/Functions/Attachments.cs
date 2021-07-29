@@ -23,16 +23,13 @@ namespace Dfe.CdcEventApi.FunctionApp.Functions
         /// <param name="attachmentProcessor">
         /// An instance of type <see cref="IAttachmentProcessor" />.
         /// </param>
-        /// <param name="attachmentSettingsProvider">
-        /// An isntance of <see cref="IAttachmentSettingsProvider"/>.</param>
         /// <param name="loggerProvider">
         /// An instance of type <see cref="ILoggerProvider" />.
         /// </param>
         public Attachments(
             IAttachmentProcessor attachmentProcessor,
-            IAttachmentSettingsProvider attachmentSettingsProvider,
             ILoggerProvider loggerProvider)
-            : base(attachmentProcessor, attachmentSettingsProvider, loggerProvider)
+            : base(attachmentProcessor, loggerProvider)
         {
             this.loggerProvider = loggerProvider;
         }
