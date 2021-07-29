@@ -391,7 +391,11 @@
                             "BlobMimeType": "@items('For-Each-Attachment')['MimeType']",
                             "BlobObtained": "@variables('Control-Started')",
                             "BlobShare": "cdcdocuments",
-                            "BlobSiteUniqueId": "@items('For-Each-Attachment')?['SiteUniqueId']"
+                            "BlobSiteUniqueId": "@items('For-Each-Attachment')?['SiteUniqueId']",
+                            "BlobEntityUniqueId": "@items('For-Each-Attachment')?['EntityUniqueId']",
+                            "BlobSiteUrn": "@items('For-Each-Attachment')?['SiteUrn']",
+                            "BlobFileType": "@items('For-Each-Attachment')?['FileType']",
+                            "BlobSiteName": "@items('For-Each-Attachment')?['SiteName']"
                           }
                         ],
                         "headers": {
@@ -761,14 +765,18 @@
                         "schema": {
                           "items": {
                             "properties": {
+                              "SiteUniqueId": { "type": "string" },
+                              "EntityUniqueId": { "type": "string" },
+                              "SiteUrn": { "type": "string" },
                               "BlobKey": { "type": "string" },
-                              "Entity": { "type": "string" },
-                              "Extension": { "type": "string" },
-                              "Folder": { "type": "string" },
                               "MimeType": { "type": "string" },
-                              "SiteUniqueId": { "type": "string" }
+                              "Folder": { "type": "string" },
+                              "Extension": { "type": "string" },
+                              "Entity": { "type": "string" },
+                              "FileType": { "type": "string" },
+                              "SiteName": { "type": "string" }
                             },
-                            "required": [ "SiteUniqueId", "BlobKey", "MimeType", "Folder", "Extension", "Entity" ],
+                            "required": [ "SiteUniqueId", "EntityUniqueId", "SiteUrn", "BlobKey", "MimeType", "Folder", "Extension", "Entity", "Filetype", "SiteName" ],
                             "type": "object"
                           },
                           "type": "array"

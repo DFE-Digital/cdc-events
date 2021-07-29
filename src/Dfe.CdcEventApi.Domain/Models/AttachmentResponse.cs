@@ -44,6 +44,21 @@
         public string BlobSiteUniqueId { get; set; }
 
         /// <summary>
+        /// Gets or sets the Site URN.
+        /// </summary>
+        public int BlobSiteUrn { get; set; }
+
+        /// <summary>
+        /// Gets or sets the CDC File location file type.
+        /// </summary>
+        public int BlobFiletype { get; set; }
+
+        /// <summary>
+        /// Gets or sets the entity unique id.
+        /// </summary>
+        public string BlobEntityUniqueId { get; set; }
+
+        /// <summary>
         /// Gets or sets the Obained date and time.
         /// </summary>
         public DateTime BlobObtained { get; set; }
@@ -58,5 +73,10 @@
         /// Gets or sets the blob usage Entity.
         /// </summary>
         public string BlobEntity { get; set; }
+
+        /// <summary>
+        /// Gets or sets the blob site name.
+        /// </summary>
+        public string BlobSiteName { get; set; }
     }
 }
