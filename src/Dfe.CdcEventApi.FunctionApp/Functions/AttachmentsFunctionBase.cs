@@ -11,7 +11,6 @@
     using Dfe.CdcEventApi.Application.Definitions;
     using Dfe.CdcEventApi.Application.Exceptions;
     using Dfe.CdcEventApi.Domain.Definitions;
-    using Dfe.CdcEventApi.Domain.Definitions.SettingsProviders;
     using Dfe.CdcEventApi.Domain.Exceptions;
     using Dfe.CdcEventApi.Domain.Models;
     using Microsoft.AspNetCore.Http;

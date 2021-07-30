@@ -78,7 +78,7 @@
                 try
                 {
                     this.loggerProvider.Info($"Creating the control record.");
-                    var loads = await this.controlProcessor.CreateAsync(
+                    var controls = await this.controlProcessor.CreateAsync(
                                         runIdentifier.Value,
                                         cancellationToken)
                                         .ConfigureAwait(false);
@@ -91,11 +91,11 @@
 
                     // Also return the run identifier as a header.
                     this.loggerProvider.Info($"Returning SQL adjusted run identifier value.");
-                    toReturn.Headers.Add(HeaderNameRunIdentifier, $"{loads.First().Load_DateTime:O}");
+                    toReturn.Headers.Add(HeaderNameRunIdentifier, $"{controls.First().Load_DateTime:O}");
 
-                    var sinceDateTime = (loads.LastOrDefault()?.Load_DateTime ?? this.dafaultSinceDate).AddMilliseconds(1);
+                    var sinceDateTime = (controls.LastOrDefault()?.Load_DateTime ?? this.dafaultSinceDate).AddMilliseconds(1);
 
-                    var currentLoad = loads.First();
+                    var currentLoad = controls.First();
                     currentLoad.Since_DateTime = sinceDateTime;
 
                     this.loggerProvider.Info($"Updating the derived Since date and time to the created control record.");
@@ -249,7 +249,7 @@
 
                     if (load.Status == ControlState.Delivered)
                     {
-                        load.Finished_DateTime = DateTime.UtcNow;
+                        load.Loaded_DateTime = DateTime.UtcNow;
 
                         this.loggerProvider.Info($"Retrieving the delivered control record counts.");
                         load.Count = await this.controlProcessor.GetCountAsync(

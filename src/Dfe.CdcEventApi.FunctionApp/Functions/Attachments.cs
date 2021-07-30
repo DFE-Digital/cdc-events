@@ -5,7 +5,6 @@ namespace Dfe.CdcEventApi.FunctionApp.Functions
     using System.Threading.Tasks;
     using Dfe.CdcEventApi.Application.Definitions;
     using Dfe.CdcEventApi.Domain.Definitions;
-    using Dfe.CdcEventApi.Domain.Definitions.SettingsProviders;
     using Microsoft.AspNetCore.Http;
     using Microsoft.Azure.WebJobs;
     using Microsoft.Azure.WebJobs.Extensions.Http;

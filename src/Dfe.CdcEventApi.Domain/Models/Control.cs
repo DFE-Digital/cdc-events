@@ -28,10 +28,10 @@
         }
 
         /// <summary>
-        /// Gets or sets the Finish time.
+        /// Gets or sets the load finish time.
         /// </summary>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Naming", "CA1707:Identifiers should not contain underscores", Justification = "This is a DTO")]
-        public DateTime? Finished_DateTime
+        public DateTime? Loaded_DateTime
         {
             get;
             set;

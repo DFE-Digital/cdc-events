@@ -5,7 +5,6 @@
     using System.Threading.Tasks;
     using Dfe.CdcEventApi.Application.Definitions;
     using Dfe.CdcEventApi.Domain.Definitions;
-    using Dfe.CdcEventApi.Domain.Definitions.SettingsProviders;
 
     /// <summary>
     /// Implements <see cref="IEntityArchiveProcessor"/>.
@@ -37,7 +36,7 @@
         public async Task CreateAsync(string entityType, DateTime runIdentifier, string data, CancellationToken cancellationToken)
         {
             // Generate stored item name
-            var itemName = $"{entityType}-{runIdentifier:O}-{DateTime.UtcNow:0}.json";
+            var itemName = $"{entityType}-{runIdentifier:O}-{DateTime.UtcNow:O}.json";
             this.loggerProvider.Debug($"Storing entity data for entity {entityType} and run identifier {runIdentifier:O} under item name {itemName}");
 
             // store the item under this name.
