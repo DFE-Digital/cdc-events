@@ -973,7 +973,7 @@
                                 "method": "GET",
                                 "queries": {
                                   "Page": "@{variables('Control-Page')}",
-                                  "PageSize": "1000",
+                                  "PageSize": "@{parameters('ItemsPerPage')}",
                                   "SessionId": "@variables('SourceOAUTHToken')",
                                   "UpdatedSince": "@variables('Control-Since')",
                                   "format": "json",
@@ -1650,8 +1650,12 @@
               "type": "Scope"
             }
           },
-          "contentVersion": "1.0.0.0",
+          "contentVersion": "2.0.0.0",
           "parameters": {
+            "ItemsPerPage": {
+              "defaultValue": 500,
+              "type": "Int"
+            },
             "CDC2NotifyAPIKeySecretUri": {
               "defaultValue": "[concat(reference(variables('keyVaultSecretCDC2NotifyAPIKey'), '2019-09-01').secretUriWithVersion, '?api-version=2016-10-01')]",
               "type": "String"
@@ -1770,5 +1774,5 @@
       "type": "string"
     }
   },
-  "contentVersion": "1.0.0.0"
+  "contentVersion": "2.0.0.0"
 }
