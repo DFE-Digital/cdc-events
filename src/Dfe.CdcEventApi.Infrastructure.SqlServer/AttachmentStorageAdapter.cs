@@ -200,7 +200,7 @@
         /// <inheritdoc/>
         public Task<IEnumerable<AttachmentRequest>> GetAsync()
         {
-            this.loggerProvider.Info($"Getting requried attachments list.");
+            this.loggerProvider.Info($"Getting required attachments list.");
 
             Stopwatch stopwatch = new Stopwatch();
             using (SqlConnection sqlConnection = new SqlConnection(this.rawDbConnectionString))

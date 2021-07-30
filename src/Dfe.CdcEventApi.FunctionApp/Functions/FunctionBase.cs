@@ -29,7 +29,7 @@
         /// <summary>
         /// The name of the Message header.
         /// </summary>
-        protected const string HeaderNameMEssage = "X-Run-Messsage";
+        protected const string HeaderNameMessage = "X-Run-Messsage";
 
         private readonly ILoggerProvider loggerProvider;
 
@@ -139,6 +139,38 @@
             }
 
             return runIdentifier;
+        }
+
+        /// <summary>
+        /// Gets the run message from the headers if any.
+        /// </summary>
+        /// <param name="headerDictionary">
+        /// The headers collection.
+        /// </param>
+        /// <returns>
+        /// Null or the message string.
+        /// </returns>
+        protected string GetMessage(IHeaderDictionary headerDictionary)
+        {
+            if (headerDictionary == null)
+            {
+                return null;
+            }
+
+            string message = null;
+
+            this.loggerProvider.Debug($"Checking for header \"{HeaderNameMessage}\"...");
+
+            if (headerDictionary.ContainsKey(HeaderNameMessage))
+            {
+                message = headerDictionary[HeaderNameMessage];
+
+                this.loggerProvider.Info(
+                    $"Header \"{HeaderNameRunIdentifier}\" was specified: " +
+                    $"\"{message}\". Parsing...");
+            }
+
+            return message;
         }
     }
 }

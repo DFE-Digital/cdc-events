@@ -8,21 +8,31 @@
         /// <summary>
         /// Gets the API Key to use.
         /// </summary>
-        string APIKey { get; }
+        string NotifyApiKey { get; }
 
         /// <summary>
         /// Gets the Success template Id to use.
         /// </summary>
-        string SuccessTemplateId { get; }
+        string NotifySuccessTemplateId { get; }
 
         /// <summary>
         /// Gets the Failure template Id to use.
         /// </summary>
-        string FailureAddresses { get; }
+        string NotifyFailureTemplateId { get; }
+
+        /// <summary>
+        /// Gets the Failure template Id to use.
+        /// </summary>
+        string NotifyFailureAddresses { get; }
 
         /// <summary>
         /// Gets the Success email addresses.
         /// </summary>
-        string SucesssAddresses { get; }
+        string NotifySucesssAddresses { get; }
+
+        /// <summary>
+        /// Gets the environment name.
+        /// </summary>
+        string NotifyEnvironmentName { get; }
     }
 }

@@ -82,7 +82,7 @@
     "sqlServerPassword": {
       "type": "securestring",
       "minLength": 12
-    },   
+    },
     "websiteRunFromPackage": {
       "type": "string",
       "defaultValue": "0"
@@ -91,10 +91,27 @@
       "type": "string",
       "maxLength": 8
     },
-    "archiveContainerName": {
+    "attachmentArchiveContainerName": {
       "type": "string",
       "maxLength": 255,
       "defaultValue": "entityarchive"
+    },
+    "notifyApiKey": {
+      "type": "string"
+    },
+    "notifySuccessTemplateId": {
+      "type": "string",
+      "maxLength": 36
+    },
+    "notifySucesssAddresses": {
+      "type": "string"
+    },
+    "notifyFailureTemplateId": {
+      "type": "string",
+      "maxLength": 36
+    },
+    "notifyFailureAddresses": {
+      "type": "string"
     }
 
   },
@@ -111,7 +128,6 @@
     "appInsightsName": "[concat(variables('namePrefix'), '-ai-', parameters('appInsightsInstance'))]",
     "appInsightsId": "[resourceId(variables('sharedResourceGroupName'), 'Microsoft.Insights/components', variables('appInsightsName'))]",
 
-    "archiveContainerName": "[parameters('archiveContainerName')]",
     "storageAccountName": "[concat(variables('namePrefix'), parameters('appName'), 'sa01')]",
     "storageAccountId": "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName'))]",
     "storageAccountConnStr": "[concat('DefaultEndpointsProtocol=https;AccountName=', variables('storageAccountName'), ';AccountKey=')]",
@@ -241,12 +257,34 @@
               "value": "[concat('@Microsoft.KeyVault(VaultName=', variables('keyVaultName'), ';SecretName=BlobStorageAccountKey)')]"
             },
             {
-              "name": "ArchiveContainerName",
-              "value": "[variables('archiveContainerName')]"
+              "name": "AttachmentArchiveContainerName",
+              "value": "[parameters('attachmentArchiveContainerName')]"
+            },
+            {
+              "name": "NotifyApiKey",
+              "value": "[parameters('notifyApiKey')]"
+            },
+            {
+              "name": "NotifySuccessTemplateId",
+              "value": "[parameters('notifySuccessTemplateId')]"
+            },
+            {
+              "name": "NotifySucesssAddresses",
+              "value": "[parameters('notifySucesssAddresses')]"
+            },
+            {
+              "name": "NotifyFailureTemplateId",
+              "value": "[parameters('notifyFailureTemplateId')]"
+            },
+            {
+              "name": "NotifyFailureAddresses",
+              "value": "[parameters('notifyFailureAddresses')]"
+            },
+            {
+              "name": "NotifyEnvironmentName",
+              "value": "[parameters('environmentName')]"
             }
-
           ],
-
           "ipSecurityRestrictions": [
             {
               "ipAddress": "[concat(parameters('eapimPublicIpAddress'), '/32')]",
@@ -287,5 +325,5 @@
       "type": "string"
     }
   },
-  "contentVersion": "1.0.0.0"
+  "contentVersion": "2.0.0.0"
 }

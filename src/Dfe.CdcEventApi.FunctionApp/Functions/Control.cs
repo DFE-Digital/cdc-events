@@ -23,7 +23,7 @@
         /// <param name="controlProcessor">
         /// An instance of type <see cref="IControlProcessor" />.
         /// </param>
-        /// <param name="notifyProcessor"></param>
+        /// <param name="notifyProcessor">An instance of <see cref="INotifyProcessor"/>.</param>
         /// <param name="loggerProvider">
         /// An instance of type <see cref="ILoggerProvider" />.
         /// </param>

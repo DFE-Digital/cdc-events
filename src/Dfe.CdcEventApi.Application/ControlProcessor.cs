@@ -139,7 +139,7 @@
             int status,
             CancellationToken cancellationToken)
         {
-            this.loggerProvider.Debug($"Updating the load status...");
+            this.loggerProvider.Debug($"Setting completion status...");
             await this.loadStorageAdapter
                         .UpdateStatusAsync(runIdentifier, status)
                         .ConfigureAwait(false);

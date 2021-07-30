@@ -8,7 +8,6 @@
     using System.Threading.Tasks;
     using Dfe.CdcEventApi.Application.Definitions;
     using Dfe.CdcEventApi.Domain.Definitions;
-    using Dfe.CdcEventApi.Domain.Exceptions;
     using Dfe.CdcEventApi.Domain.Models;
     using Microsoft.AspNetCore.Http;
     using Newtonsoft.Json;
@@ -57,29 +56,28 @@
         /// An instance of <see cref="HttpResponseMessage" />.
         /// The returned runIdentifier header is used to refresh the client with the actually stored date and time.
         /// </returns>
-        protected async Task<HttpResponseMessage> StartLoad(
-           HttpRequest httpRequest,
-           CancellationToken cancellationToken)
+        protected async Task<HttpResponseMessage> StartLoad(HttpRequest httpRequest, CancellationToken cancellationToken)
         {
-            this.loggerProvider.Info($"");
+            this.loggerProvider.Info($"{nameof(this.StartLoad)} {httpRequest?.Method ?? string.Empty} called.");
+
             HttpResponseMessage toReturn = null;
 
             if (httpRequest == null)
             {
-                this.loggerProvider.Info($"");
+                this.loggerProvider.Info($"The HTTP request object was null.");
                 throw new ArgumentNullException(nameof(httpRequest));
             }
 
             IHeaderDictionary headerDictionary = httpRequest.Headers;
 
             DateTime? runIdentifier = this.GetRunIdentifier(headerDictionary);
-            this.loggerProvider.Info($"");
 
             if (runIdentifier.HasValue)
             {
+                this.loggerProvider.Info($"The run indentifier is {runIdentifier.Value}");
                 try
                 {
-                    this.loggerProvider.Info($"");
+                    this.loggerProvider.Info($"Creating the control record.");
                     var loads = await this.controlProcessor.CreateAsync(
                                         runIdentifier.Value,
                                         cancellationToken)
@@ -88,41 +86,37 @@
                     this.loggerProvider.Info(
                         $"{nameof(this.controlProcessor.CreateAsync)} processed.");
 
-                    // Everything good? Return accepted.
-                    this.loggerProvider.Info($"");
                     toReturn =
                         new HttpResponseMessage(HttpStatusCode.Created);
 
                     // Also return the run identifier as a header.
-                    this.loggerProvider.Info($"");
-                    toReturn.Headers.Add(
-                        HeaderNameRunIdentifier,
-                        $"{loads.First().Load_DateTime:O}");
+                    this.loggerProvider.Info($"Returning SQL adjusted run identifier value.");
+                    toReturn.Headers.Add(HeaderNameRunIdentifier, $"{loads.First().Load_DateTime:O}");
 
                     var sinceDateTime = (loads.LastOrDefault()?.Load_DateTime ?? this.dafaultSinceDate).AddMilliseconds(1);
 
                     var currentLoad = loads.First();
                     currentLoad.Since_DateTime = sinceDateTime;
-                    this.loggerProvider.Info($"");
+
+                    this.loggerProvider.Info($"Updating the derived Since date and time to the created control record.");
                     await this.controlProcessor.UpdateAsync(
                                 currentLoad,
                                 cancellationToken).ConfigureAwait(false);
 
                     // also return the previous run time
-                    this.loggerProvider.Info($"");
+                    this.loggerProvider.Info($"Adding the since date and time to the headers.");
                     toReturn.Headers.Add(HeaderNameSince, $"{sinceDateTime:O}");
                 }
-                catch (MissingLoadHandlerFileException exception)
+                catch (Exception exception)
                 {
-                    toReturn = new HttpResponseMessage(
-                        HttpStatusCode.NotImplemented);
-
                     this.loggerProvider.Error(
-                        $"A {nameof(MissingLoadHandlerFileException)} was " +
+                        $"A {exception.GetType()} was " +
                         $"thrown, returning " +
-                        $"{HttpStatusCode.NotImplemented}. Message: " +
+                        $"{HttpStatusCode.InternalServerError}. Message: " +
                         $"{exception.Message}",
                         exception);
+                    toReturn = new HttpResponseMessage(HttpStatusCode.InternalServerError);
+                    throw;
                 }
             }
             else
@@ -145,28 +139,27 @@
         /// <returns>
         /// An instance of <see cref="HttpResponseMessage" />.
         /// </returns>
-        protected async Task<HttpResponseMessage> UpdateLoad(
-           HttpRequest httpRequest,
-           CancellationToken cancellationToken)
+        protected async Task<HttpResponseMessage> UpdateLoad(HttpRequest httpRequest, CancellationToken cancellationToken)
         {
-            this.loggerProvider.Info($"");
+            this.loggerProvider.Info($"{nameof(this.UpdateLoad)} {httpRequest?.Method ?? string.Empty} called.");
+
             HttpResponseMessage toReturn = null;
 
             if (httpRequest == null)
             {
-                this.loggerProvider.Info($"");
+                this.loggerProvider.Info($"The HTTP request object was null.");
                 throw new ArgumentNullException(nameof(httpRequest));
             }
 
             IHeaderDictionary headerDictionary = httpRequest.Headers;
 
             DateTime? runIdentifier = this.GetRunIdentifier(headerDictionary);
-            this.loggerProvider.Info($"");
 
             int? status = this.GetStatus(headerDictionary);
 
             if (status.HasValue && runIdentifier.HasValue)
             {
+                this.loggerProvider.Info($"The run indentifier is {runIdentifier.Value} the status is {status}");
                 try
                 {
                     await this.controlProcessor.UpdateStatusAsync(
@@ -178,31 +171,27 @@
                     this.loggerProvider.Info(
                         $"{nameof(this.controlProcessor.UpdateStatusAsync)} processed.");
 
-                    // Everything good? Return ok.
-                    this.loggerProvider.Info($"");
                     toReturn =
                         new HttpResponseMessage(HttpStatusCode.Accepted);
                 }
-                catch (MissingLoadHandlerFileException exception)
+                catch (Exception exception)
                 {
-                    toReturn = new HttpResponseMessage(
-                        HttpStatusCode.NotImplemented);
-
                     this.loggerProvider.Error(
-                        $"A {nameof(MissingLoadHandlerFileException)} was " +
+                        $"A {exception.GetType()} was " +
                         $"thrown, returning " +
-                        $"{HttpStatusCode.NotImplemented}. Message: " +
+                        $"{HttpStatusCode.InternalServerError}. Message: " +
                         $"{exception.Message}",
                         exception);
+                    toReturn = new HttpResponseMessage(HttpStatusCode.InternalServerError);
+                    throw;
                 }
             }
             else
             {
-                this.loggerProvider.Info($"");
+                this.loggerProvider.Info($"The required values were not provided.");
                 toReturn = new HttpResponseMessage(HttpStatusCode.BadRequest);
             }
 
-            this.loggerProvider.Info($"");
             return toReturn;
         }
 
@@ -222,68 +211,85 @@
             HttpRequest httpRequest,
             CancellationToken cancellationToken)
         {
-            HttpResponseMessage toReturn;
-            this.loggerProvider.Info($"");
+            this.loggerProvider.Info($"{nameof(this.FinishLoad)} {httpRequest?.Method ?? string.Empty} called.");
+
+            HttpResponseMessage toReturn = null;
+
             if (httpRequest == null)
             {
-                this.loggerProvider.Info($"");
+                this.loggerProvider.Info($"The HTTP request object was null.");
                 throw new ArgumentNullException(nameof(httpRequest));
             }
 
             IHeaderDictionary headerDictionary = httpRequest.Headers;
 
-            // extract the Header for the runIdentifier
             DateTime? runIdentifier = this.GetRunIdentifier(headerDictionary);
-            this.loggerProvider.Info($"");
 
-            // extract the Header for the status
             int? status = this.GetStatus(headerDictionary);
-            this.loggerProvider.Info($"");
 
             if (status.HasValue && runIdentifier.HasValue)
             {
-                // update the record to the specified status
-                this.loggerProvider.Info($"");
-                await this.controlProcessor.UpdateStatusAsync(
-                    runIdentifier.Value,
-                    status.Value,
-                    cancellationToken)
-                    .ConfigureAwait(false);
-
-                // retrieve the record as it stands
-                this.loggerProvider.Info($"");
-                var load = await this.controlProcessor.GetAsync(
-                                        runIdentifier.Value,
-                                        cancellationToken)
-                                        .ConfigureAwait(false);
-
-                if (load.Status == ControlState.Delivered)
+                this.loggerProvider.Info($"The run indentifier is {runIdentifier.Value} the status is {status}");
+                try
                 {
-                    load.Finished_DateTime = DateTime.UtcNow;
-                    this.loggerProvider.Info($"");
-                    load.Count = await this.controlProcessor.GetCountAsync(
-                                runIdentifier.Value,
-                                cancellationToken)
-                                .ConfigureAwait(false);
-                    this.loggerProvider.Info($"");
+                    // update the record to the specified status
+                    this.loggerProvider.Info($"Updating the control status.");
+                    await this.controlProcessor.UpdateStatusAsync(
+                        runIdentifier.Value,
+                        status.Value,
+                        cancellationToken)
+                        .ConfigureAwait(false);
+
+                    // retrieve the record as it stands
+                    this.loggerProvider.Info($"Retrieving the current control values.");
+                    var load = await this.controlProcessor.GetAsync(
+                                            runIdentifier.Value,
+                                            cancellationToken)
+                                            .ConfigureAwait(false);
+
+                    if (load.Status == ControlState.Delivered)
+                    {
+                        load.Finished_DateTime = DateTime.UtcNow;
+
+                        this.loggerProvider.Info($"Retrieving the delivered control record counts.");
+                        load.Count = await this.controlProcessor.GetCountAsync(
+                                    runIdentifier.Value,
+                                    cancellationToken)
+                                    .ConfigureAwait(false);
+                    }
+
+                    string message = this.GetMessage(headerDictionary);
+                    load.Message = message;
+
+                    this.loggerProvider.Info($"Updating the control record.");
                     await this.controlProcessor.UpdateAsync(load, cancellationToken).ConfigureAwait(false);
+
+                    this.loggerProvider.Info($"Issuing status notification messages");
+                    await this.notifyProcessor.Notify(load, cancellationToken).ConfigureAwait(false);
+
+                    toReturn = new HttpResponseMessage(HttpStatusCode.Accepted)
+                    {
+                        Content = new StringContent(JsonConvert.SerializeObject(load)),
+                    };
                 }
-
-                this.loggerProvider.Info($"");
-                await this.notifyProcessor.Notify(load, cancellationToken).ConfigureAwait(false);
-
-                toReturn = new HttpResponseMessage(HttpStatusCode.Accepted)
+                catch (Exception exception)
                 {
-                    Content = new StringContent(JsonConvert.SerializeObject(load)),
-                };
+                    this.loggerProvider.Error(
+                        $"A {exception.GetType()} was " +
+                        $"thrown, returning " +
+                        $"{HttpStatusCode.InternalServerError}. Message: " +
+                        $"{exception.Message}",
+                        exception);
+                    toReturn = new HttpResponseMessage(HttpStatusCode.InternalServerError);
+                    throw;
+                }
             }
             else
             {
-                this.loggerProvider.Info($"");
+                this.loggerProvider.Info($"The required values were not provided.");
                 toReturn = new HttpResponseMessage(HttpStatusCode.BadRequest);
             }
 
-            this.loggerProvider.Info($"");
             return toReturn;
         }
     }

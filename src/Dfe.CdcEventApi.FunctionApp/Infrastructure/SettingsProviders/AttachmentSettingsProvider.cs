@@ -46,7 +46,7 @@
         {
             get
             {
-                string toReturn = Environment.GetEnvironmentVariable("ArchiveContainerName");
+                string toReturn = Environment.GetEnvironmentVariable("AttachmentArchiveContainerName");
 
                 return toReturn;
             }

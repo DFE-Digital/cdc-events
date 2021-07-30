@@ -11,7 +11,7 @@
     "/attachments": {
       "get": {
         "summary": "Attachment List",
-        "description": "Retrieves the list of requried attachments.",
+        "description": "Retrieves the list of required attachments.",
         "operationId": "attachments-get",
         "parameters": [
           {

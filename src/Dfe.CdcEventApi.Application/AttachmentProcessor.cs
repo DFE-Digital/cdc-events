@@ -34,7 +34,7 @@
         }
 
         /// <summary>
-        /// Retrieve a list of requried attachments.
+        /// Retrieve a list of required attachments.
         /// </summary>
         /// <param name="cancellationToken">An instance of <see cref="CancellationToken"/>.</param>
         /// <returns>A collection of <see cref="AttachmentRequest"/>.</returns>
