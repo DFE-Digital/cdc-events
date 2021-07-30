@@ -36,7 +36,7 @@
         public async Task CreateAsync(string entityType, DateTime runIdentifier, string data, CancellationToken cancellationToken)
         {
             // Generate stored item name
-            var itemName = $"{entityType}-{runIdentifier:O}-{DateTime.UtcNow:O}.json";
+            var itemName = $"{runIdentifier:O}-{entityType}-{DateTime.UtcNow:O}.json";
             this.loggerProvider.Debug($"Storing entity data for entity {entityType} and run identifier {runIdentifier:O} under item name {itemName}");
 
             // store the item under this name.

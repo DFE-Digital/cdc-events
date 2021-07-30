@@ -73,7 +73,7 @@
                 personalisation.Add("environment", this.environmentName);
                 personalisation.Add("runIdentifier", control.Load_DateTime);
                 personalisation.Add("runStatus", control.Status.ToEnumDescription());
-                personalisation.Add("message", control.Message);
+                personalisation.Add("message", control.Message ?? "Completed.");
             }
 
             foreach (var address in addresses)
