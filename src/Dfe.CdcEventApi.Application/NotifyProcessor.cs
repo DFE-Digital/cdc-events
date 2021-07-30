@@ -45,7 +45,7 @@
             this.aPIKey = notifySettingsProvider.NotifyApiKey;
             this.successTemplateId = notifySettingsProvider.NotifySuccessTemplateId;
             this.failureTemplateId = notifySettingsProvider.NotifyFailureTemplateId;
-            this.sucesssAddresses = notifySettingsProvider.NotifySucesssAddresses;
+            this.sucesssAddresses = notifySettingsProvider.NotifySuccesssAddresses;
             this.failureAddresses = notifySettingsProvider.NotifyFailureAddresses;
             this.environmentName = notifySettingsProvider.NotifyEnvironmentName;
         }

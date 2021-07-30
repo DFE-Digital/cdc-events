@@ -63,11 +63,11 @@
         /// <summary>
         /// Gets the Success email addresses.
         /// </summary>
-        public string NotifySucesssAddresses
+        public string NotifySuccesssAddresses
         {
             get
             {
-                string toReturn = Environment.GetEnvironmentVariable("NotifySucesssAddresses");
+                string toReturn = Environment.GetEnvironmentVariable("NotifySuccesssAddresses");
 
                 return toReturn;
             }

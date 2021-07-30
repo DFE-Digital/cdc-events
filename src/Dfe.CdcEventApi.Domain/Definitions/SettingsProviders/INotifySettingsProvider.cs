@@ -28,7 +28,7 @@
         /// <summary>
         /// Gets the Success email addresses.
         /// </summary>
-        string NotifySucesssAddresses { get; }
+        string NotifySuccesssAddresses { get; }
 
         /// <summary>
         /// Gets the environment name.
