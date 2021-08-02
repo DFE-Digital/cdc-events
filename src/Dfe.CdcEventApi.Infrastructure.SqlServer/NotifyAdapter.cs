@@ -24,7 +24,7 @@
         /// <inheritdoc/>
         public Task Notify(string apiKey, string emailAddress, string templateId, Dictionary<string, dynamic> personalisation)
         {
-            this.loggerProvider.Debug($"Sending notification to address: {emailAddress} for tempalte: {templateId} via key: {apiKey}");
+            this.loggerProvider.Debug($"Sending notification to address: {emailAddress} for template: {templateId} via key: {apiKey}");
             var client = new NotificationClient(apiKey);
             client.SendEmail(emailAddress, templateId, personalisation, null, null);
             return Task.FromResult(0);
