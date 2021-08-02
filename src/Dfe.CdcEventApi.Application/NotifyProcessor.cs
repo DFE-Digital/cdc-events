@@ -63,6 +63,8 @@
                 throw new ArgumentNullException(nameof(control));
             }
 
+            this.ThrowExceptionOnMissingSettings();
+
             this.loggerProvider.Info($"{nameof(this.Notify)} processing control for {control.Load_DateTime}");
             var personalisation = new Dictionary<string, dynamic>();
             var success = control.Status == ControlState.Delivered;
@@ -81,6 +83,32 @@
                 this.loggerProvider.Debug($"Calling the Notify system to send a message.");
                 await this.notifyAdapter.Notify(this.aPIKey, address, templateId, personalisation)
                     .ConfigureAwait(false);
+            }
+        }
+
+        private void ThrowExceptionOnMissingSettings()
+        {
+            var reasons = string.Empty;
+            var settings = new Dictionary<string, string>() {
+                {"APIKey", this.aPIKey },
+                {"SuccessTemplateId", this.successTemplateId },
+                {"FailureTemplateId", this.failureTemplateId },
+                {"SucesssAddresses", this.sucesssAddresses },
+                {"FailureAddresses", this.failureAddresses },
+                {"EnvironmentName", this.environmentName },
+            };
+
+            foreach (var setting in settings)
+            {
+                if (string.IsNullOrWhiteSpace(setting.Value))
+                {
+                    reasons += $"{setting.Key} has no value\r\n";
+                }
+            }
+
+            if (!string.IsNullOrEmpty(reasons))
+            {
+                throw new ArgumentException(reasons);
             }
         }
     }
