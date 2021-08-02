@@ -1559,7 +1559,7 @@
                 "Set-Control-Status-Attachments": {
                   "inputs": {
                     "name": "Control-Status",
-                    "value": "@parameters('StatusExtracting')"
+                    "value": "@parameters('StatusAttachments')"
                   },
                   "runAfter": {},
                   "type": "SetVariable"
