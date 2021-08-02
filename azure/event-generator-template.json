@@ -1386,7 +1386,7 @@
                         "inputs": {
                           "runError": {
                             "code": "1",
-                            "message": "Termianted after failure: @{variables('Control-Error-Message')}"
+                            "message": "Terminated after failure: @{variables('Control-Error-Message')}"
                           },
                           "runStatus": "Failed"
                         },
@@ -1398,7 +1398,7 @@
                   "expression": {
                     "and": [
                       { "equals": [ "@variables('Control-Status')", "@parameters('StatusReporting')" ] },
-                      { "equals": [ "@outputs('Record-Control-Status-Report')['statusCode']", 200 ] }
+                      { "equals": [ "@outputs('Record-Control-Status-Report')['statusCode']", 202 ] }
                     ]
                   },
                   "runAfter": { "Record-Control-Status-Report": [ "Succeeded" ] },
