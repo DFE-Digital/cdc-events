@@ -236,10 +236,12 @@
 
             var folderToUse = blob.BlobFolder;
 
+            blob.BlobFiletype = 3;
+
             if (blob.BlobMimeType.ToUpperInvariant() == "application/pdf".ToUpperInvariant())
             {
                 folderToUse += "/Site Plan";
-                blob.BlobFiletype = 2; // change from default of 3 (evidence) to Site plan
+                blob.BlobFiletype = 2;
             }
             else
             {
