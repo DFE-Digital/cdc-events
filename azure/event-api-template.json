@@ -105,7 +105,7 @@
       "maxLength": 36,
       "defaultValue": "ab76055c-6476-4805-9de1-f9226b76b2d1"
     },
-    "notifySucesssAddresses": {
+    "notifySuccessAddresses": {
       "type": "string",
       "defaultValue": ""
     },
@@ -273,8 +273,8 @@
               "value": "[parameters('notifySuccessTemplateId')]"
             },
             {
-              "name": "NotifySucesssAddresses",
-              "value": "[parameters('notifySucesssAddresses')]"
+              "name": "NotifySuccessAddresses",
+              "value": "[parameters('notifySuccessAddresses')]"
             },
             {
               "name": "NotifyFailureTemplateId",
