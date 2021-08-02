@@ -67,7 +67,7 @@
         {
             get
             {
-                string toReturn = Environment.GetEnvironmentVariable("NotifySuccesssAddresses");
+                string toReturn = Environment.GetEnvironmentVariable("NotifySuccessAddresses");
 
                 return toReturn;
             }
