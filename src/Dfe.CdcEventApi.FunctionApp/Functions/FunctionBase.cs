@@ -29,7 +29,7 @@
         /// <summary>
         /// The name of the Message header.
         /// </summary>
-        protected const string HeaderNameMessage = "X-Run-Messsage";
+        protected const string HeaderNameMessage = "X-Run-Message";
 
         private readonly ILoggerProvider loggerProvider;
 
