@@ -11,7 +11,7 @@ $a.resources[0].properties.definition.parameters.SourceOAUTHSecretUri.defaultVal
 $a.resources[0].properties.definition.parameters.TargetOAUTHCredentialsUri.defaultValue = "[concat(reference(variables('keyVaultSecretCdcEventsTokenRequestPayload'), '2019-09-01').secretUriWithVersion, '?api-version=2016-10-01')]"
 $a.resources[0].properties.definition.parameters.TargetOAUTHKeyUri.defaultValue = "[concat(reference(variables('keyVaultSecretCdcEventsSubscriptionKey'), '2019-09-01').secretUriWithVersion, '?api-version=2016-10-01')]"
 $a.resources[0].properties.definition.parameters.TargetEndpoint.defaultValue = "[concat(parameters('cdcEventsApiBaseUri'), '/')]"
-$a.resources[0].properties.definition.parameters.TargetControlEndpoint.defaultValue = "[concat(parameters('cdcEventsApiBaseUri'), '/load')]"
+$a.resources[0].properties.definition.parameters.TargetControlEndpoint.defaultValue = "[concat(parameters('cdcEventsApiBaseUri'), '/control')]"
 $a.resources[0].properties.definition.parameters.TargetOAUTHEndpoint.defaultValue = "[parameters('internalOAuthTokenEndpoint')]"
 $a.resources[0].properties.definition.parameters.CDC2NotifyAPIKeySecretUri.defaultValue  = "[concat(reference(variables('keyVaultSecretCDC2NotifyAPIKey'), '2019-09-01').secretUriWithVersion, '?api-version=2016-10-01')]"
 #

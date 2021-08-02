@@ -385,17 +385,17 @@
                           {
                             "BlobData": "@body('Get-Attachment')",
                             "BlobEntity": "@items('For-Each-Attachment')['Entity']",
+                            "BlobEntityUniqueId": "@items('For-Each-Attachment')?['EntityUniqueId']",
+                            "BlobFileType": "@items('For-Each-Attachment')?['FileType']",
                             "BlobFilename": "@{items('For-Each-Attachment')['BlobKey']}@{items('For-Each-Attachment')['Extension']}",
                             "BlobFolder": "@{items('For-Each-Attachment')['Folder']}",
                             "BlobKey": "@items('For-Each-Attachment')['BlobKey']",
                             "BlobMimeType": "@items('For-Each-Attachment')['MimeType']",
                             "BlobObtained": "@variables('Control-Started')",
                             "BlobShare": "cdcdocuments",
+                            "BlobSiteName": "@items('For-Each-Attachment')?['SiteName']",
                             "BlobSiteUniqueId": "@items('For-Each-Attachment')?['SiteUniqueId']",
-                            "BlobEntityUniqueId": "@items('For-Each-Attachment')?['EntityUniqueId']",
-                            "BlobSiteUrn": "@items('For-Each-Attachment')?['SiteUrn']",
-                            "BlobFileType": "@items('For-Each-Attachment')?['FileType']",
-                            "BlobSiteName": "@items('For-Each-Attachment')?['SiteName']"
+                            "BlobSiteUrn": "@items('For-Each-Attachment')?['SiteUrn']"
                           }
                         ],
                         "headers": {
@@ -596,7 +596,7 @@
                           }
                         }
                       },
-                      "expression": { "and": [ { "equals": [ "", 201 ] } ] },
+                      "expression": { "and": [ { "equals": [ "@outputs('Post-Attachment')['statusCode']", 201 ] } ] },
                       "runAfter": { "Post-Attachment": [ "Succeeded" ] },
                       "type": "If"
                     },
@@ -682,7 +682,7 @@
                                         }
                                       }
                                     },
-                                    "expression": { "and": [ { "equals": [ "", 200 ] } ] },
+                                    "expression": { "and": [ { "equals": [ "@outputs('Get-Attachment-Reauthenticate')['statusCode']", 200 ] } ] },
                                     "runAfter": { "Get-Attachment-Reauthenticate": [ "Succeeded" ] },
                                     "type": "If"
                                   }
@@ -707,13 +707,13 @@
                                     }
                                   }
                                 },
-                                "expression": { "and": [ { "equals": [ "", 401 ] } ] },
+                                "expression": { "and": [ { "equals": [ "@outputs('Get-Attachment')['statusCode']", 401 ] } ] },
                                 "runAfter": {},
                                 "type": "If"
                               }
                             }
                           },
-                          "expression": { "and": [ { "equals": [ "", 200 ] } ] },
+                          "expression": { "and": [ { "equals": [ "@outputs('Get-Attachment')['statusCode']", 200 ] } ] },
                           "runAfter": { "Get-Attachment": [ "Succeeded" ] },
                           "type": "If"
                         }
@@ -765,16 +765,16 @@
                         "schema": {
                           "items": {
                             "properties": {
-                              "SiteUniqueId": { "type": "string" },
-                              "EntityUniqueId": { "type": "string" },
-                              "SiteUrn": { "type": "string" },
                               "BlobKey": { "type": "string" },
-                              "MimeType": { "type": "string" },
-                              "Folder": { "type": "string" },
-                              "Extension": { "type": "string" },
                               "Entity": { "type": "string" },
+                              "EntityUniqueId": { "type": "string" },
+                              "Extension": { "type": "string" },
                               "FileType": { "type": "string" },
-                              "SiteName": { "type": "string" }
+                              "Folder": { "type": "string" },
+                              "MimeType": { "type": "string" },
+                              "SiteName": { "type": "string" },
+                              "SiteUniqueId": { "type": "string" },
+                              "SiteUrn": { "type": "string" }
                             },
                             "required": [ "SiteUniqueId", "EntityUniqueId", "SiteUrn", "BlobKey", "MimeType", "Folder", "Extension", "Entity", "Filetype", "SiteName" ],
                             "type": "object"
@@ -1586,7 +1586,7 @@
                       }
                     }
                   },
-                  "expression": { "and": [ { "equals": [ "", 202 ] } ] },
+                  "expression": { "and": [ { "equals": [ "@outputs('Record-Control-Status-Attachments')['statusCode']", 202 ] } ] },
                   "runAfter": { "Record-Control-Status-Attachments": [ "Succeeded" ] },
                   "type": "If"
                 }
@@ -1652,10 +1652,6 @@
           },
           "contentVersion": "2.0.0.0",
           "parameters": {
-            "ItemsPerPage": {
-              "defaultValue": 500,
-              "type": "Int"
-            },
             "CDC2NotifyAPIKeySecretUri": {
               "defaultValue": "[concat(reference(variables('keyVaultSecretCDC2NotifyAPIKey'), '2019-09-01').secretUriWithVersion, '?api-version=2016-10-01')]",
               "type": "String"
@@ -1663,6 +1659,10 @@
             "Environment": {
               "defaultValue": "[concat(parameters('environmentName'), '-', parameters('environmentInstance'))]",
               "type": "String"
+            },
+            "ItemsPerPage": {
+              "defaultValue": 500,
+              "type": "Int"
             },
             "NotifyFailureAddresses": {
               "defaultValue": "iain.stevenson@education.gov.uk",
