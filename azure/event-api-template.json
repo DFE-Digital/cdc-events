@@ -97,23 +97,27 @@
       "defaultValue": "entityarchive"
     },
     "notifyApiKey": {
-      "type": "string"
+      "type": "string",
+      "defaultValue":  ""
     },
     "notifySuccessTemplateId": {
       "type": "string",
-      "maxLength": 36
+      "maxLength": 36,
+      "defaultValue": "ab76055c-6476-4805-9de1-f9226b76b2d1"
     },
     "notifySucesssAddresses": {
-      "type": "string"
+      "type": "string",
+      "defaultValue": ""
     },
     "notifyFailureTemplateId": {
       "type": "string",
-      "maxLength": 36
+      "maxLength": 36,
+      "defaultValue": "8afdcd06-7a33-4c84-adba-6e3bdd14df63"
     },
     "notifyFailureAddresses": {
-      "type": "string"
+      "type": "string",
+      "defaultValue": ""
     }
-
   },
   "variables": {
 
