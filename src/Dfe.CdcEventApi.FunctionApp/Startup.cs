@@ -48,30 +48,28 @@
         private static void AddSettingsProviders(
             IServiceCollection serviceCollection)
         {
-            serviceCollection
-                .AddSingleton<IEntityStorageAdapterSettingsProvider, EntityStorageAdapterSettingsProvider>();
-            serviceCollection
-               .AddSingleton<IBlobSettingsProvider, BlobSettingsProvider>();
+            serviceCollection.AddSingleton<IEntityStorageAdapterSettingsProvider, EntityStorageAdapterSettingsProvider>();
+            serviceCollection.AddSingleton<IAttachmentSettingsProvider, AttachmentSettingsProvider>();
+            serviceCollection.AddSingleton<INotifySettingsProvider, NotifySettingsProvider>();
         }
 
         private static void AddProcessors(IServiceCollection serviceCollection)
         {
-            serviceCollection
-                .AddScoped<IEntityProcessor, EntityProcessor>();
-            serviceCollection
-                .AddScoped<IBlobProcessor, BlobProcessor>();
-            serviceCollection
-                .AddScoped<IBlobConvertor, BlobConvertor>();
-            serviceCollection
-                .AddScoped<ILoadProcessor, LoadProcessor>();
+            serviceCollection.AddScoped<IEntityProcessor, EntityProcessor>();
+            serviceCollection.AddScoped<IAttachmentProcessor, AttachmentProcessor>();
+            serviceCollection.AddScoped<IEntityArchiveProcessor, EntityArchiveProcessor>();
+            serviceCollection.AddScoped<IControlProcessor, ControlProcessor>();
+            serviceCollection.AddScoped<INotifyProcessor, NotifyProcessor>();
         }
 
         private static void AddAdapters(IServiceCollection serviceCollection)
         {
-            serviceCollection
-                .AddScoped<IEntityStorageAdapter, EntityStorageAdapter>();
-            serviceCollection
-                .AddScoped<ILoadStorageAdapter, LoadStorageAdapter>();
+            serviceCollection.AddScoped<IBlobConvertor, BlobConvertor>();
+            serviceCollection.AddScoped<IEntityStorageAdapter, EntityStorageAdapter>();
+            serviceCollection.AddScoped<IControlStorageAdapter, ControlStorageAdapter>();
+            serviceCollection.AddScoped<IAttachmentStorageAdapter, AttachmentStorageAdapter>();
+            serviceCollection.AddScoped<IEntityArchiveAdapter, EntityArchiveAdapter>();
+            serviceCollection.AddScoped<INotifyAdapter, NotifyAdapter>();
         }
 
         private static ILogger CreateILogger(IServiceProvider serviceProvider)

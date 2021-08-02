@@ -376,14 +376,14 @@
                         "name": "Control-Attachment-Count",
                         "value": 1
                       },
-                      "runAfter": { "Validate-Post-blob": [ "Succeeded" ] },
+                      "runAfter": { "Validate-Post-Attachment": [ "Succeeded" ] },
                       "type": "IncrementVariable"
                     },
-                    "Post-blob": {
+                    "Post-Attachment": {
                       "inputs": {
                         "body": [
                           {
-                            "BlobData": "@body('Get-Blob')",
+                            "BlobData": "@body('Get-Attachment')",
                             "BlobEntity": "@items('For-Each-Attachment')['Entity']",
                             "BlobFilename": "@{items('For-Each-Attachment')['BlobKey']}@{items('For-Each-Attachment')['Extension']}",
                             "BlobFolder": "@{items('For-Each-Attachment')['Folder']}",
@@ -391,7 +391,11 @@
                             "BlobMimeType": "@items('For-Each-Attachment')['MimeType']",
                             "BlobObtained": "@variables('Control-Started')",
                             "BlobShare": "cdcdocuments",
-                            "BlobSiteUniqueId": "@items('For-Each-Attachment')?['SiteUniqueId']"
+                            "BlobSiteUniqueId": "@items('For-Each-Attachment')?['SiteUniqueId']",
+                            "BlobEntityUniqueId": "@items('For-Each-Attachment')?['EntityUniqueId']",
+                            "BlobSiteUrn": "@items('For-Each-Attachment')?['SiteUrn']",
+                            "BlobFileType": "@items('For-Each-Attachment')?['FileType']",
+                            "BlobSiteName": "@items('For-Each-Attachment')?['SiteName']"
                           }
                         ],
                         "headers": {
@@ -401,7 +405,7 @@
                           "X-Run-Identifier": "@variables('Control-Started')"
                         },
                         "method": "POST",
-                        "uri": "@{parameters('TargetEndpoint')}blobs"
+                        "uri": "@{parameters('TargetEndpoint')}attachments"
                       },
                       "runAfter": { "While-Control-Continue-Step-True": [ "Succeeded" ] },
                       "runtimeConfiguration": { "contentTransfer": { "transferMode": "Chunked" } },
@@ -569,7 +573,7 @@
                       "runAfter": {},
                       "type": "If"
                     },
-                    "Validate-Post-blob": {
+                    "Validate-Post-Attachment": {
                       "actions": {},
                       "else": {
                         "actions": {
@@ -592,13 +596,13 @@
                           }
                         }
                       },
-                      "expression": { "and": [ { "equals": [ "@outputs('Post-blob')['statusCode']", 202 ] } ] },
-                      "runAfter": { "Post-blob": [ "Succeeded" ] },
+                      "expression": { "and": [ { "equals": [ "", 201 ] } ] },
+                      "runAfter": { "Post-Attachment": [ "Succeeded" ] },
                       "type": "If"
                     },
                     "While-Control-Continue-Step-True": {
                       "actions": {
-                        "Get-Blob": {
+                        "Get-Attachment": {
                           "inputs": {
                             "headers": { "Accept": "*/*" },
                             "method": "GET",
@@ -613,13 +617,13 @@
                           "runAfter": {},
                           "type": "Http"
                         },
-                        "Validate-Get-Blob": {
+                        "Validate-Get-Attachment": {
                           "actions": {},
                           "else": {
                             "actions": {
                               "If-Unauthorised": {
                                 "actions": {
-                                  "Get-Blob-Reauthenticate": {
+                                  "Get-Attachment-Reauthenticate": {
                                     "inputs": {
                                       "headers": { "Accept": "application/json" },
                                       "method": "POST",
@@ -633,11 +637,11 @@
                                     "runAfter": {},
                                     "type": "Http"
                                   },
-                                  "Validate-Get-Blob-Reauthenticate": {
+                                  "Validate-Get-Attachment-Reauthenticate": {
                                     "actions": {
                                       "Parse-Get-Blob-Reauthenticate": {
                                         "inputs": {
-                                          "content": "@body('Get-Blob-Reauthenticate')",
+                                          "content": "@body('Get-Attachment-Reauthenticate')",
                                           "schema": {
                                             "properties": {
                                               "SessionId": { "type": "string" },
@@ -678,8 +682,8 @@
                                         }
                                       }
                                     },
-                                    "expression": { "and": [ { "equals": [ "@outputs('Get-Blob-Reauthenticate')['statusCode']", 200 ] } ] },
-                                    "runAfter": { "Get-Blob-Reauthenticate": [ "Succeeded" ] },
+                                    "expression": { "and": [ { "equals": [ "", 200 ] } ] },
+                                    "runAfter": { "Get-Attachment-Reauthenticate": [ "Succeeded" ] },
                                     "type": "If"
                                   }
                                 },
@@ -703,14 +707,14 @@
                                     }
                                   }
                                 },
-                                "expression": { "and": [ { "equals": [ "@outputs('Get-Blob')['statusCode']", 401 ] } ] },
+                                "expression": { "and": [ { "equals": [ "", 401 ] } ] },
                                 "runAfter": {},
                                 "type": "If"
                               }
                             }
                           },
-                          "expression": { "and": [ { "equals": [ "@outputs('Get-Blob')['statusCode']", 200 ] } ] },
-                          "runAfter": { "Get-Blob": [ "Succeeded" ] },
+                          "expression": { "and": [ { "equals": [ "", 200 ] } ] },
+                          "runAfter": { "Get-Attachment": [ "Succeeded" ] },
                           "type": "If"
                         }
                       },
@@ -723,6 +727,14 @@
                   "runAfter": {},
                   "runtimeConfiguration": { "concurrency": { "repetitions": 1 } },
                   "type": "Foreach"
+                },
+                "Set-Control-Status-Reporting": {
+                  "inputs": {
+                    "name": "Control-Status",
+                    "value": "@parameters('StatusReporting')"
+                  },
+                  "runAfter": { "For-Each-Attachment": [ "Succeeded" ] },
+                  "type": "SetVariable"
                 }
               },
               "description": "Obtain all of the attachments on the list and post the data and metadata to the blobs endpoint to store the file and update the database.",
@@ -753,14 +765,18 @@
                         "schema": {
                           "items": {
                             "properties": {
+                              "SiteUniqueId": { "type": "string" },
+                              "EntityUniqueId": { "type": "string" },
+                              "SiteUrn": { "type": "string" },
                               "BlobKey": { "type": "string" },
-                              "Entity": { "type": "string" },
-                              "Extension": { "type": "string" },
-                              "Folder": { "type": "string" },
                               "MimeType": { "type": "string" },
-                              "SiteUniqueId": { "type": "string" }
+                              "Folder": { "type": "string" },
+                              "Extension": { "type": "string" },
+                              "Entity": { "type": "string" },
+                              "FileType": { "type": "string" },
+                              "SiteName": { "type": "string" }
                             },
-                            "required": [ "SiteUniqueId", "BlobKey", "MimeType", "Folder", "Extension", "Entity" ],
+                            "required": [ "SiteUniqueId", "EntityUniqueId", "SiteUrn", "BlobKey", "MimeType", "Folder", "Extension", "Entity", "Filetype", "SiteName" ],
                             "type": "object"
                           },
                           "type": "array"
@@ -803,7 +819,7 @@
                   "type": "If"
                 }
               },
-              "runAfter": { "Scope-Update-Status-Extract": [ "Succeeded" ] },
+              "runAfter": { "Scope-Update-Status-Attachments": [ "Succeeded" ] },
               "type": "Scope"
             },
             "Scope-Entities": {
@@ -957,7 +973,7 @@
                                 "method": "GET",
                                 "queries": {
                                   "Page": "@{variables('Control-Page')}",
-                                  "PageSize": "1000",
+                                  "PageSize": "@{parameters('ItemsPerPage')}",
                                   "SessionId": "@variables('SourceOAUTHToken')",
                                   "UpdatedSince": "@variables('Control-Since')",
                                   "format": "json",
@@ -1339,50 +1355,29 @@
             },
             "Scope-Report": {
               "actions": {
+                "Record-Control-Status-Report": {
+                  "description": "Record the final status that marks this task as completed.",
+                  "inputs": {
+                    "headers": {
+                      "Authorization": "Bearer @{variables('TargetOAUTHToken')}",
+                      "Content-Type": "application/json",
+                      "Ocp-Apim-Subscription-Key": "@variables('TargetOAUTHKey')",
+                      "X-Run-Identifier": "@variables('Control-Started')",
+                      "X-Run-Message": "@variables('Control-Error-Message')",
+                      "X-Run-Status": "@{variables('Control-Status')}"
+                    },
+                    "method": "PUT",
+                    "uri": "@parameters('TargetControlEndpoint')"
+                  },
+                  "runAfter": {},
+                  "type": "Http"
+                },
                 "Validate-Scope-Report": {
                   "actions": {
-                    "Record-Control-Status-Report": {
-                      "description": "Record the final status that marks this task as completed.",
-                      "inputs": {
-                        "headers": {
-                          "Authorization": "Bearer @{variables('TargetOAUTHToken')}",
-                          "Content-Type": "application/json",
-                          "Ocp-Apim-Subscription-Key": "@variables('TargetOAUTHKey')",
-                          "X-Run-Identifier": "@variables('Control-Started')",
-                          "X-Run-Status": "@{variables('Control-Status')}"
-                        },
-                        "method": "PUT",
-                        "uri": "@parameters('TargetControlEndpoint')"
-                      },
+                    "Success": {
+                      "inputs": { "runStatus": "Succeeded" },
                       "runAfter": {},
-                      "type": "Http"
-                    },
-                    "Validate-Record-Control-Status-Report": {
-                      "actions": {
-                        "Success": {
-                          "inputs": { "runStatus": "Succeeded" },
-                          "runAfter": {},
-                          "type": "Terminate"
-                        }
-                      },
-                      "else": {
-                        "actions": {
-                          "Record-Control-Status-Report-Failed": {
-                            "inputs": {
-                              "runError": {
-                                "code": "1",
-                                "message": "Failed to record success."
-                              },
-                              "runStatus": "Failed"
-                            },
-                            "runAfter": {},
-                            "type": "Terminate"
-                          }
-                        }
-                      },
-                      "expression": { "and": [ { "equals": [ "@outputs('Record-Control-Status-Report')['statusCode']", 202 ] } ] },
-                      "runAfter": { "Record-Control-Status-Report": [ "Succeeded", "Failed", "TimedOut" ] },
-                      "type": "If"
+                      "type": "Terminate"
                     }
                   },
                   "else": {
@@ -1400,13 +1395,18 @@
                       }
                     }
                   },
-                  "expression": { "and": [ { "equals": [ "@variables('Control-Status')", "@parameters('StatusReporting')" ] } ] },
-                  "runAfter": {},
+                  "expression": {
+                    "and": [
+                      { "equals": [ "@variables('Control-Status')", "@parameters('StatusReporting')" ] },
+                      { "equals": [ "@outputs('Record-Control-Status-Report')['statusCode']", 200 ] }
+                    ]
+                  },
+                  "runAfter": { "Record-Control-Status-Report": [ "Succeeded" ] },
                   "type": "If"
                 }
               },
               "description": "To send notification via email on results of the run.",
-              "runAfter": { "Scope-Update-Status-Transform": [ "Succeeded", "TimedOut", "Skipped", "Failed" ] },
+              "runAfter": { "Scope-Attachments": [ "Succeeded", "Failed", "Skipped", "TimedOut" ] },
               "type": "Scope"
             },
             "Scope-Start-Status": {
@@ -1538,6 +1538,62 @@
               "runAfter": { "Scope-Get-Secrets": [ "Succeeded" ] },
               "type": "Scope"
             },
+            "Scope-Update-Status-Attachments": {
+              "actions": {
+                "Record-Control-Status-Attachments": {
+                  "description": "This will trigger the extract process inside the database via stored procedures",
+                  "inputs": {
+                    "headers": {
+                      "Authorization": "Bearer @{variables('TargetOAUTHToken')}",
+                      "Content-Type": "application/json",
+                      "Ocp-Apim-Subscription-Key": "@variables('TargetOAUTHKey')",
+                      "X-Run-Identifier": "@variables('Control-Started')",
+                      "X-Run-Status": "@{variables('Control-Status')}"
+                    },
+                    "method": "PATCH",
+                    "uri": "@parameters('TargetControlEndpoint')"
+                  },
+                  "runAfter": { "Set-Control-Status-Attachments": [ "Succeeded" ] },
+                  "type": "Http"
+                },
+                "Set-Control-Status-Attachments": {
+                  "inputs": {
+                    "name": "Control-Status",
+                    "value": "@parameters('StatusAttachments')"
+                  },
+                  "runAfter": {},
+                  "type": "SetVariable"
+                },
+                "Validate-Scope-Update-Status-Attachments": {
+                  "actions": {},
+                  "else": {
+                    "actions": {
+                      "Set-Scope-Update-Status-Attachments-Fail": {
+                        "inputs": {
+                          "name": "Control-Error",
+                          "value": "@int('__ERROR__')"
+                        },
+                        "runAfter": { "Set-Scope-Update-Status-Attachments-Fail-Message": [ "Succeeded" ] },
+                        "type": "SetVariable"
+                      },
+                      "Set-Scope-Update-Status-Attachments-Fail-Message": {
+                        "inputs": {
+                          "name": "Control-Error-Message",
+                          "value": "Failed to record task progress status to extract."
+                        },
+                        "runAfter": {},
+                        "type": "SetVariable"
+                      }
+                    }
+                  },
+                  "expression": { "and": [ { "equals": [ "", 202 ] } ] },
+                  "runAfter": { "Record-Control-Status-Attachments": [ "Succeeded" ] },
+                  "type": "If"
+                }
+              },
+              "runAfter": { "Scope-Entities": [ "Succeeded" ] },
+              "type": "Scope"
+            },
             "Scope-Update-Status-Entities": {
               "actions": {
                 "Record-Control-Status-Entities": {
@@ -1592,132 +1648,14 @@
               },
               "runAfter": { "Scope-Start-Status": [ "Succeeded" ] },
               "type": "Scope"
-            },
-            "Scope-Update-Status-Extract": {
-              "actions": {
-                "Record-Control-Status-Extract": {
-                  "description": "This will trigger the extract process inside the database via stored procedures",
-                  "inputs": {
-                    "headers": {
-                      "Authorization": "Bearer @{variables('TargetOAUTHToken')}",
-                      "Content-Type": "application/json",
-                      "Ocp-Apim-Subscription-Key": "@variables('TargetOAUTHKey')",
-                      "X-Run-Identifier": "@variables('Control-Started')",
-                      "X-Run-Status": "@{variables('Control-Status')}"
-                    },
-                    "method": "PUT",
-                    "uri": "@parameters('TargetControlEndpoint')"
-                  },
-                  "runAfter": { "Set-Control-Status-Extract": [ "Succeeded" ] },
-                  "type": "Http"
-                },
-                "Set-Control-Status-Extract": {
-                  "inputs": {
-                    "name": "Control-Status",
-                    "value": "@parameters('StatusExtracting')"
-                  },
-                  "runAfter": {},
-                  "type": "SetVariable"
-                },
-                "Validate-Scope-Update-Status-Extract": {
-                  "actions": {},
-                  "else": {
-                    "actions": {
-                      "Set-Scope-Update-Status-Extract-Fail": {
-                        "inputs": {
-                          "name": "Control-Error",
-                          "value": "@int('__ERROR__')"
-                        },
-                        "runAfter": { "Set-Scope-Update-Status-Extract-Fail-Message": [ "Succeeded" ] },
-                        "type": "SetVariable"
-                      },
-                      "Set-Scope-Update-Status-Extract-Fail-Message": {
-                        "inputs": {
-                          "name": "Control-Error-Message",
-                          "value": "Failed to record task progress status to extract."
-                        },
-                        "runAfter": {},
-                        "type": "SetVariable"
-                      }
-                    }
-                  },
-                  "expression": { "and": [ { "equals": [ "@outputs('Record-Control-Status-Extract')['statusCode']", 202 ] } ] },
-                  "runAfter": { "Record-Control-Status-Extract": [ "Succeeded" ] },
-                  "type": "If"
-                }
-              },
-              "runAfter": { "Scope-Entities": [ "Succeeded" ] },
-              "type": "Scope"
-            },
-            "Scope-Update-Status-Transform": {
-              "actions": {
-                "Record-Control-Status-Transform": {
-                  "description": "This will trigger the final transform process inside the database via stored procedures",
-                  "inputs": {
-                    "headers": {
-                      "Authorization": "Bearer @{variables('TargetOAUTHToken')}",
-                      "Content-Type": "application/json",
-                      "Ocp-Apim-Subscription-Key": "@variables('TargetOAUTHKey')",
-                      "X-Run-Identifier": "@variables('Control-Started')",
-                      "X-Run-Status": "@{variables('Control-Status')}"
-                    },
-                    "method": "PUT",
-                    "uri": "@parameters('TargetControlEndpoint')"
-                  },
-                  "runAfter": { "Set-Control-Status-Transform": [ "Succeeded" ] },
-                  "type": "Http"
-                },
-                "Set-Control-Status-Transform": {
-                  "inputs": {
-                    "name": "Control-Status",
-                    "value": "@parameters('StatusTransforming')"
-                  },
-                  "runAfter": {},
-                  "type": "SetVariable"
-                },
-                "Validate-Scope-Update-Status-Transform": {
-                  "actions": {
-                    "Set-Control-Status-Report-Success": {
-                      "inputs": {
-                        "name": "Control-Status",
-                        "value": "@parameters('StatusReporting')"
-                      },
-                      "runAfter": {},
-                      "type": "SetVariable"
-                    }
-                  },
-                  "else": {
-                    "actions": {
-                      "Scope-Update-Status-Transform-Fail": {
-                        "inputs": {
-                          "name": "Control-Error",
-                          "value": "@int('__ERROR__')"
-                        },
-                        "runAfter": { "Scope-Update-Status-Transform-Fail-Message": [ "Succeeded" ] },
-                        "type": "SetVariable"
-                      },
-                      "Scope-Update-Status-Transform-Fail-Message": {
-                        "inputs": {
-                          "name": "Control-Error-Message",
-                          "value": "Failed to record status as Transforming."
-                        },
-                        "runAfter": {},
-                        "type": "SetVariable"
-                      }
-                    }
-                  },
-                  "expression": { "and": [ { "equals": [ "@outputs('Record-Control-Status-Transform')['statusCode']", 202 ] } ] },
-                  "runAfter": { "Record-Control-Status-Transform": [ "Succeeded" ] },
-                  "type": "If"
-                }
-              },
-              "description": "Trigger the transformation of the changes",
-              "runAfter": { "Scope-Attachments": [ "Succeeded" ] },
-              "type": "Scope"
             }
           },
-          "contentVersion": "1.0.0.0",
+          "contentVersion": "2.0.0.0",
           "parameters": {
+            "ItemsPerPage": {
+              "defaultValue": 500,
+              "type": "Int"
+            },
             "CDC2NotifyAPIKeySecretUri": {
               "defaultValue": "[concat(reference(variables('keyVaultSecretCDC2NotifyAPIKey'), '2019-09-01').secretUriWithVersion, '?api-version=2016-10-01')]",
               "type": "String"
@@ -1779,31 +1717,23 @@
               "type": "String"
             },
             "StatusAttachments": {
-              "defaultValue": 4,
-              "type": "Int"
-            },
-            "StatusEntities": {
               "defaultValue": 2,
               "type": "Int"
             },
-            "StatusExtracting": {
-              "defaultValue": 3,
-              "type": "Int"
-            },
-            "StatusReporting": {
-              "defaultValue": 100,
-              "type": "Int"
-            },
-            "StatusStart": {
+            "StatusEntities": {
               "defaultValue": 1,
               "type": "Int"
             },
-            "StatusTransforming": {
-              "defaultValue": 5,
+            "StatusReporting": {
+              "defaultValue": 3,
+              "type": "Int"
+            },
+            "StatusStart": {
+              "defaultValue": 0,
               "type": "Int"
             },
             "TargetControlEndpoint": {
-              "defaultValue": "[concat(parameters('cdcEventsApiBaseUri'), '/load')]",
+              "defaultValue": "[concat(parameters('cdcEventsApiBaseUri'), '/control')]",
               "type": "String"
             },
             "TargetEndpoint": {
@@ -1844,5 +1774,5 @@
       "type": "string"
     }
   },
-  "contentVersion": "1.0.0.0"
+  "contentVersion": "2.0.0.0"
 }

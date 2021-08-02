@@ -23,14 +23,17 @@
         /// <param name="entityProcessor">
         /// An instance of type <see cref="IEntityProcessor" />.
         /// </param>
+        /// <param name="entityArchiveProcessor">An instance of <see cref="IEntityArchiveProcessor"/>.</param>
         /// <param name="loggerProvider">
         /// An instance of type <see cref="ILoggerProvider" />.
         /// </param>
         public Sites(
             IEntityProcessor entityProcessor,
+            IEntityArchiveProcessor entityArchiveProcessor,
             ILoggerProvider loggerProvider)
             : base(
                   entityProcessor,
+                  entityArchiveProcessor,
                   loggerProvider)
         {
             this.loggerProvider = loggerProvider;
@@ -56,7 +59,6 @@
         {
             try
             {
-
                 HttpResponseMessage toReturn =
                     await this.PostAsync<Site>(
                         httpRequest,

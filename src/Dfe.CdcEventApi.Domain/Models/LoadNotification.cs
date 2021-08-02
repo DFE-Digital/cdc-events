@@ -1,12 +1,9 @@
 ﻿namespace Dfe.CdcEventApi.Domain.Models
 {
-    using Dfe.CdcEventApi.Application.Definitions;
-    using Dfe.CdcEventApi.Domain.Definitions;
-
     /// <summary>
     /// Represents the Load reporting entity.
     /// </summary>
-    public class LoadNotification : LoadBase
+    public class LoadNotification : ControlBase
     {
         /// <summary>
         /// Gets or sets the entity id.

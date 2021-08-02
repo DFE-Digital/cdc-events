@@ -2,13 +2,11 @@ namespace Dfe.CdcEventApi.Application.UnitTests
 {
     using System;
     using System.Collections.Generic;
-    using System.Collections.ObjectModel;
     using System.IO;
     using System.Linq;
     using System.Reflection;
     using System.Threading;
     using System.Threading.Tasks;
-    using System.Xml;
     using System.Xml.Linq;
     using Dfe.CdcEventApi.Application.Exceptions;
     using Dfe.CdcEventApi.Application.Models;
@@ -48,7 +46,7 @@ namespace Dfe.CdcEventApi.Application.UnitTests
             Task processEntitiesAsync()
             {
                 // Act
-                return this.unit.CreateEntitiesAsync(
+                return this.unit.CreateAsync(
                     runIdentifier,
                     exampleEntities,
                     cancellationToken);
@@ -74,7 +72,7 @@ namespace Dfe.CdcEventApi.Application.UnitTests
             Task processEntitiesAsync()
             {
                 // Act
-                return this.unit.CreateEntitiesAsync(
+                return this.unit.CreateAsync(
                     runIdentifier,
                     dataHandlerMissingEntities,
                     cancellationToken);
@@ -99,7 +97,7 @@ namespace Dfe.CdcEventApi.Application.UnitTests
             }
 
             this.mockEntityStorageAdapter
-                .Setup(x => x.StoreEntitiesAsync(It.IsAny<string>(), It.IsAny<DateTime>(), It.IsAny<XDocument>(), It.IsAny<CancellationToken>()))
+                .Setup(x => x.StoreAsync(It.IsAny<string>(), It.IsAny<DateTime>(), It.IsAny<XDocument>(), It.IsAny<CancellationToken>()))
                 .Callback((Action<string, DateTime, XDocument, CancellationToken>)storeEntitiesAsync);
 
             string[] expectedDataHandlerIdentifiers = new string[] {
@@ -117,7 +115,7 @@ namespace Dfe.CdcEventApi.Application.UnitTests
             CancellationToken cancellationToken = CancellationToken.None;
 
             // Act
-            await this.unit.CreateEntitiesAsync(
+            await this.unit.CreateAsync(
                 runIdentifier,
                 exampleEntities,
                 cancellationToken);

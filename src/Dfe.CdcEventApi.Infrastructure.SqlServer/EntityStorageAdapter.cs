@@ -57,14 +57,14 @@
 
             this.assembly = type.Assembly;
 
-            this.dataHandlersPath = $"{type.Namespace}.DataHandlers";
+            this.dataHandlersPath = $"{type.Namespace}.EntityHandlers";
 
             this.rawDbConnectionString =
                 entityStorageAdapterSettingsProvider.RawDbConnectionString;
         }
 
         /// <inheritdoc />
-        public async Task StoreEntitiesAsync(
+        public async Task StoreAsync(
             string dataHandlerIdentifier,
             DateTime runIdentifier,
             XDocument xDocument,
@@ -121,7 +121,7 @@
                 }
                 catch (Exception ex)
                 {
-                    this.loggerProvider.Error($"Unexpected error during {nameof(this.StoreEntitiesAsync)} for type {dataHandlerIdentifier}; {ex.Message} {ex.InnerException?.Message ?? string.Empty}", ex);
+                    this.loggerProvider.Error($"Unexpected error during {nameof(this.StoreAsync)} for type {dataHandlerIdentifier}; {ex.Message} {ex.InnerException?.Message ?? string.Empty}", ex);
                     throw;
                 }
                 finally

@@ -4,44 +4,37 @@
     using System.Threading;
     using System.Threading.Tasks;
     using Dfe.CdcEventApi.Application.Definitions;
-    using Dfe.CdcEventApi.Application.Models;
     using Dfe.CdcEventApi.Domain.Definitions;
     using Microsoft.AspNetCore.Http;
     using Microsoft.Azure.WebJobs;
     using Microsoft.Azure.WebJobs.Extensions.Http;
 
     /// <summary>
-    /// Entry class for the <c>portfolios</c> function.
+    /// Allows sending of notifications via the GOV.UK.Notify service, on completion of a task.
     /// </summary>
-    public class Portfolios : EntityFunctionsBase
+    public class Notify : NotifyFunctionBase
     {
         private readonly ILoggerProvider loggerProvider;
 
         /// <summary>
-        /// Initialises a new instance of the <see cref="Portfolios" />
-        /// class.
+        /// Initialises a new instance of the <see cref="Notify"/> class.
         /// </summary>
-        /// <param name="entityProcessor">
-        /// An instance of type <see cref="IEntityProcessor" />.
+        /// <param name="notifyProcessor">
+        /// An instance of type <see cref="INotifyProcessor" />.
         /// </param>
-        /// <param name="entityArchiveProcessor">An instance of <see cref="IEntityArchiveProcessor"/>.</param>
         /// <param name="loggerProvider">
         /// An instance of type <see cref="ILoggerProvider" />.
         /// </param>
-        public Portfolios(
-            IEntityProcessor entityProcessor,
-            IEntityArchiveProcessor entityArchiveProcessor,
+        public Notify(
+            INotifyProcessor notifyProcessor,
             ILoggerProvider loggerProvider)
-            : base(
-                    entityProcessor,
-                    entityArchiveProcessor,
-                    loggerProvider)
+            : base(notifyProcessor, loggerProvider)
         {
             this.loggerProvider = loggerProvider;
         }
 
         /// <summary>
-        /// Entry method for the <c>portfolios</c> function.
+        /// Entry method for the <c>attachments</c> function.
         /// </summary>
         /// <param name="httpRequest">
         /// An instance of type <see cref="HttpRequest" />.
@@ -52,25 +45,29 @@
         /// <returns>
         /// An instance of <see cref="HttpResponseMessage" />.
         /// </returns>
-        [FunctionName("portfolios")]
-        public async Task<HttpResponseMessage> RunAsync(
-            [HttpTrigger(AuthorizationLevel.Function, "POST")]
-            HttpRequest httpRequest,
+        [FunctionName("notify")]
+        public async Task<HttpResponseMessage> Run(
+            [HttpTrigger(AuthorizationLevel.Function, "POST")] HttpRequest httpRequest,
             CancellationToken cancellationToken)
         {
             try
             {
-                HttpResponseMessage toReturn =
-                    await this.PostAsync<Portfolio>(
-                        httpRequest,
-                        cancellationToken)
-                    .ConfigureAwait(false);
-
-                return toReturn;
+                switch (httpRequest?.Method ?? "UNSUPPORTED")
+                {
+                    case "POST":
+                        HttpResponseMessage postReturn =
+                              await this.PostAsync(
+                                  httpRequest,
+                                  cancellationToken)
+                              .ConfigureAwait(false);
+                        return postReturn;
+                    default:
+                        return new HttpResponseMessage(System.Net.HttpStatusCode.BadRequest);
+                }
             }
             catch (System.Exception ex)
             {
-                this.loggerProvider.Error($"Exception in {nameof(Portfolios)} endpoint.", ex);
+                this.loggerProvider.Error($"Exception in {nameof(Attachments)} {httpRequest?.Method ?? "UNSUPPORTED"} endpoint.", ex);
                 throw;
             }
         }

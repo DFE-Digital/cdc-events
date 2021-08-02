@@ -1,1 +1,0 @@
-EXECUTE [etl].[p_EXTRACT-Update-Blobkey-Use] @BlobSiteUniqueId, @EvidenceUniqueId, @BlobKey, @BlobUrl, @BlobMimeType, @BlobFolder, @BlobFilename, @BlobEntity

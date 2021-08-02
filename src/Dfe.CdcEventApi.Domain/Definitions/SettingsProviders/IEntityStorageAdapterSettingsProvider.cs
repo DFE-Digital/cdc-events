@@ -13,5 +13,10 @@
         {
             get;
         }
+
+        /// <summary>
+        /// Gets the Mastered database connection string.
+        /// </summary>
+        string MasteredDbConnectionString { get; }
     }
 }
