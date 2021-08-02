@@ -79,7 +79,7 @@
                     this.loggerProvider.Error(
                         $"{nameof(this.GetStatus)} Unable to parse the value of " +
                         $"\"{HeaderNameRunIdentifier}\" " +
-                        $"(\"{statusString}\") as a value in the range {ControlState.Start}..{ControlState.Attachments} or {ControlState.Delivered}.");
+                        $"(\"{statusString}\") as a value in the range {ControlState.Start}..{ControlState.Finished}.");
                 }
             }
             else
@@ -87,7 +87,7 @@
                 this.loggerProvider.Error(
                     $"{nameof(this.GetStatus)} A valid status was not supplied. The " +
                     $"status must be " +
-                    $"specified as a valid {nameof(ControlState)} value in the range {ControlState.Start}..{ControlState.Attachments} or {ControlState.Delivered}.");
+                    $"specified as a valid {nameof(ControlState)} value in the range {ControlState.Start}..{ControlState.Finished}.");
             }
 
             return null;
@@ -139,6 +139,54 @@
             }
 
             return runIdentifier;
+        }
+
+        /// <summary>
+        /// Gets the since date and time from the headers.
+        /// </summary>
+        /// <param name="headerDictionary">
+        /// The headers collection.
+        /// </param>
+        /// <returns>
+        /// Null or the date and time.
+        /// </returns>
+        protected DateTime? GetSince(IHeaderDictionary headerDictionary)
+        {
+            if (headerDictionary == null)
+            {
+                return null;
+            }
+
+            DateTime? since = null;
+            string sinceStr = null;
+
+            this.loggerProvider.Debug($"Checking for header \"{HeaderNameSince}\"...");
+
+            if (headerDictionary.ContainsKey(HeaderNameSince))
+            {
+                sinceStr = headerDictionary[HeaderNameSince];
+
+                this.loggerProvider.Info(
+                    $"Header \"{HeaderNameSince}\" was specified: " +
+                    $"\"{sinceStr}\". Parsing...");
+
+                try
+                {
+                    since = DateTime.Parse(
+                        sinceStr,
+                        CultureInfo.InvariantCulture);
+                }
+                catch (FormatException)
+                {
+                    this.loggerProvider.Error(
+                        $"A valid {nameof(since)} was not usable. The " +
+                        $"{nameof(since)} must be " +
+                        $"specified as a valid {nameof(DateTime)} value.");
+                    return null;
+                }
+            }
+
+            return since;
         }
 
         /// <summary>

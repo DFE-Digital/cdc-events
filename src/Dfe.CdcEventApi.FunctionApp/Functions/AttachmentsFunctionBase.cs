@@ -2,7 +2,6 @@
 {
     using System;
     using System.Collections.Generic;
-    using System.Globalization;
     using System.Linq;
     using System.Net;
     using System.Net.Http;
@@ -96,44 +95,9 @@
                 throw new ArgumentNullException(nameof(httpRequest));
             }
 
-            this.loggerProvider.Debug(
-                $"Checking for header \"{HeaderNameRunIdentifier}\"...");
-
             IHeaderDictionary headerDictionary = httpRequest.Headers;
 
-            DateTime? runIdentifier = null;
-            string runIdentifierStr = null;
-            if (headerDictionary.ContainsKey(HeaderNameRunIdentifier))
-            {
-                runIdentifierStr = headerDictionary[HeaderNameRunIdentifier];
-
-                this.loggerProvider.Info(
-                    $"Header \"{HeaderNameRunIdentifier}\" was specified: " +
-                    $"\"{runIdentifierStr}\". Parsing...");
-
-                try
-                {
-                    runIdentifier = DateTime.Parse(runIdentifierStr, CultureInfo.InvariantCulture);
-                }
-                catch (FormatException formatException)
-                {
-                    this.loggerProvider.Warning(
-                        $"Unable to parse the value of " +
-                        $"\"{HeaderNameRunIdentifier}\" " +
-                        $"(\"{runIdentifierStr}\") as a {nameof(DateTime)}.",
-                        formatException);
-                }
-            }
-
-            if (string.IsNullOrEmpty(runIdentifierStr))
-            {
-                runIdentifier = DateTime.UtcNow;
-
-                this.loggerProvider.Info(
-                    $"Header \"{HeaderNameRunIdentifier}\" not supplied, or " +
-                    $"was blank. {nameof(runIdentifierStr)} will default to " +
-                    $"\"{runIdentifierStr}\".");
-            }
+            DateTime? runIdentifier = this.GetRunIdentifier(headerDictionary);
 
             if (runIdentifier.HasValue)
             {
@@ -161,19 +125,14 @@
                                             cancellationToken)
                                             .ConfigureAwait(false);
 
-                    this.loggerProvider.Info(
-                        $"All {models.Count()} entities processed.");
+                    this.loggerProvider.Info($"All {models.Count()} entities processed.");
 
-                    // Everything good? Return accepted.
                     toReturn =
                         new HttpResponseMessage(HttpStatusCode.Created);
 
-                    // Also return the run identifier.
-                    runIdentifierStr = runIdentifier.ToString();
-
                     toReturn.Headers.Add(
                         HeaderNameRunIdentifier,
-                        runIdentifierStr);
+                        $"{runIdentifier.Value}");
                 }
                 catch (MissingDataHandlerAttributeException missingDataHandlerAttributeException)
                 {
