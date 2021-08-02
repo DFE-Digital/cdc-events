@@ -51,7 +51,7 @@
         /// <summary>
         /// Gets or sets the CDC File location file type.
         /// </summary>
-        public int BlobFiletype { get; set; }
+        public int BlobFiletype { get; set; } = 3;
 
         /// <summary>
         /// Gets or sets the entity unique id.
