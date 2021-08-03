@@ -55,11 +55,8 @@
                 switch (httpRequest?.Method ?? "UNSUPPORTED")
                 {
                     case "POST":
-                        HttpResponseMessage postReturn =
-                              await this.PostAsync(
-                                  httpRequest,
-                                  cancellationToken)
-                              .ConfigureAwait(false);
+                        HttpResponseMessage postReturn = await this.PostAsync(httpRequest, cancellationToken)
+                                                                      .ConfigureAwait(false);
                         return postReturn;
                     default:
                         return new HttpResponseMessage(System.Net.HttpStatusCode.BadRequest);
