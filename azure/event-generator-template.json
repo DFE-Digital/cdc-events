@@ -772,7 +772,7 @@
                               "FileType": { "type": "integer" },
                               "FolderName": { "type": "string" },
                               "MimeType": { "type": "string" },
-                              "SiteName": {},
+                              "SiteName": { "type": "string" },
                               "SiteUniqueId": { "type": "string" },
                               "SiteURN": { "type": "integer" }
                             },
