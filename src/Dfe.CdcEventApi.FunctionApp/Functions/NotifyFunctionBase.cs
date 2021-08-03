@@ -79,7 +79,7 @@
                         Message = string.Empty,
                     };
 
-                    await this.notifyProcessor.Notify(
+                    await this.notifyProcessor.NotifyAsync(
                                             control,
                                             cancellationToken)
                                             .ConfigureAwait(false);

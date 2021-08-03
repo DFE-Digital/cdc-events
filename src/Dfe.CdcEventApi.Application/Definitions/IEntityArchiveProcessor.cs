@@ -23,10 +23,6 @@
         /// <returns>
         /// A <see cref="Task"/> representing the asynchronous operation.
         /// </returns>
-        Task CreateAsync(
-            string entityType,
-            DateTime runIdentifier,
-            string data,
-            CancellationToken cancellationToken);
+        Task CreateAsync(string entityType, DateTime runIdentifier, string data, CancellationToken cancellationToken);
     }
 }

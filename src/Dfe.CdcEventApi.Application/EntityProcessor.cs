@@ -33,19 +33,14 @@
         /// <param name="loggerProvider">
         /// An instance of type <see cref="ILoggerProvider" />.
         /// </param>
-        public EntityProcessor(
-            IEntityStorageAdapter entityStorageAdapter,
-            ILoggerProvider loggerProvider)
+        public EntityProcessor(IEntityStorageAdapter entityStorageAdapter, ILoggerProvider loggerProvider)
         {
             this.entityStorageAdapter = entityStorageAdapter;
             this.loggerProvider = loggerProvider;
         }
 
         /// <inheritdoc />
-        public async Task CreateAsync<TModelsBase>(
-            DateTime runIdentifier,
-            IEnumerable<TModelsBase> modelsBases,
-            CancellationToken cancellationToken)
+        public async Task CreateAsync<TModelsBase>(DateTime runIdentifier, IEnumerable<TModelsBase> modelsBases, CancellationToken cancellationToken)
             where TModelsBase : ModelsBase
         {
             if (modelsBases == null)

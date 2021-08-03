@@ -1,9 +1,9 @@
-EXECUTE [etl].[p_EXTRACT-Attachment-Merge] @BlobSiteUniqueId, 
+EXECUTE [etl].[p_EXTRACT-Attachment-Merge] @SiteUniqueId, 
 											@EvidenceUniqueId, 
-											@BlobKey, 
-											@BlobObtained, 
-											@BlobUrl, 
-											@BlobMimeType, 
-											@BlobFolder, 
-											@BlobFilename, 
-											@BlobEntity
+											@Key, 
+											@Obtained, 
+											@Url, 
+											@MimeType, 
+											@FolderName, 
+											@FileName, 
+											@EntityName

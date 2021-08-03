@@ -25,9 +25,7 @@
         /// <param name="loggerProvider">
         /// An instance of type <see cref="ILoggerProvider" />.
         /// </param>
-        public AttachmentProcessor(
-           IAttachmentStorageAdapter attachmentStorageAdapter,
-           ILoggerProvider loggerProvider)
+        public AttachmentProcessor(IAttachmentStorageAdapter attachmentStorageAdapter, ILoggerProvider loggerProvider)
         {
             this.attachmentStorageAdapter = attachmentStorageAdapter;
             this.loggerProvider = loggerProvider;

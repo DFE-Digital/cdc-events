@@ -1,8 +1,8 @@
-EXECUTE [dbo].[p_UPSERT_File-Info]   @SiteUrn
-									,@BlobKey
-									,@BlobSiteName 
-									,@BlobFileType  
-									,@BlobObtained
-									,@BlobFilename 
-									,@BlobUrl
-									,@BlobEntityUniqueId 
+EXECUTE [dbo].[p_UPSERT_File-Info]   @SiteURN
+									,@Key
+									,@SiteName 
+									,@FileType  
+									,@Obtained
+									,@FileName 
+									,@Url
+									,@EntityUniqueId 
