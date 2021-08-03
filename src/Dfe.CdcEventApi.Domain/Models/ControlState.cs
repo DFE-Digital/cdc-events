@@ -31,7 +31,7 @@
         /// This value is depended upon by SQL Code in the downstream ETL Process in the CDC-Raw-Data project and Azure Data Factory processes.
         /// IMPORTANT NOTE:
         /// Further step values in the etl.Control table Status column are;
-        /// Extracted = 4, transformed = 5, Finisheded = 6
+        /// Extracted = 4, transformed = 5, Finished = 6
         /// which are handled by the ETL extract and Transform process in other system components.
         /// </summary>
         [Description("Delivered")]
@@ -50,7 +50,7 @@
         Transformed = 5,
 
         /// <summary>
-        /// This is handled by downstream ETL processing, and indicates that the data was onward delivered and a cleanup was pereformed.
+        /// This is handled by downstream ETL processing, and indicates that the data was onward delivered and a cleanup was performed.
         /// </summary>
         [Description("Finished")]
         Finished = 6,

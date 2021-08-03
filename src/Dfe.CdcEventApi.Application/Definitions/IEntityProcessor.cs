@@ -31,10 +31,7 @@
         /// <returns>
         /// A <see cref="Task"/> representing the asynchronous operation.
         /// </returns>
-        Task CreateAsync<TModelsBase>(
-            DateTime runIdentifier,
-            IEnumerable<TModelsBase> modelsBases,
-            CancellationToken cancellationToken)
+        Task CreateAsync<TModelsBase>(DateTime runIdentifier, IEnumerable<TModelsBase> modelsBases, CancellationToken cancellationToken)
             where TModelsBase : ModelsBase;
     }
 }

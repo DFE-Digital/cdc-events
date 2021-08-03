@@ -25,9 +25,7 @@
         /// <param name="loggerProvider">
         /// An injected instance of <see cref="ILoggerProvider"/>.
         /// </param>
-        public ControlProcessor(
-            IControlStorageAdapter loadStorageAdapter,
-            ILoggerProvider loggerProvider)
+        public ControlProcessor(IControlStorageAdapter loadStorageAdapter, ILoggerProvider loggerProvider)
         {
             this.loadStorageAdapter = loadStorageAdapter;
             this.loggerProvider = loggerProvider;
@@ -45,9 +43,7 @@
         /// <returns>
         /// A instance of a <see cref="Task"/> bearing an instance of the created <see cref="Control"/>.
         /// </returns>
-        public async Task<IEnumerable<Control>> CreateAsync(
-            DateTime runIdentifier,
-            CancellationToken cancellationToken)
+        public async Task<IEnumerable<Control>> CreateAsync(DateTime runIdentifier, CancellationToken cancellationToken)
         {
             this.loggerProvider.Debug($"Creating a new Load...");
             var loads = await this.loadStorageAdapter.CreateAsync(runIdentifier)
@@ -67,9 +63,7 @@
         /// <returns>
         /// A <see cref="Task"/> wrapping the <see cref="Control"/> instance.
         /// </returns>
-        public async Task<Control> GetAsync(
-                DateTime runIdentifier,
-                CancellationToken cancellationToken)
+        public async Task<Control> GetAsync(DateTime runIdentifier, CancellationToken cancellationToken)
         {
             this.loggerProvider.Debug($"Getting the Load data...");
             var load = await this.loadStorageAdapter.GetAsync(runIdentifier)
@@ -92,9 +86,7 @@
         public async Task<int> GetCountAsync(DateTime runIdentifier, CancellationToken cancellationToken)
         {
             this.loggerProvider.Debug($"Getting the load row count...");
-            return await this.loadStorageAdapter
-                                 .GetCountAsync(runIdentifier)
-                                 .ConfigureAwait(false);
+            return await this.loadStorageAdapter.GetCountAsync(runIdentifier).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -114,9 +106,7 @@
             CancellationToken cancellationToken)
         {
             this.loggerProvider.Debug($"Updating the load...");
-            await this.loadStorageAdapter
-                        .UpdateAsync(item)
-                        .ConfigureAwait(false);
+            await this.loadStorageAdapter.UpdateAsync(item).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -140,9 +130,7 @@
             CancellationToken cancellationToken)
         {
             this.loggerProvider.Debug($"Setting completion status...");
-            await this.loadStorageAdapter
-                        .UpdateStatusAsync(runIdentifier, status)
-                        .ConfigureAwait(false);
+            await this.loadStorageAdapter.UpdateStatusAsync(runIdentifier, status).ConfigureAwait(false);
         }
     }
 }

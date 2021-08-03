@@ -8,7 +8,7 @@
     public interface IBlobConvertor
     {
         /// <summary>
-        /// Converts <see cref="AttachmentResponse"/> data content to a string.
+        /// Converts <see cref="AttachmentResponse"/> data content to an array of bytes.
         /// </summary>
         /// <param name="blob">The <see cref="AttachmentResponse"/>.</param>
         /// <returns>An array of <see cref="byte"/>.</returns>

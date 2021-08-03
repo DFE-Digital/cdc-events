@@ -383,19 +383,19 @@
                       "inputs": {
                         "body": [
                           {
-                            "BlobData": "@body('Get-Attachment')",
-                            "BlobEntity": "@items('For-Each-Attachment')['Entity']",
-                            "BlobEntityUniqueId": "@items('For-Each-Attachment')?['EntityUniqueId']",
-                            "BlobFileType": "@items('For-Each-Attachment')?['FileType']",
-                            "BlobFilename": "@{items('For-Each-Attachment')['BlobKey']}@{items('For-Each-Attachment')['Extension']}",
-                            "BlobFolder": "@{items('For-Each-Attachment')['Folder']}",
-                            "BlobKey": "@items('For-Each-Attachment')['BlobKey']",
-                            "BlobMimeType": "@items('For-Each-Attachment')['MimeType']",
-                            "BlobObtained": "@variables('Control-Started')",
-                            "BlobShare": "cdcdocuments",
-                            "BlobSiteName": "@items('For-Each-Attachment')?['SiteName']",
-                            "BlobSiteUniqueId": "@items('For-Each-Attachment')?['SiteUniqueId']",
-                            "BlobSiteUrn": "@items('For-Each-Attachment')?['SiteUrn']"
+                            "Key": "@items('For-Each-Attachment')['Key']",
+                            "Data": "@body('Get-Attachment')",
+                            "Obtained": "@variables('Control-Started')",
+                            "MimeType": "@items('For-Each-Attachment')['MimeType']",
+                            "EntityName": "@items('For-Each-Attachment')['EntityName']",
+                            "EntityUniqueId": "@items('For-Each-Attachment')?['EntityUniqueId']",
+                            "ShareName": "cdcdocuments",
+                            "FolderName": "@{items('For-Each-Attachment')['FolderName']}",
+                            "FileName": "@{items('For-Each-Attachment')['Key']}@{items('For-Each-Attachment')['Extension']}",
+                            "FileType": "@items('For-Each-Attachment')?['FileType']",
+                            "SiteUniqueId": "@items('For-Each-Attachment')?['SiteUniqueId']",
+                            "SiteName": "@items('For-Each-Attachment')?['SiteName']",
+                            "SiteURN": "@items('For-Each-Attachment')?['SiteURN']"
                           }
                         ],
                         "headers": {
@@ -609,7 +609,7 @@
                             "queries": {
                               "AsAtachment": "true",
                               "AsAttachment": "true",
-                              "BlobKey": "@{items('For-Each-Attachment')['BlobKey']}",
+                              "BlobKey": "@{items('For-Each-Attachment')['Key']}",
                               "SessionId": "@variables('SourceOAUTHToken')"
                             },
                             "uri": "@{parameters('SourceEndpoint')}blobs"
@@ -765,18 +765,18 @@
                         "schema": {
                           "items": {
                             "properties": {
-                              "BlobKey": { "type": "string" },
-                              "Entity": { "type": "string" },
+                              "Key": { "type": "string" },
+                              "EntityName": { "type": "string" },
                               "EntityUniqueId": { "type": "string" },
                               "Extension": { "type": "string" },
-                              "FileType": { "type": "string" },
-                              "Folder": { "type": "string" },
+                              "FileType": { "type": "integer" },
+                              "FolderName": { "type": "string" },
                               "MimeType": { "type": "string" },
-                              "SiteName": { "type": "string" },
+                              "SiteName": {},
                               "SiteUniqueId": { "type": "string" },
-                              "SiteUrn": { "type": "string" }
+                              "SiteURN": { "type": "integer" }
                             },
-                            "required": [ "SiteUniqueId", "EntityUniqueId", "SiteUrn", "BlobKey", "MimeType", "Folder", "Extension", "Entity", "Filetype", "SiteName" ],
+                            "required": [ "SiteUniqueId", "EntityUniqueId", "SiteURN", "Key", "MimeType", "FolderName", "Extension", "EntityName", "FileType", "SiteName" ],
                             "type": "object"
                           },
                           "type": "array"
@@ -807,7 +807,7 @@
                       "Set-Scope-Attachments-List-Fail-Message": {
                         "inputs": {
                           "name": "Control-Error-Message",
-                          "value": "Failed to get the attachments list to downlaod attachment files."
+                          "value": "Failed to get the attachments list to download attachment files."
                         },
                         "runAfter": {},
                         "type": "SetVariable"

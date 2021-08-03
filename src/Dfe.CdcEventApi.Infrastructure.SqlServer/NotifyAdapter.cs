@@ -1,6 +1,7 @@
 ﻿namespace Dfe.CdcEventApi.Infrastructure.SqlServer
 {
     using System.Collections.Generic;
+    using System.Threading;
     using System.Threading.Tasks;
     using Dfe.CdcEventApi.Domain.Definitions;
     using Notify.Client;
@@ -22,12 +23,14 @@
         }
 
         /// <inheritdoc/>
-        public Task Notify(string apiKey, string emailAddress, string templateId, Dictionary<string, dynamic> personalisation)
+        public async Task NotifyAsync(string apiKey, string emailAddress, string templateId, Dictionary<string, dynamic> personalisation, CancellationToken cancellationToken)
         {
             this.loggerProvider.Debug($"Sending notification to address: {emailAddress} for template: {templateId} via key: {apiKey}");
             var client = new NotificationClient(apiKey);
-            client.SendEmail(emailAddress, templateId, personalisation, null, null);
-            return Task.FromResult(0);
+            if (!cancellationToken.IsCancellationRequested)
+            {
+                await client.SendEmailAsync(emailAddress, templateId, personalisation, null, null).ConfigureAwait(false);
+            }
         }
     }
 }

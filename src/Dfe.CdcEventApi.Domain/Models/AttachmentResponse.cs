@@ -1,82 +1,85 @@
 ﻿namespace Dfe.CdcEventApi.Domain.Models
 {
     using System;
-    using Dfe.CdcEventApi.Domain.Definitions;
 
     /// <summary>
-    /// Represents an individual <c>blob</c> entity.
+    /// Represents the API response for an evidence attachment file.
     /// </summary>
-    public class AttachmentResponse : ControlBase
+    public class AttachmentResponse : IAttachmentResponse
     {
         /// <summary>
         /// Gets or sets the blob key.
         /// </summary>
-        public string BlobKey { get; set; }
-
-        /// <summary>
-        /// Gets or sets the recieved blob data object. Due to Azure this is of variable type handled by an <see cref="IBlobConvertor"/>.
-        /// </summary>
-        public object BlobData { get; set; }
+        public string Key { get; set; }
 
         /// <summary>
         /// Gets or sets the file share name.
         /// </summary>
-        public string BlobShare { get; set; }
+        public string ShareName { get; set; }
 
         /// <summary>
         /// Gets or sets the file mimetype.
         /// </summary>
-        public string BlobMimeType { get; set; }
+        public string MimeType { get; set; }
 
         /// <summary>
         /// Gets or sets the file folder.
         /// </summary>
-        public string BlobFolder { get; set; }
+        public string FolderName { get; set; }
 
         /// <summary>
         /// Gets or sets the file name with extension.
         /// </summary>
-        public string BlobFilename { get; set; }
+        public string FileName { get; set; }
 
         /// <summary>
         /// Gets or sets the Site id.
         /// </summary>
-        public string BlobSiteUniqueId { get; set; }
+        public string SiteUniqueId { get; set; }
 
         /// <summary>
         /// Gets or sets the Site URN.
         /// </summary>
-        public int BlobSiteUrn { get; set; }
-
-        /// <summary>
-        /// Gets or sets the CDC File location file type.
-        /// </summary>
-        public int BlobFiletype { get; set; } = 3;
+        public int SiteURN { get; set; }
 
         /// <summary>
         /// Gets or sets the entity unique id.
         /// </summary>
-        public string BlobEntityUniqueId { get; set; }
+        public string EntityUniqueId { get; set; }
 
         /// <summary>
         /// Gets or sets the Obained date and time.
         /// </summary>
-        public DateTime BlobObtained { get; set; }
+        public DateTime Obtained { get; set; }
 
         /// <summary>
         /// Gets or sets the Url.
         /// </summary>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1056:URI-like properties should not be strings", Justification = "Its a DTO")]
-        public string BlobUrl { get; set; }
+        public string Url { get; set; }
 
         /// <summary>
         /// Gets or sets the blob usage Entity.
         /// </summary>
-        public string BlobEntity { get; set; }
+        public string EntityName { get; set; }
 
         /// <summary>
         /// Gets or sets the blob site name.
         /// </summary>
-        public string BlobSiteName { get; set; }
+        public string SiteName { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value for the Extension.
+        /// </summary>
+        public string Extension { get; set; }
+
+        /// <summary>
+        /// Gets or sets the CDC File location file type.
+        /// </summary>
+        public int FileType { get; set; } = 3;
+
+        /// <summary>
+        /// Gets or sets the attachment data.
+        /// </summary>
+        public object Data { get; set; }
     }
 }

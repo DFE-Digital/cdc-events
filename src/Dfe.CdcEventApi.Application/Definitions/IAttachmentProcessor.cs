@@ -26,10 +26,7 @@
         /// <returns>
         /// A <see cref="Task"/> representing the asynchronous operation.
         /// </returns>
-        Task PostAsync(
-            DateTime runIdentifier,
-            IEnumerable<AttachmentResponse> models,
-            CancellationToken cancellationToken);
+        Task PostAsync(DateTime runIdentifier, IEnumerable<AttachmentResponse> models, CancellationToken cancellationToken);
 
         /// <summary>
         /// Gets the currently required collection of <see cref="AttachmentRequest"/>.

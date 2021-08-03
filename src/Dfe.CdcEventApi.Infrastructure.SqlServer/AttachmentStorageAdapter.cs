@@ -231,17 +231,17 @@
 
         private async Task<AttachmentResponse> StoreAttachment(AttachmentResponse blob)
         {
-            ShareClient share = new ShareClient(this.attachmentStorageConnectionString, blob.BlobShare);
-            this.loggerProvider.Info($"Created file share client for share {blob.BlobShare}.");
+            ShareClient share = new ShareClient(this.attachmentStorageConnectionString, blob.ShareName);
+            this.loggerProvider.Info($"Created file share client for share {blob.ShareName}.");
 
-            var folderToUse = blob.BlobFolder;
+            var folderToUse = blob.FolderName;
 
-            blob.BlobFiletype = 3;
+            blob.FileType = 3;
 
-            if (blob.BlobMimeType.ToUpperInvariant() == "application/pdf".ToUpperInvariant())
+            if (blob.MimeType.ToUpperInvariant() == "application/pdf".ToUpperInvariant())
             {
                 folderToUse += "/Site Plan";
-                blob.BlobFiletype = 2;
+                blob.FileType = 2;
             }
             else
             {
@@ -249,9 +249,9 @@
             }
 
             var directory = share.GetDirectoryClient(folderToUse);
-            var file = directory.GetFileClient(blob.BlobFilename);
+            var file = directory.GetFileClient(blob.FileName);
 
-            this.loggerProvider.Info($"Obtained file share file reference {file.Path} for file of mime type {blob.BlobMimeType}.");
+            this.loggerProvider.Info($"Obtained file share file reference {file.Path} for file of mime type {blob.MimeType}.");
 
             using (MemoryStream stream = new MemoryStream(this.blobConvertor.Convert(blob)))
             {
@@ -270,8 +270,8 @@
             this.loggerProvider.Info($"Generating file share readonly SAS");
 
             // now update this blob to have the correct URL.
-            blob.BlobUrl = this.GetFileSasUri(
-                blob.BlobShare,
+            blob.Url = this.GetFileSasUri(
+                blob.ShareName,
                 file.Path,
                 DateTime.MaxValue,
                 this.attachmentStorageAccountName,

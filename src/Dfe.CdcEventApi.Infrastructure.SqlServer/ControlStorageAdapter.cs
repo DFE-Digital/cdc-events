@@ -118,9 +118,7 @@
 
                 elapsed = stopwatch.Elapsed;
 
-                this.loggerProvider.Info(
-                    $"Query executed with success, time elapsed: " +
-                    $"{elapsed}.");
+                this.loggerProvider.Info($"Query executed with success, time elapsed: {elapsed}.");
 
                 return controls;
             }

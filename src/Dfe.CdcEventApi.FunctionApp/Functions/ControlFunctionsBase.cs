@@ -265,7 +265,7 @@
                     await this.controlProcessor.UpdateAsync(load, cancellationToken).ConfigureAwait(false);
 
                     this.loggerProvider.Info($"Issuing status notification messages");
-                    await this.notifyProcessor.Notify(load, cancellationToken).ConfigureAwait(false);
+                    await this.notifyProcessor.NotifyAsync(load, cancellationToken).ConfigureAwait(false);
 
                     toReturn = new HttpResponseMessage(HttpStatusCode.Accepted)
                     {

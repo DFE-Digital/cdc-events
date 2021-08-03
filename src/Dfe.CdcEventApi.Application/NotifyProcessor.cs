@@ -56,7 +56,7 @@
         /// <param name="control">The task control record.</param>
         /// <param name="cancellationToken">An instance of <see cref="CancellationToken"/>.</param>
         /// <returns>An instance of <see cref="Task"/>.</returns>
-        public async Task Notify(Control control, CancellationToken cancellationToken)
+        public async Task NotifyAsync(Control control, CancellationToken cancellationToken)
         {
             if (control == null)
             {
@@ -65,7 +65,7 @@
 
             this.ThrowExceptionOnMissingSettings();
 
-            this.loggerProvider.Info($"{nameof(this.Notify)} processing control for {control.Load_DateTime}");
+            this.loggerProvider.Info($"{nameof(this.NotifyAsync)} processing control for {control.Load_DateTime}");
             var personalisation = new Dictionary<string, dynamic>();
             var success = control.Status == ControlState.Delivered;
             var addresses = success ? this.sucesssAddresses.Split(';') : this.failureAddresses.Split(';');
@@ -81,7 +81,7 @@
             foreach (var address in addresses)
             {
                 this.loggerProvider.Debug($"Calling the Notify system to send a message.");
-                await this.notifyAdapter.Notify(this.aPIKey, address, templateId, personalisation)
+                await this.notifyAdapter.NotifyAsync(this.aPIKey, address, templateId, personalisation, cancellationToken)
                     .ConfigureAwait(false);
             }
         }
@@ -89,13 +89,14 @@
         private void ThrowExceptionOnMissingSettings()
         {
             var reasons = string.Empty;
-            var settings = new Dictionary<string, string>() {
-                {"APIKey", this.aPIKey },
-                {"SuccessTemplateId", this.successTemplateId },
-                {"FailureTemplateId", this.failureTemplateId },
-                {"SucesssAddresses", this.sucesssAddresses },
-                {"FailureAddresses", this.failureAddresses },
-                {"EnvironmentName", this.environmentName },
+            var settings = new Dictionary<string, string>()
+            {
+                { "APIKey", this.aPIKey },
+                { "SuccessTemplateId", this.successTemplateId },
+                { "FailureTemplateId", this.failureTemplateId },
+                { "SucesssAddresses", this.sucesssAddresses },
+                { "FailureAddresses", this.failureAddresses },
+                { "EnvironmentName", this.environmentName },
             };
 
             foreach (var setting in settings)

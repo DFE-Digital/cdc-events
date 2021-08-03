@@ -15,6 +15,6 @@
         /// <param name="control">The control item for the task.</param>
         /// <param name="cancellationToken">An instance of <see cref="CancellationToken"/>.</param>
         /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
-        Task Notify(Control control, CancellationToken cancellationToken);
+        Task NotifyAsync(Control control, CancellationToken cancellationToken);
     }
 }

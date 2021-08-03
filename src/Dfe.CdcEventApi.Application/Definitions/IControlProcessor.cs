@@ -17,9 +17,7 @@
         /// <param name="runIdentifier">The load start date and time.</param>
         /// <param name="cancellationToken">The asyncrhonous cancellation token.</param>
         /// <returns>The created <see cref="Control"/> record with its default values.</returns>
-        Task<IEnumerable<Control>> CreateAsync(
-            DateTime runIdentifier,
-            CancellationToken cancellationToken);
+        Task<IEnumerable<Control>> CreateAsync(DateTime runIdentifier, CancellationToken cancellationToken);
 
         /// <summary>
         /// Updates an existing <see cref="Control"/> record.
@@ -28,10 +26,7 @@
         /// <param name="status">The finish status of the load run.</param>
         /// <param name="cancellationToken">The asyncrhonous cancellation token.</param>
         /// <returns>The asynchronous task.</returns>
-        Task UpdateStatusAsync(
-            DateTime runIdentifier,
-            int status,
-            CancellationToken cancellationToken);
+        Task UpdateStatusAsync(DateTime runIdentifier, int status, CancellationToken cancellationToken);
 
         /// <summary>
         /// Gets an instance of <see cref="Control"/>.
@@ -45,9 +40,7 @@
         /// <returns>
         /// A <see cref="Task"/> wrapping the <see cref="Control"/> instance.
         /// </returns>
-        Task<Control> GetAsync(
-            DateTime runIdentifier,
-            CancellationToken cancellationToken);
+        Task<Control> GetAsync(DateTime runIdentifier, CancellationToken cancellationToken);
 
         /// <summary>
         /// Uploads a complete instance of <see cref="Control"/>.
@@ -61,9 +54,7 @@
         /// <returns>
         /// A <see cref="Task"/>.
         /// </returns>
-        Task UpdateAsync(
-            Control item,
-            CancellationToken cancellationToken);
+        Task UpdateAsync(Control item, CancellationToken cancellationToken);
 
         /// <summary>
         /// Gets the loaded row count for the run.

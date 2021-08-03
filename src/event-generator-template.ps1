@@ -23,3 +23,6 @@ $a.resources[0].properties.definition.parameters.StatusAttachments.defaultValue 
 $a.resources[0].properties.definition.parameters.StatusReporting.defaultValue = 3
 # Finally write it back to the same file
 $a | ConvertTo-Json -Compress -Depth 32 | % { [System.Text.RegularExpressions.Regex]::Unescape($_) }  | set-content $pathToJson 
+#
+# The tempalte is now compressed to a single line with all hard coded variables set to ARM template parameter and variable selectors.
+#

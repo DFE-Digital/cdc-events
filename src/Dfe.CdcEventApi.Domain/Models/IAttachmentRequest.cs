@@ -3,78 +3,82 @@
     using System;
 
     /// <summary>
-    /// Represents an attachment entity.
+    /// Defines the properties of the API attachment request.
     /// </summary>
-    public class AttachmentRequest : IAttachmentRequest
+    public interface IAttachmentRequest
     {
         /// <summary>
         /// Gets or sets the blob key.
         /// </summary>
-        public string Key { get; set; }
+        string Key { get; set; }
 
         /// <summary>
         /// Gets or sets the file share name.
         /// </summary>
-        public string ShareName { get; set; }
+        string ShareName { get; set; }
 
         /// <summary>
         /// Gets or sets the file mimetype.
         /// </summary>
-        public string MimeType { get; set; }
+        string MimeType { get; set; }
 
         /// <summary>
         /// Gets or sets the file folder.
         /// </summary>
-        public string FolderName { get; set; }
+        string FolderName { get; set; }
 
         /// <summary>
         /// Gets or sets the file name with extension.
         /// </summary>
-        public string FileName { get; set; }
+        string FileName { get; set; }
 
         /// <summary>
         /// Gets or sets the Site id.
         /// </summary>
-        public string SiteUniqueId { get; set; }
+        string SiteUniqueId { get; set; }
 
         /// <summary>
         /// Gets or sets the Site URN.
         /// </summary>
-        public int SiteURN { get; set; }
+        int SiteURN { get; set; }
 
         /// <summary>
         /// Gets or sets the entity unique id.
         /// </summary>
-        public string EntityUniqueId { get; set; }
+        string EntityUniqueId { get; set; }
 
         /// <summary>
         /// Gets or sets the Obained date and time.
         /// </summary>
-        public DateTime Obtained { get; set; }
+        DateTime Obtained { get; set; }
 
         /// <summary>
         /// Gets or sets the Url.
         /// </summary>
-        public string Url { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1056:URI-like properties should not be strings", Justification = "Required for internal processing of a DTO")]
+        string Url { get; set; }
 
         /// <summary>
         /// Gets or sets the blob usage Entity.
         /// </summary>
-        public string EntityName { get; set; }
+        string EntityName { get; set; }
 
         /// <summary>
         /// Gets or sets the blob site name.
         /// </summary>
-        public string SiteName { get; set; }
+        string SiteName { get; set; }
 
         /// <summary>
         /// Gets or sets a value for the Extension.
         /// </summary>
-        public string Extension { get; set; }
+        string Extension { get; set; }
 
         /// <summary>
         /// Gets or sets the CDC File location file type.
+        /// Should default to 3 for evidence attachments.
+        /// Values set should be one of the CDC File Location File Types.
+        /// e.g. 1,2 or [3].
         /// </summary>
-        public int FileType { get; set; } = 3;
+        int FileType { get; set; }
     }
 }

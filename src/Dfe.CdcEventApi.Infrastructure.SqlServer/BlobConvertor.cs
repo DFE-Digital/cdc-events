@@ -24,16 +24,16 @@
                 return null as byte[];
             }
 
-            if (blob.BlobData != null)
+            if (blob.Data != null)
             {
-                if (blob.BlobData is string)
+                if (blob.Data is string)
                 {
-                    return System.Text.Encoding.UTF8.GetBytes(blob.BlobData as string);
+                    return System.Text.Encoding.UTF8.GetBytes(blob.Data as string);
                 }
 
-                if (blob.BlobData is object)
+                if (blob.Data is object)
                 {
-                    string stringData = JsonConvert.SerializeObject(blob.BlobData);
+                    string stringData = JsonConvert.SerializeObject(blob.Data);
 
                     // is this the best way to identify an azure content object
                     if (
