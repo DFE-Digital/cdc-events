@@ -8,6 +8,7 @@
     using System.IO;
     using System.Reflection;
     using System.Threading.Tasks;
+    using System.Web;
     using Azure;
     using Azure.Storage;
     using Azure.Storage.Files.Shares;
@@ -270,13 +271,9 @@
             this.loggerProvider.Info($"Generating file share readonly SAS");
 
             // now update this blob to have the correct URL.
-            blob.Url = this.GetFileSasUri(
-                blob.ShareName,
-                file.Path,
-                DateTime.MaxValue,
-                this.attachmentStorageAccountName,
-                this.attachmentStorageAccountKey,
-                ShareFileSasPermissions.Read).ToString();
+            // blob.Url = this.GetFileSasUri(blob.ShareName,file.Path,DateTime.MaxValue,this.attachmentStorageAccountName,this.attachmentStorageAccountKey,ShareFileSasPermissions.Read).ToString();
+            blob.Url = new UriBuilder($"https://{this.attachmentStorageAccountName}.file.core.windows.net/{blob.ShareName}/{file.Path}").ToString();
+            blob.Url = HttpUtility.HtmlEncode(blob.Url);
 
             this.loggerProvider.Info($"Generated file share readonly SAS");
 
