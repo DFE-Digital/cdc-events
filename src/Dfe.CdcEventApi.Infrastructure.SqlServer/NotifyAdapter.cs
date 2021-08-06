@@ -25,7 +25,7 @@
         /// <inheritdoc/>
         public async Task NotifyAsync(string apiKey, string emailAddress, string templateId, Dictionary<string, dynamic> personalisation, CancellationToken cancellationToken)
         {
-            this.loggerProvider.Debug($"Sending notification to address: {emailAddress} for template: {templateId} via key: {apiKey}");
+            this.loggerProvider.Debug($"Sending notification to address: {emailAddress} for template: {templateId}");
             var client = new NotificationClient(apiKey);
             if (!cancellationToken.IsCancellationRequested)
             {
