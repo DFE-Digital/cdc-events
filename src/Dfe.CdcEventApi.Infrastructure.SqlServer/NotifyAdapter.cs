@@ -4,6 +4,7 @@
     using System.Threading;
     using System.Threading.Tasks;
     using Dfe.CdcEventApi.Domain.Definitions;
+    using Newtonsoft.Json;
     using Notify.Client;
 
     /// <summary>
@@ -30,7 +31,20 @@
             if (!cancellationToken.IsCancellationRequested)
             {
                 this.loggerProvider.Debug($"Sending notification to address: {emailAddress} for template: {templateId}.");
-                await client.SendEmailAsync(emailAddress, templateId, personalisation, null, null).ConfigureAwait(false);
+                try
+                {
+                    await client.SendEmailAsync(emailAddress, templateId, personalisation, null, null).ConfigureAwait(false);
+                }
+                catch (System.Exception ex)
+                {
+                    var message = $"The extremely twitchy GOV.UK Notify endpoint client has thrown an exception, again." +
+                        $"Parameters: APIKey: [{apiKey}]" + /* come back and remove this, the value only shows up inside the protected azure logs but its bad practice once we get the thing working */
+                        $"Address: [{emailAddress}]" +
+                        $"Template Id: [{templateId}]" +
+                        $"Personalisation: {JsonConvert.SerializeObject(personalisation)}";
+                    this.loggerProvider.Error(message, ex);
+                    throw;
+                }
             }
         }
     }
