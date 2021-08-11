@@ -68,7 +68,11 @@
             this.loggerProvider.Info($"{nameof(this.NotifyAsync)} processing control for {control.Load_DateTime}");
             var personalisation = new Dictionary<string, dynamic>();
             var success = control.Status == ControlState.Delivered;
-            var addresses = success ? this.sucesssAddresses.Split(';') : this.failureAddresses.Split(';');
+            var successAddresses = this.sucesssAddresses.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
+            var failureAddresses = this.failureAddresses.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
+
+            var addresses = success ? successAddresses : failureAddresses;
+
             var templateId = success ? this.successTemplateId : this.failureTemplateId;
             if (success)
             {
@@ -81,7 +85,7 @@
             foreach (var address in addresses)
             {
                 this.loggerProvider.Debug($"Calling the Notify system to send a message.");
-                await this.notifyAdapter.NotifyAsync(this.aPIKey, address, templateId, personalisation, cancellationToken)
+                await this.notifyAdapter.NotifyAsync(this.aPIKey.Trim(), address.Trim(), templateId.Trim(), personalisation, cancellationToken)
                     .ConfigureAwait(false);
             }
         }
