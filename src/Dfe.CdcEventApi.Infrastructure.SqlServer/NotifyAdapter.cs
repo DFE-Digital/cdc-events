@@ -26,25 +26,26 @@
         /// <inheritdoc/>
         public async Task NotifyAsync(string apiKey, string emailAddress, string templateId, Dictionary<string, dynamic> personalisation, CancellationToken cancellationToken)
         {
-            this.loggerProvider.Debug($"Creating Notification Client.");
-            var client = new NotificationClient(apiKey);
-            if (!cancellationToken.IsCancellationRequested)
+            this.loggerProvider.Debug($"Notification requested.");
+            try
             {
-                this.loggerProvider.Debug($"Sending notification to address: {emailAddress} for template: {templateId}.");
-                try
+                this.loggerProvider.Debug($"Creating Notification Client.");
+                var client = new NotificationClient(apiKey);
+                if (!cancellationToken.IsCancellationRequested)
                 {
+                    this.loggerProvider.Debug($"Sending notification to address: {emailAddress} for template: {templateId}.");
                     await client.SendEmailAsync(emailAddress, templateId, personalisation, null, null).ConfigureAwait(false);
                 }
-                catch (System.Exception ex)
-                {
-                    var message = $"The extremely twitchy GOV.UK Notify endpoint client has thrown an exception, again." +
-                        $"Parameters: APIKey: [{apiKey}]" + /* come back and remove this, the value only shows up inside the protected azure logs but its bad practice once we get the thing working */
-                        $"Address: [{emailAddress}]" +
-                        $"Template Id: [{templateId}]" +
-                        $"Personalisation: {JsonConvert.SerializeObject(personalisation)}";
-                    this.loggerProvider.Error(message, ex);
-                    throw;
-                }
+            }
+            catch (System.Exception ex)
+            {
+                var message = $"The GOV.UK Notify endpoint client has thrown an exception. " +
+                    $"Parameters: APIKey: [{apiKey}] " + 
+                    $"Address: [{emailAddress}] " +
+                    $"Template Id: [{templateId}] " +
+                    $"Personalisation: {JsonConvert.SerializeObject(personalisation)}";
+                this.loggerProvider.Error(message, ex);
+                throw;
             }
         }
     }
