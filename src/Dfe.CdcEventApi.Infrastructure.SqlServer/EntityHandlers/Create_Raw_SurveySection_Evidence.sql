@@ -3,7 +3,7 @@ INSERT INTO [raw].[SurveySection_Evidence]
 SELECT
     Tbl.Col.value('bk_SurveySectionId[1]', 'nvarchar(40)') AS [bk_SurveySectionId],
     Tbl.Col.value('Description[1]', 'nvarchar(max)') AS [Description],
-    Tbl.Col.value('ref_SurveySectionEvidenceItemTypeReference[1]', 'nvarchar(max)') AS [ref_SurveySectionEvidenceItemTypeReference],
+    Tbl.Col.value('ref_SurveyEvidenceItemTypeReference[1]', 'nvarchar(max)') AS [ref_SurveySectionEvidenceItemTypeReference],
     Tbl.Col.value('MimeType[1]', 'nvarchar(max)') AS [MimeType],
     Tbl.Col.value('Reference[1]', 'nvarchar(max)') AS [Reference],
     Tbl.Col.value('SortOrder[1]', 'nvarchar(40)') AS [SortOrder],
