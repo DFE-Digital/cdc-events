@@ -12,6 +12,9 @@ trigger:
 workspace:
   clean: all
 
+pool:
+    vmImage: ubuntu-20.04
+
 variables:
   BuildConfiguration: 'Release'
 
