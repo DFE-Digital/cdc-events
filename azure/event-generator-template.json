@@ -383,19 +383,19 @@
                       "inputs": {
                         "body": [
                           {
-                            "Key": "@items('For-Each-Attachment')['Key']",
                             "Data": "@body('Get-Attachment')",
-                            "Obtained": "@variables('Control-Started')",
-                            "MimeType": "@items('For-Each-Attachment')['MimeType']",
                             "EntityName": "@items('For-Each-Attachment')['EntityName']",
                             "EntityUniqueId": "@items('For-Each-Attachment')?['EntityUniqueId']",
-                            "ShareName": "cdcdocuments",
-                            "FolderName": "@{items('For-Each-Attachment')['FolderName']}",
                             "FileName": "@{items('For-Each-Attachment')['Key']}@{items('For-Each-Attachment')['Extension']}",
                             "FileType": "@items('For-Each-Attachment')?['FileType']",
-                            "SiteUniqueId": "@items('For-Each-Attachment')?['SiteUniqueId']",
+                            "FolderName": "@{items('For-Each-Attachment')['FolderName']}",
+                            "Key": "@items('For-Each-Attachment')['Key']",
+                            "MimeType": "@items('For-Each-Attachment')['MimeType']",
+                            "Obtained": "@variables('Control-Started')",
+                            "ShareName": "cdcdocuments",
                             "SiteName": "@items('For-Each-Attachment')?['SiteName']",
-                            "SiteURN": "@items('For-Each-Attachment')?['SiteURN']"
+                            "SiteURN": "@items('For-Each-Attachment')?['SiteURN']",
+                            "SiteUniqueId": "@items('For-Each-Attachment')?['SiteUniqueId']"
                           }
                         ],
                         "headers": {
@@ -765,16 +765,16 @@
                         "schema": {
                           "items": {
                             "properties": {
-                              "Key": { "type": "string" },
                               "EntityName": { "type": "string" },
                               "EntityUniqueId": { "type": "string" },
                               "Extension": { "type": "string" },
                               "FileType": { "type": "integer" },
                               "FolderName": { "type": "string" },
+                              "Key": { "type": "string" },
                               "MimeType": { "type": "string" },
                               "SiteName": { "type": "string" },
-                              "SiteUniqueId": { "type": "string" },
-                              "SiteURN": { "type": "integer" }
+                              "SiteURN": { "type": "integer" },
+                              "SiteUniqueId": { "type": "string" }
                             },
                             "required": [ "SiteUniqueId", "EntityUniqueId", "SiteURN", "Key", "MimeType", "FolderName", "Extension", "EntityName", "FileType", "SiteName" ],
                             "type": "object"
@@ -1090,11 +1090,30 @@
                               "else": {
                                 "actions": {
                                   "Set-Validate-Get-Entity-Page-Fail": {
+                                    "description": "Forces an exception in the workflow by calling int() on a string",
                                     "inputs": {
                                       "name": "Control-Error",
                                       "value": "@int('__ERROR__')"
                                     },
+                                    "runAfter": { "Set-Validate-Get-Entity-Page-Fail-Control-Entity-Completed": [ "Succeeded" ] },
+                                    "type": "SetVariable"
+                                  },
+                                  "Set-Validate-Get-Entity-Page-Fail-Control-Continue": {
+                                    "description": "Get page has failed so stop processing this entity",
+                                    "inputs": {
+                                      "name": "Control-Continue",
+                                      "value": "@false"
+                                    },
                                     "runAfter": { "Set-Validate-Get-Entity-Page-Fail-Message": [ "Succeeded" ] },
+                                    "type": "SetVariable"
+                                  },
+                                  "Set-Validate-Get-Entity-Page-Fail-Control-Entity-Completed": {
+                                    "description": "Move on to next entity to avoid a long-running loop of failures on this entity",
+                                    "inputs": {
+                                      "name": "Control-Entity-Completed",
+                                      "value": "@true"
+                                    },
+                                    "runAfter": { "Set-Validate-Get-Entity-Page-Fail-Control-Continue": [ "Succeeded" ] },
                                     "type": "SetVariable"
                                   },
                                   "Set-Validate-Get-Entity-Page-Fail-Message": {
@@ -1107,7 +1126,12 @@
                                   }
                                 }
                               },
-                              "expression": { "and": [ { "equals": [ "@outputs('Get-Entity-Page')['statusCode']", 200 ] } ] },
+                              "expression": {
+                                "and": [
+                                  { "equals": [ "@outputs('Get-Entity-Page')['statusCode']", 200 ] },
+                                  { "equals": [ "@equals(body('Get-Entity-Page')['Success'], true)", "@true" ] }
+                                ]
+                              },
                               "runAfter": { "Get-Entity-Page": [ "Succeeded" ] },
                               "type": "If"
                             }
@@ -1755,6 +1779,11 @@
           },
           "triggers": {
             "Recurrence": {
+              "evaluatedRecurrence": {
+                "frequency": "Day",
+                "interval": 1,
+                "schedule": { "hours": [ "0" ] }
+              },
               "recurrence": {
                 "frequency": "Day",
                 "interval": 1,
