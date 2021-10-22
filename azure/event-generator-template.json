@@ -899,7 +899,10 @@
                               }
                             }
                           },
-                          "expression": { "and": [ { "equals": [ "@outputs('Re-Authenticate-Source')['statusCode']", 200 ] } ] },
+                          "expression": { "and": [
+                            { "equals": [ "@outputs('Re-Authenticate-Source')['statusCode']", 200 ] },
+                            { "equals": [ "@equals(body('Re-Authenticate-Source')['Success'],true)","@true" ] }
+                           ] },
                           "runAfter": { "Re-Authenticate-Source": [ "Succeeded" ] },
                           "type": "If"
                         },
