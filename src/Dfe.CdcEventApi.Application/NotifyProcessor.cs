@@ -20,7 +20,7 @@
         private readonly string aPIKey;
         private readonly string successTemplateId;
         private readonly string failureTemplateId;
-        private readonly string sucesssAddresses;
+        private readonly string successAddresses;
         private readonly string failureAddresses;
         private readonly string environmentName;
 
@@ -45,7 +45,7 @@
             this.aPIKey = notifySettingsProvider.NotifyApiKey;
             this.successTemplateId = notifySettingsProvider.NotifySuccessTemplateId;
             this.failureTemplateId = notifySettingsProvider.NotifyFailureTemplateId;
-            this.sucesssAddresses = notifySettingsProvider.NotifySuccesssAddresses;
+            this.successAddresses = notifySettingsProvider.NotifySuccesssAddresses;
             this.failureAddresses = notifySettingsProvider.NotifyFailureAddresses;
             this.environmentName = notifySettingsProvider.NotifyEnvironmentName;
         }
@@ -67,8 +67,8 @@
 
             this.loggerProvider.Info($"{nameof(this.NotifyAsync)} processing control for {control.Load_DateTime}");
             var personalisation = new Dictionary<string, dynamic>();
-            var success = control.Status == ControlState.Delivered;
-            var successAddresses = this.sucesssAddresses.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
+            var success = control.Status == ControlState.Delivered || control.Status == ControlState.Finished;
+            var successAddresses = this.successAddresses.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
             var failureAddresses = this.failureAddresses.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
 
             var addresses = success ? successAddresses : failureAddresses;
@@ -98,7 +98,7 @@
                 { "APIKey", this.aPIKey },
                 { "SuccessTemplateId", this.successTemplateId },
                 { "FailureTemplateId", this.failureTemplateId },
-                { "SucesssAddresses", this.sucesssAddresses },
+                { "SucesssAddresses", this.successAddresses },
                 { "FailureAddresses", this.failureAddresses },
                 { "EnvironmentName", this.environmentName },
             };
