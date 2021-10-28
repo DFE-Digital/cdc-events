@@ -40,7 +40,7 @@
             catch (System.Exception ex)
             {
                 var message = $"The GOV.UK Notify endpoint client has thrown an exception. " +
-                    $"Parameters: APIKey: [{apiKey}] " + 
+                    $"Parameters: APIKey: [{apiKey}] " +
                     $"Address: [{emailAddress}] " +
                     $"Template Id: [{templateId}] " +
                     $"Personalisation: {JsonConvert.SerializeObject(personalisation)}";
