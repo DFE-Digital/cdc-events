@@ -6,6 +6,7 @@
     using System.Diagnostics;
     using System.Globalization;
     using System.IO;
+    using System.Linq;
     using System.Reflection;
     using System.Threading.Tasks;
     using System.Web;
@@ -140,7 +141,7 @@
 
                 stopwatch.Start();
 
-                // despite cabability of handling a collection of objects ther eus usually only one.
+                // despite cabability of handling a collection of objects there is usually only one.
                 foreach (var blob in attachments)
                 {
                     this.loggerProvider.Info($"Storing obtained attachment data.");
@@ -251,8 +252,12 @@
 
             var directory = share.GetDirectoryClient(folderToUse);
             var file = directory.GetFileClient(blob.FileName);
+            var chunkSize = 4194304;
+            long streamPosition = 0;
+            long streamLength = 0;
+            long bytesRemaining = 0;
 
-            this.loggerProvider.Info($"Obtained file share file reference {file.Path} for file of mime type {blob.MimeType}.");
+            this.loggerProvider.Info($"Obtained file share file reference {file.Path} for file of mime type {blob.MimeType}");
 
             using (MemoryStream stream = new MemoryStream(this.blobConvertor.Convert(blob)))
             {
@@ -262,9 +267,30 @@
                 await file.CreateAsync(stream.Length).ConfigureAwait(false);
                 this.loggerProvider.Info($"Created file {file.Path}.");
 
-                this.loggerProvider.Info($"Creating file content for {file.Path}.");
+                streamLength = stream.Length;
+                bytesRemaining = streamLength;
+
+                this.loggerProvider.Info($"Creating file content for {file.Path}");
                 stream.Position = 0;
-                await file.UploadRangeAsync(new HttpRange(0, stream.Length), stream).ConfigureAwait(false);
+
+                while (streamPosition < streamLength)
+                {
+                    this.loggerProvider.Info($"Chunk start: {streamPosition}, Bytes remaining: {bytesRemaining}");
+
+                    byte[] buffer = new byte[chunkSize];
+                    var bytesRead = await stream.ReadAsync(buffer, 0, (int)chunkSize).ConfigureAwait(false);
+
+                    this.loggerProvider.Info($"{bytesRead} bytes read from stream for current chunk");
+
+                    using (MemoryStream chunkStream = new MemoryStream(buffer.Take(bytesRead).ToArray()))
+                    {
+                        await file.UploadRangeAsync(new Azure.HttpRange(streamPosition, bytesRead), chunkStream).ConfigureAwait(false);
+                    }
+
+                    streamPosition = stream.Position;
+                    bytesRemaining -= chunkSize;
+                }
+
                 this.loggerProvider.Info($"Created file content for {file.Path}.");
             }
 
