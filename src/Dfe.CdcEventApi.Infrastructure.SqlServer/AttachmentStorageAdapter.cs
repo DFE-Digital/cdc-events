@@ -141,7 +141,7 @@
 
                 stopwatch.Start();
 
-                // despite cabability of handling a collection of objects there is usually only one.
+                // despite capability of handling a collection of objects there is usually only one.
                 foreach (var blob in attachments)
                 {
                     this.loggerProvider.Info($"Storing obtained attachment data.");
@@ -252,7 +252,7 @@
 
             var directory = share.GetDirectoryClient(folderToUse);
             var file = directory.GetFileClient(blob.FileName);
-            var chunkSize = 4194304;
+            var chunkSize = 4194304; // hard limit in Azure Storage
             long streamPosition = 0;
             long streamLength = 0;
             long bytesRemaining = 0;
