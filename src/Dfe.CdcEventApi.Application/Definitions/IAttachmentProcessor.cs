@@ -34,5 +34,12 @@
         /// <param name="cancellationToken">An instance of <see cref="CancellationToken"/>.</param>
         /// <returns>A collection of <see cref="AttachmentRequest"/>.</returns>
         Task<IEnumerable<AttachmentRequest>> GetAsync(CancellationToken cancellationToken);
+
+        /// <summary>
+        /// Gets the currently required collection of <see cref="AttachmentForDeletionRequest"/>.
+        /// </summary>
+        /// <param name="cancellationToken">An instance of <see cref="CancellationToken"/>.</param>
+        /// <returns>A collection of <see cref="AttachmentForDeletionRequest"/>.</returns>
+        Task<IEnumerable<AttachmentForDeletionRequest>> GetForDeletionAsync(CancellationToken cancellationToken);
     }
 }

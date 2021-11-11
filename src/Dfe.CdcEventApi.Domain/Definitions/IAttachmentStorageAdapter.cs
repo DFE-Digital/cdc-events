@@ -19,6 +19,14 @@
         Task<IEnumerable<AttachmentRequest>> GetAsync();
 
         /// <summary>
+        /// Gets a list of Attachments queued for deletion.
+        /// </summary>
+        /// <returns>
+        /// An <see cref="Task"/> wrapping an collection of <see cref="AttachmentForDeletionRequest"/> of the run.
+        /// </returns>
+        Task<IEnumerable<AttachmentForDeletionRequest>> GetForDeletionAsync();
+
+        /// <summary>
         /// Creats new <see cref="AttachmentResponse"/> records.
         /// </summary>
         /// <param name="runIdentifier">The load run identifier.</param>

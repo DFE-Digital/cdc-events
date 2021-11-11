@@ -12,7 +12,7 @@
     /// <summary>
     /// Entry point for the <see cref="AttachmentsForDeletion"/> function.
     /// </summary>
-    public class AttachmentsForDeletion : AttachmentsFunctionBase
+    public class AttachmentsForDeletion : AttachmentsForDeletionFunctionBase
     {
         private readonly ILoggerProvider loggerProvider;
 

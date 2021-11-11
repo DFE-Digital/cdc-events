@@ -62,13 +62,13 @@
             }
 
             HttpResponseMessage toReturn;
-            var attachtments = await this.attachmentProcessor
+            var attachments = await this.attachmentProcessor
                                             .GetAsync(cancellationToken)
                                             .ConfigureAwait(false);
 
             toReturn = new HttpResponseMessage(HttpStatusCode.OK)
             {
-                Content = new StringContent(JsonConvert.SerializeObject(attachtments)),
+                Content = new StringContent(JsonConvert.SerializeObject(attachments)),
             };
 
             return toReturn;
