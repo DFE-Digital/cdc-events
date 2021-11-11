@@ -54,6 +54,30 @@
         }
       }
     },
+    "/attachmentsfordeletion": {
+      "get": {
+        "summary": "Attachment List for deletion",
+        "description": "Retrieves the list of attachments queued for deletion.",
+        "operationId": "attachmentsfordeletion-get",
+        "parameters": [
+          {
+            "in": "header",
+            "type": "string",
+            "name": "Authorization",
+            "description": "Bearer token authorization.",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The request was accepted and processed."
+          },
+          "500": {
+            "description": "An unexpected error has occurred - please get in touch with us so we can check our logs!"
+          }
+        }
+      }
+    },
     "/deleted": {
       "post": {
         "summary": "Deleted Created",
