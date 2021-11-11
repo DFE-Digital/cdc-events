@@ -21,7 +21,7 @@
     using Dfe.CdcEventApi.Domain.Models;
 
     /// <summary>
-    /// Implements <see cref="IControlStorageAdapter" />.
+    /// Implements <see cref="IAttachmentStorageAdapter" />.
     /// This adapter provids two services;
     /// Get a list of required attachment file details <see cref="AttachmentRequest"/>.
     /// Recieve the obtained attachment data <see cref="AttachmentResponse"/>.
@@ -31,6 +31,7 @@
         private const string EXTRACTAttachmentMerge = "EXTRACT-Attachment-Merge";
         private const string EXTRACTAttachmentFileInfo = "EXTRACT-Attachment-File-Info";
         private const string EXTRACTAttachmentList = "EXTRACT-Attachment-List";
+        private const string EXTRACTAttachmentToDeleteList = "EXTRACT-Attachment-To-Delete-List";
         private const int CommandTimeoutAsLongAsItTakes = 0;
         private const string ProcessHandlerFileNameFormat = "{0}.sql";
         private readonly string rawDbConnectionString;
@@ -213,6 +214,38 @@
                 stopwatch.Start();
 
                 var attachments = sqlConnection.Query<AttachmentRequest>(
+                                            querySql,
+                                            null,
+                                            null,
+                                            true,
+                                            CommandTimeoutAsLongAsItTakes);
+
+                stopwatch.Stop();
+
+                TimeSpan elapsed = stopwatch.Elapsed;
+
+                this.loggerProvider.Info(
+                    $"Query executed with success, time elapsed: " +
+                    $"{elapsed}.");
+
+                return Task.FromResult(attachments);
+            }
+        }
+
+        /// <inheritdoc/>
+        public Task<IEnumerable<AttachmentForDeletionRequest>> GetForDeletionAsync()
+        {
+            this.loggerProvider.Info($"Getting list of attachments for deletion.");
+
+            Stopwatch stopwatch = new Stopwatch();
+            using (SqlConnection sqlConnection = new SqlConnection(this.rawDbConnectionString))
+            {
+                string querySql = this.ExtractHandler(EXTRACTAttachmentToDeleteList);
+                this.loggerProvider.Debug($"Retrieving attachment for deletion records.");
+
+                stopwatch.Start();
+
+                var attachments = sqlConnection.Query<AttachmentForDeletionRequest>(
                                             querySql,
                                             null,
                                             null,

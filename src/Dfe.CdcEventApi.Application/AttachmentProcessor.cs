@@ -45,6 +45,19 @@
         }
 
         /// <summary>
+        /// Retrieve a list of attachments queued for deletion.
+        /// </summary>
+        /// <param name="cancellationToken">An instance of <see cref="CancellationToken"/>.</param>
+        /// <returns>A collection of <see cref="AttachmentForDeletionRequest"/>.</returns>
+        public async Task<IEnumerable<AttachmentForDeletionRequest>> GetForDeletionAsync(CancellationToken cancellationToken)
+        {
+            this.loggerProvider.Info($"{nameof(AttachmentProcessor)} Retrieving list of attachment for deletion.");
+
+            return await this.attachmentStorageAdapter.GetForDeletionAsync()
+                                             .ConfigureAwait(false);
+        }
+
+        /// <summary>
         /// Creates a collection of <see cref="AttachmentResponse"/> records.
         /// </summary>
         /// <param name="runIdentifier">The run identifier date and time.</param>
