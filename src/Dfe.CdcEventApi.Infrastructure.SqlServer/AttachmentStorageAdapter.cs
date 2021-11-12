@@ -283,7 +283,7 @@
 
                     var fileData = sqlConnection.Query<FileData>(
                                                 querySql,
-                                                attachment.BlobKey,
+                                                new { SupplierKeyID = attachment.BlobKey },
                                                 null,
                                                 true,
                                                 CommandTimeoutAsLongAsItTakes);
