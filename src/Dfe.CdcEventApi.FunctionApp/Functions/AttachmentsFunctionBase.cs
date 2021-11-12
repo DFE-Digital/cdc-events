@@ -171,5 +171,36 @@
 
             return toReturn;
         }
+
+        /// <summary>
+        /// Deletes queued attachments from file share and Mastered db.
+        /// </summary>
+        /// <param name="httpRequest">
+        /// The <see cref="HttpRequest"/> being processed.</param>
+        /// <param name="cancellationToken">
+        /// The asynchronous <see cref="CancellationToken"/>.
+        /// </param>
+        /// <returns>
+        /// A <see cref="Task"/> wrapping the <see cref="HttpResponseMessage"/>.
+        /// </returns>
+        protected async Task<HttpResponseMessage> DeleteAsync(HttpRequest httpRequest, CancellationToken cancellationToken)
+        {
+            if (httpRequest == null)
+            {
+                throw new ArgumentNullException(nameof(httpRequest));
+            }
+
+            HttpResponseMessage toReturn;
+            var attachments = await this.attachmentProcessor
+                                            .DeleteAsync(cancellationToken)
+                                            .ConfigureAwait(false);
+
+            toReturn = new HttpResponseMessage(HttpStatusCode.OK)
+            {
+                Content = new StringContent(JsonConvert.SerializeObject(attachments)),
+            };
+
+            return toReturn;
+        }
     }
 }

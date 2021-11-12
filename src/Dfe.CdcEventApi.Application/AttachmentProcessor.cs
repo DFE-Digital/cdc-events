@@ -81,5 +81,14 @@
                                             models)
                                             .ConfigureAwait(false);
         }
+
+        /// <inheritdoc/>
+        public async Task<IEnumerable<AttachmentForDeletionRequest>> DeleteAsync(CancellationToken cancellationToken)
+        {
+            this.loggerProvider.Info($"{nameof(AttachmentProcessor)} deleting queued attachments.");
+
+            return await this.attachmentStorageAdapter.DeleteAsync()
+                                             .ConfigureAwait(false);
+        }
     }
 }

@@ -41,5 +41,12 @@
         /// <param name="cancellationToken">An instance of <see cref="CancellationToken"/>.</param>
         /// <returns>A collection of <see cref="AttachmentForDeletionRequest"/>.</returns>
         Task<IEnumerable<AttachmentForDeletionRequest>> GetForDeletionAsync(CancellationToken cancellationToken);
+
+        /// <summary>
+        /// Deletes queued attachments from file share and Mastered db.
+        /// </summary>
+        /// <param name="cancellationToken">An instance of <see cref="CancellationToken"/>.</param>
+        /// <returns>A collection of <see cref="AttachmentForDeletionRequest"/>.</returns>
+        Task<IEnumerable<AttachmentForDeletionRequest>> DeleteAsync(CancellationToken cancellationToken);
     }
 }
