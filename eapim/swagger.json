@@ -52,6 +52,28 @@
             "description": "An unexpected error has occurred - please get in touch with us so we can check our logs!"
           }
         }
+      },
+      "delete": {
+        "summary": "Attachments Delete",
+        "description": "Removes attachments queued for deletion from storage.",
+        "operationId": "attachments-delete",
+        "parameters": [
+          {
+            "in": "header",
+            "type": "string",
+            "name": "Authorization",
+            "description": "Bearer token authorization.",
+            "required": true
+          }
+        ],
+        "responses": {
+          "202": {
+            "description": "The event data was accepted and processed."
+          },
+          "500": {
+            "description": "An unexpected error has occurred - please get in touch with us so we can check our logs!"
+          }
+        }
       }
     },
     "/attachmentsfordeletion": {

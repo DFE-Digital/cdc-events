@@ -47,7 +47,7 @@ namespace Dfe.CdcEventApi.FunctionApp.Functions
         /// </returns>
         [FunctionName("attachments")]
         public async Task<HttpResponseMessage> Run(
-            [HttpTrigger(AuthorizationLevel.Function, "GET", "POST")] HttpRequest httpRequest,
+            [HttpTrigger(AuthorizationLevel.Function, "GET", "POST", "DELETE")] HttpRequest httpRequest,
             CancellationToken cancellationToken)
         {
             try
@@ -68,6 +68,13 @@ namespace Dfe.CdcEventApi.FunctionApp.Functions
                                   cancellationToken)
                               .ConfigureAwait(false);
                         return postReturn;
+                    case "DELETE":
+                        HttpResponseMessage deleteReturn =
+                              await this.DeleteAsync(
+                                  httpRequest,
+                                  cancellationToken)
+                              .ConfigureAwait(false);
+                        return deleteReturn;
                     default:
                         return new HttpResponseMessage(System.Net.HttpStatusCode.BadRequest);
                 }

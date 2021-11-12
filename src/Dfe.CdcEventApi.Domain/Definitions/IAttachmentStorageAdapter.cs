@@ -19,6 +19,14 @@
         Task<IEnumerable<AttachmentRequest>> GetAsync();
 
         /// <summary>
+        /// Deletes queued attachments from the file share and Mastered db.
+        /// </summary>
+        /// <returns>
+        /// An <see cref="Task"/> wrapping an collection of <see cref="AttachmentForDeletionRequest"/> of the run.
+        /// </returns>
+        Task<IEnumerable<AttachmentForDeletionRequest>> DeleteAsync();
+
+        /// <summary>
         /// Gets a list of Attachments queued for deletion.
         /// </summary>
         /// <returns>

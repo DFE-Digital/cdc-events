@@ -32,6 +32,8 @@
         private const string EXTRACTAttachmentFileInfo = "EXTRACT-Attachment-File-Info";
         private const string EXTRACTAttachmentList = "EXTRACT-Attachment-List";
         private const string EXTRACTAttachmentToDeleteList = "EXTRACT-Attachment-To-Delete-List";
+        private const string MASTERFileData = "MASTER-File-Data";
+        private const string MASTERFileDataDelete = "MASTER-File-Data-Delete";
         private const int CommandTimeoutAsLongAsItTakes = 0;
         private const string ProcessHandlerFileNameFormat = "{0}.sql";
         private readonly string rawDbConnectionString;
@@ -262,6 +264,41 @@
 
                 return Task.FromResult(attachments);
             }
+        }
+
+        /// <inheritdoc/>
+        public async Task<IEnumerable<AttachmentForDeletionRequest>> DeleteAsync()
+        {
+            var attachments = await this.GetForDeletionAsync().ConfigureAwait(false);
+
+            foreach (var attachment in attachments)
+            {
+                Stopwatch stopwatch = new Stopwatch();
+                using (SqlConnection sqlConnection = new SqlConnection(this.masteredDbConnectionString))
+                {
+                    string querySql = this.ExtractHandler(MASTERFileData);
+                    this.loggerProvider.Debug($"Retrieving file data for blob key {attachment.BlobKey}.");
+
+                    stopwatch.Start();
+
+                    var fileData = sqlConnection.Query<FileData>(
+                                                querySql,
+                                                attachment.BlobKey,
+                                                null,
+                                                true,
+                                                CommandTimeoutAsLongAsItTakes);
+
+                    stopwatch.Stop();
+
+                    TimeSpan elapsed = stopwatch.Elapsed;
+
+                    this.loggerProvider.Info(
+                        $"File data for {fileData.First().FileURL} retrieved, time elapsed: " +
+                        $"{elapsed}.");
+                }
+            }
+
+            return attachments;
         }
 
         private async Task<AttachmentResponse> StoreAttachment(AttachmentResponse blob)
