@@ -105,6 +105,20 @@
         "definition": {
           "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
           "actions": {
+            "Delete-Queued-Attachments": {
+              "inputs": {
+                "headers": {
+                  "Authorization": "Bearer @{variables('TargetOAUTHToken')}",
+                  "Content-Type": "application/json",
+                  "Ocp-Apim-Subscription-Key": "@variables('TargetOAUTHKey')",
+                  "X-Run-Identifier": "@variables('Control-Started')"
+                },
+                "method": "DELETE",
+                "uri": "@{parameters('TargetEndpoint')}attachments"
+              },
+              "runAfter": { "Scope-Attachments": [ "Succeeded" ] },
+              "type": "Http"
+            },
             "Init-Control-Attachment-Count": {
               "inputs": {
                 "variables": [
@@ -899,10 +913,12 @@
                               }
                             }
                           },
-                          "expression": { "and": [
-                            { "equals": [ "@outputs('Re-Authenticate-Source')['statusCode']", 200 ] },
-                            { "equals": [ "@equals(body('Re-Authenticate-Source')['Success'],true)","@true" ] }
-                           ] },
+                          "expression": {
+                            "and": [
+                              { "equals": [ "@outputs('Re-Authenticate-Source')['statusCode']", 200 ] },
+                              { "equals": [ "@equals(body('Re-Authenticate-Source')['Success'],true)", "@true" ] }
+                            ]
+                          },
                           "runAfter": { "Re-Authenticate-Source": [ "Succeeded" ] },
                           "type": "If"
                         },
@@ -1433,7 +1449,7 @@
                 }
               },
               "description": "To send notification via email on results of the run.",
-              "runAfter": { "Scope-Attachments": [ "Succeeded", "Failed", "Skipped", "TimedOut" ] },
+              "runAfter": { "Delete-Queued-Attachments": [ "Succeeded" ] },
               "type": "Scope"
             },
             "Scope-Start-Status": {
