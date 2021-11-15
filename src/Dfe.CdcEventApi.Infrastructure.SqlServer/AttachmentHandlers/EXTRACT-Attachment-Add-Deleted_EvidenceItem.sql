@@ -1,0 +1,1 @@
+﻿EXECUTE [raw].[p_CREATE-Deleted_EvidenceItem] @EntityUniqueID, @BlobKey, @EvidenceType

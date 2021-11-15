@@ -12,6 +12,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Remove="AttachmentHandlers\EXTRACT-Attachment-Add-Deleted_EvidenceItem.sql" />
     <None Remove="AttachmentHandlers\EXTRACT-Attachment-List.sql" />
     <None Remove="AttachmentHandlers\EXTRACT-Attachment-Merge.sql" />
     <None Remove="AttachmentHandlers\MASTER-File-Data.sql" />
@@ -71,6 +72,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <EmbeddedResource Include="AttachmentHandlers\EXTRACT-Attachment-Add-Deleted_EvidenceItem.sql" />
     <EmbeddedResource Include="AttachmentHandlers\EXTRACT-Attachment-List.sql" />
     <EmbeddedResource Include="AttachmentHandlers\EXTRACT-Attachment-To-Delete-List.sql" />
     <EmbeddedResource Include="AttachmentHandlers\EXTRACT-Attachment-Merge.sql" />
