@@ -32,6 +32,7 @@
         private const string EXTRACTAttachmentFileInfo = "EXTRACT-Attachment-File-Info";
         private const string EXTRACTAttachmentList = "EXTRACT-Attachment-List";
         private const string EXTRACTAttachmentToDeleteList = "EXTRACT-Attachment-To-Delete-List";
+        private const string EXTRACTAttachmentAddDeletedEvidenceItem = "EXTRACT-Attachment-Add-Deleted_EvidenceItem";
         private const string MASTERFileData = "MASTER-File-Data";
         private const string MASTERFileDataDelete = "MASTER-File-Data-Delete";
         private const int CommandTimeoutAsLongAsItTakes = 0;
@@ -274,15 +275,30 @@
             foreach (var attachment in attachments)
             {
                 Stopwatch stopwatch = new Stopwatch();
-                using (SqlConnection sqlConnection = new SqlConnection(this.masteredDbConnectionString))
+                SqlTransaction transaction = null;
+                SqlConnection sqlConnection = null;
+                SqlConnection masteredSqlConnection = null;
+                try
                 {
-                    string querySql = this.ExtractHandler(MASTERFileData);
+                    var masteredSelectSql = this.ExtractHandler(MASTERFileData);
+                    var masteredDeleteSql = this.ExtractHandler(MASTERFileDataDelete);
+                    var rawInsertSql = this.ExtractHandler(EXTRACTAttachmentAddDeletedEvidenceItem);
+
+                    sqlConnection = new SqlConnection(this.rawDbConnectionString);
+#pragma warning disable CA2000 // Dispose objects before losing scope
+                    masteredSqlConnection = new SqlConnection(this.masteredDbConnectionString);
+#pragma warning restore CA2000 // Dispose objects before losing scope
+
+                    sqlConnection.Open();
+                    masteredSqlConnection.Open();
+                    this.loggerProvider.Info($"Opened 2 SQL Connections");
+
                     this.loggerProvider.Debug($"Retrieving file data for blob key {attachment.BlobKey}.");
 
                     stopwatch.Start();
 
-                    var fileData = sqlConnection.Query<FileData>(
-                                                querySql,
+                    var fileData = masteredSqlConnection.Query<FileData>(
+                                                masteredSelectSql,
                                                 new { SupplierKeyID = attachment.BlobKey },
                                                 null,
                                                 true,
@@ -292,9 +308,69 @@
 
                     TimeSpan elapsed = stopwatch.Elapsed;
 
+                    var fileUrl = fileData.First().FileURL;
+
                     this.loggerProvider.Info(
-                        $"File data for {fileData.First().FileURL} retrieved, time elapsed: " +
+                        $"File data for {fileUrl} retrieved, time elapsed: " +
                         $"{elapsed}.");
+
+                    transaction = sqlConnection.BeginTransaction();
+
+                    this.loggerProvider.Info($"Started transaction on primary connection");
+
+                    this.loggerProvider.Info($"Attempting deletion of blob from file share");
+
+                    ShareFileClient file = new ShareFileClient(new Uri(fileUrl));
+
+                    await file.DeleteAsync().ConfigureAwait(false);
+
+                    this.loggerProvider.Debug($"Deleting Storage Blob record.");
+
+                    stopwatch.Start();
+
+                    await masteredSqlConnection
+                        .ExecuteAsync(masteredDeleteSql, new { SupplierKeyID = attachment.BlobKey }, null, CommandTimeoutAsLongAsItTakes)
+                        .ConfigureAwait(false);
+                    this.loggerProvider.Info($"Deleted file data from mastered db");
+
+                    await sqlConnection
+                        .ExecuteAsync(rawInsertSql, attachment, transaction, CommandTimeoutAsLongAsItTakes)
+                        .ConfigureAwait(false);
+                    this.loggerProvider.Info($"Added Delete_EvidenceItem record to raw db");
+
+                    transaction.Commit();
+                    stopwatch.Stop();
+                    this.loggerProvider.Info($"Commited Transaction.");
+
+                    elapsed = stopwatch.Elapsed;
+
+                    this.loggerProvider.Info(
+                        $"Query executed with success, time elapsed: " +
+                        $"{elapsed}.");
+                }
+                catch (Exception ex)
+                {
+                    transaction?.Rollback();
+                    this.loggerProvider.Error($"Exception. {ex}");
+                    throw;
+                }
+                finally
+                {
+                    if (sqlConnection?.State != System.Data.ConnectionState.Closed)
+                    {
+                        this.loggerProvider.Info($"Closing primary database connection.");
+                        sqlConnection?.Close();
+                        sqlConnection?.Dispose();
+                    }
+
+                    sqlConnection?.Dispose();
+
+                    if (masteredSqlConnection?.State != System.Data.ConnectionState.Closed)
+                    {
+                        this.loggerProvider.Info($"Closing secondary database connection.");
+                        masteredSqlConnection?.Close();
+                        masteredSqlConnection?.Dispose();
+                    }
                 }
             }
 
