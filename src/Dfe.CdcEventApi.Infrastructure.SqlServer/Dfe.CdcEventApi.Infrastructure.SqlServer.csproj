@@ -15,6 +15,7 @@
     <None Remove="AttachmentHandlers\EXTRACT-Attachment-Add-Deleted_EvidenceItem.sql" />
     <None Remove="AttachmentHandlers\EXTRACT-Attachment-List.sql" />
     <None Remove="AttachmentHandlers\EXTRACT-Attachment-Merge.sql" />
+    <None Remove="AttachmentHandlers\MASTER-File-Data-Delete.sql" />
     <None Remove="AttachmentHandlers\MASTER-File-Data.sql" />
     <None Remove="EntityHandlers\Create_Raw_Blob.sql" />
     <None Remove="EntityHandlers\Create_Raw_Deleted.sql" />
@@ -76,6 +77,7 @@
     <EmbeddedResource Include="AttachmentHandlers\EXTRACT-Attachment-List.sql" />
     <EmbeddedResource Include="AttachmentHandlers\EXTRACT-Attachment-To-Delete-List.sql" />
     <EmbeddedResource Include="AttachmentHandlers\EXTRACT-Attachment-Merge.sql" />
+    <EmbeddedResource Include="AttachmentHandlers\MASTER-File-Data-Delete.sql" />
     <EmbeddedResource Include="AttachmentHandlers\MASTER-File-Data.sql" />
     <EmbeddedResource Include="ControlHandlers\CONTROL-Get-Count.sql" />
     <EmbeddedResource Include="ControlHandlers\CONTROL-Since.sql" />
