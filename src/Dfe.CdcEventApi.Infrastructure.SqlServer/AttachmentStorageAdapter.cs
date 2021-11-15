@@ -320,9 +320,11 @@
 
                     this.loggerProvider.Info($"Attempting deletion of blob from file share");
 
-                    ShareFileClient file = new ShareFileClient(new Uri(fileUrl));
+                    StorageSharedKeyCredential credential = new StorageSharedKeyCredential(this.attachmentStorageAccountName, this.attachmentStorageAccountKey);
 
-                    await file.DeleteAsync().ConfigureAwait(false);
+                    ShareFileClient shareFileClient = new ShareFileClient(new Uri(fileUrl), credential);
+
+                    await shareFileClient.DeleteAsync().ConfigureAwait(false);
 
                     this.loggerProvider.Debug($"Deleting Storage Blob record.");
 
