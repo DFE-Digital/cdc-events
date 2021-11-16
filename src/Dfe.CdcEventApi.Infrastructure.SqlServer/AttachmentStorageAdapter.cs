@@ -308,47 +308,54 @@
 
                     TimeSpan elapsed = stopwatch.Elapsed;
 
-                    var fileUrl = fileData.First().FileURL;
+                    if (fileData.Any())
+                    {
+                        var fileUrl = fileData.First().FileURL;
 
-                    this.loggerProvider.Info(
-                        $"File data for {fileUrl} retrieved, time elapsed: " +
-                        $"{elapsed}.");
+                        this.loggerProvider.Info(
+                            $"File data for {fileUrl} retrieved, time elapsed: " +
+                            $"{elapsed}.");
 
-                    transaction = sqlConnection.BeginTransaction();
+                        transaction = sqlConnection.BeginTransaction();
 
-                    this.loggerProvider.Info($"Started transaction on primary connection");
+                        this.loggerProvider.Info($"Started transaction on primary connection");
 
-                    this.loggerProvider.Info($"Attempting deletion of blob from file share");
+                        this.loggerProvider.Info($"Attempting deletion of blob from file share");
 
-                    StorageSharedKeyCredential credential = new StorageSharedKeyCredential(this.attachmentStorageAccountName, this.attachmentStorageAccountKey);
+                        StorageSharedKeyCredential credential = new StorageSharedKeyCredential(this.attachmentStorageAccountName, this.attachmentStorageAccountKey);
 
-                    ShareFileClient shareFileClient = new ShareFileClient(new Uri(fileUrl), credential);
+                        ShareFileClient shareFileClient = new ShareFileClient(new Uri(fileUrl), credential);
 
-                    await shareFileClient.DeleteAsync().ConfigureAwait(false);
+                        await shareFileClient.DeleteAsync().ConfigureAwait(false);
 
-                    this.loggerProvider.Debug($"Deleting Storage Blob record.");
+                        this.loggerProvider.Debug($"Deleting Storage Blob record.");
 
-                    stopwatch.Start();
+                        stopwatch.Start();
 
-                    await masteredSqlConnection
-                        .ExecuteAsync(masteredDeleteSql, new { SupplierKeyID = attachment.BlobKey }, null, CommandTimeoutAsLongAsItTakes)
-                        .ConfigureAwait(false);
-                    this.loggerProvider.Info($"Deleted file data from mastered db");
+                        await masteredSqlConnection
+                            .ExecuteAsync(masteredDeleteSql, new { SupplierKeyID = attachment.BlobKey }, null, CommandTimeoutAsLongAsItTakes)
+                            .ConfigureAwait(false);
+                        this.loggerProvider.Info($"Deleted file data from mastered db");
 
-                    await sqlConnection
-                        .ExecuteAsync(rawInsertSql, attachment, transaction, CommandTimeoutAsLongAsItTakes)
-                        .ConfigureAwait(false);
-                    this.loggerProvider.Info($"Added Delete_EvidenceItem record to raw db");
+                        await sqlConnection
+                            .ExecuteAsync(rawInsertSql, attachment, transaction, CommandTimeoutAsLongAsItTakes)
+                            .ConfigureAwait(false);
+                        this.loggerProvider.Info($"Added Delete_EvidenceItem record to raw db");
 
-                    transaction.Commit();
-                    stopwatch.Stop();
-                    this.loggerProvider.Info($"Commited Transaction.");
+                        transaction.Commit();
+                        stopwatch.Stop();
+                        this.loggerProvider.Info($"Commited Transaction.");
 
-                    elapsed = stopwatch.Elapsed;
+                        elapsed = stopwatch.Elapsed;
 
-                    this.loggerProvider.Info(
-                        $"Query executed with success, time elapsed: " +
-                        $"{elapsed}.");
+                        this.loggerProvider.Info(
+                            $"Query executed with success, time elapsed: " +
+                            $"{elapsed}.");
+                    }
+                    else
+                    {
+                        this.loggerProvider.Warning($"File data not found for {attachment.BlobKey}");
+                    }
                 }
                 catch (Exception ex)
                 {
