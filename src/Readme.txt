@@ -23,8 +23,11 @@ Then Control-E,D (Menu Edit/Advanced/Format Document) to reformat the file.
 
 Then save it. Now you can perform a Compare with Unmodified to review the changes.
 
+A log analytics workspace was added to enable custom output; a json body template is required for the request from the Logic App. 
+The unescaping when converting back to json caused problems so the template string is escaped - note that if further logging steps are added
+they will need to be treated in the same way
 
-GOTCHA's
+GOTCHAs
 
 This was noticed from time to time, in dealing with the Azure Logic app designer.
 
