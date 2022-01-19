@@ -73,9 +73,7 @@
       "type": "string",
       "defaultValue": "01"
     },
-    "resourceGroupName": {
-      "type": "string"
-    }
+    "resourceGroupName": { "type": "string" }
   },
   "variables": {
     "singleQuote": "'",
@@ -1867,7 +1865,7 @@
           "$connections": {
             "value": {
               "azureloganalyticsdatacollector": {
-                "connectionId": "'/subscriptions/cf75ef66-7f08-4f44-889f-e77aabbab3eb/resourceGroups/', [concat(parameters('resourceGroupName'), '/providers/Microsoft.Web/connections/azureloganalyticsdatacollector'",
+                "connectionId": "[concat('/subscriptions/cf75ef66-7f08-4f44-889f-e77aabbab3eb/resourceGroups/', parameters('resourceGroupName'), '/providers/Microsoft.Web/connections/azureloganalyticsdatacollector')]",
                 "connectionName": "azureloganalyticsdatacollector",
                 "id": "/subscriptions/cf75ef66-7f08-4f44-889f-e77aabbab3eb/providers/Microsoft.Web/locations/westeurope/managedApis/azureloganalyticsdatacollector"
               }
