@@ -72,6 +72,9 @@
     "appInstance": {
       "type": "string",
       "defaultValue": "01"
+    },
+    "resourceGroupName": {
+      "type": "string"
     }
   },
   "variables": {
