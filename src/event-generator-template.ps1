@@ -14,6 +14,14 @@ $a.resources[0].properties.definition.parameters.TargetEndpoint.defaultValue = "
 $a.resources[0].properties.definition.parameters.TargetControlEndpoint.defaultValue = "[concat(parameters('cdcEventsApiBaseUri'), '/control')]"
 $a.resources[0].properties.definition.parameters.TargetOAUTHEndpoint.defaultValue = "[parameters('internalOAuthTokenEndpoint')]"
 $a.resources[0].properties.definition.parameters.CDC2NotifyAPIKeySecretUri.defaultValue  = "[concat(reference(variables('keyVaultSecretCDC2NotifyAPIKey'), '2019-09-01').secretUriWithVersion, '?api-version=2016-10-01')]"
+$a.resources[0].properties.parameters.'$connections'.value.azureloganalyticsdatacollector.connectionId = "'/subscriptions/cf75ef66-7f08-4f44-889f-e77aabbab3eb/resourceGroups/', [concat(parameters('resourceGroupName'), '/providers/Microsoft.Web/connections/azureloganalyticsdatacollector'"
+
+# The body template for sending log analytics has to be escaped here otherwise it all goes wrong when the json is unescaped in the last step
+# Needs to be replicated if further log analytics steps are added
+$sendDataBodyTemplate = $a.resources[0].properties.definition.actions.'Scope-Attachments'.actions.'For-Each-Attachment'.actions.'Validate-Post-Attachment'.else.actions.'Send_Data'.inputs.body
+$sendDataBodyTemplate = $sendDataBodyTemplate.Replace('"', '\"').Replace("`n","").Replace("`r","")
+$a.resources[0].properties.definition.actions.'Scope-Attachments'.actions.'For-Each-Attachment'.actions.'Validate-Post-Attachment'.else.actions.'Send_Data'.inputs.body = $sendDataBodyTemplate
+
 #
 # PLEASE NOTE: the values of the Status* Properties are dependent on the Dfe.CdcEventApi.Domain.Models.ControlState Enum values
 #
@@ -22,7 +30,7 @@ $a.resources[0].properties.definition.parameters.StatusEntities.defaultValue = 1
 $a.resources[0].properties.definition.parameters.StatusAttachments.defaultValue = 2
 $a.resources[0].properties.definition.parameters.StatusReporting.defaultValue = 3
 # Finally write it back to the same file
-$a | ConvertTo-Json -Compress -Depth 32 | % { [System.Text.RegularExpressions.Regex]::Unescape($_) }  | set-content $pathToJson 
+$a | ConvertTo-Json -Compress -Depth 32 | % { [System.Text.RegularExpressions.Regex]::Unescape($_) }  | set-content $pathToJson
 #
-# The tempalte is now compressed to a single line with all hard coded variables set to ARM template parameter and variable selectors.
+# The template is now compressed to a single line with all hard coded variables set to ARM template parameter and variable selectors.
 #

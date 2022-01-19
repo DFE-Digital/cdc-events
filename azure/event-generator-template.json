@@ -602,7 +602,7 @@
                           },
                           "Send_Data": {
                             "inputs": {
-                              "body": "{\"key\":\"@{items('For-Each-Attachment')['Key']}\",\n\"siteName\": \"@{items('For-Each-Attachment')?['SiteName']}\"}",
+                              "body": "{\"key\":\"@{items('For-Each-Attachment')['Key']}\",\"siteName\": \"@{items('For-Each-Attachment')?['SiteName']}\"}",
                               "headers": { "Log-Type": "PostAttachmentFailed" },
                               "host": { "connection": { "name": "@parameters('$connections')['azureloganalyticsdatacollector']['connectionId']" } },
                               "method": "post",
@@ -1864,7 +1864,7 @@
           "$connections": {
             "value": {
               "azureloganalyticsdatacollector": {
-                "connectionId": "/subscriptions/cf75ef66-7f08-4f44-889f-e77aabbab3eb/resourceGroups/s153p01-cdcaeg/providers/Microsoft.Web/connections/azureloganalyticsdatacollector",
+                "connectionId": "'/subscriptions/cf75ef66-7f08-4f44-889f-e77aabbab3eb/resourceGroups/', [concat(parameters('resourceGroupName'), '/providers/Microsoft.Web/connections/azureloganalyticsdatacollector'",
                 "connectionName": "azureloganalyticsdatacollector",
                 "id": "/subscriptions/cf75ef66-7f08-4f44-889f-e77aabbab3eb/providers/Microsoft.Web/locations/westeurope/managedApis/azureloganalyticsdatacollector"
               }
