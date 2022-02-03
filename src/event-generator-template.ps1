@@ -15,6 +15,8 @@ $a.resources[0].properties.definition.parameters.TargetControlEndpoint.defaultVa
 $a.resources[0].properties.definition.parameters.TargetOAUTHEndpoint.defaultValue = "[parameters('internalOAuthTokenEndpoint')]"
 $a.resources[0].properties.definition.parameters.CDC2NotifyAPIKeySecretUri.defaultValue  = "[concat(reference(variables('keyVaultSecretCDC2NotifyAPIKey'), '2019-09-01').secretUriWithVersion, '?api-version=2016-10-01')]"
 $a.resources[0].properties.parameters.'$connections'.value.azureloganalyticsdatacollector.connectionId = "[concat('/subscriptions/', parameters('subscriptionId'), '/resourceGroups/', parameters('resourceGroupPrefix'), '-cdcaeg/providers/Microsoft.Web/connections/', parameters('resourceGroupPrefix'), '-logapi-01')]"
+$a.resources[0].properties.parameters.'$connections'.value.azureloganalyticsdatacollector.connectionName = "[concat(parameters('resourceGroupPrefix'), '-logapi-01')]"
+$a.resources[0].properties.parameters.'$connections'.value.azureloganalyticsdatacollector.id = "[concat('/subscriptions/', parameters('subscriptionId'), '/providers/Microsoft.Web/locations/westeurope/managedApis/', parameters('resourceGroupPrefix'), '-logapi-01')]"
 
 # The body template for sending log analytics has to be escaped here otherwise it all goes wrong when the json is unescaped in the last step
 # Needs to be replicated if further log analytics steps are added
