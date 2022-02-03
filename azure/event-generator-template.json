@@ -1867,8 +1867,8 @@
             "value": {
               "azureloganalyticsdatacollector": {
                 "connectionId": "[concat('/subscriptions/', parameters('subscriptionId'), '/resourceGroups/', parameters('resourceGroupPrefix'), '-cdcaeg/providers/Microsoft.Web/connections/', parameters('resourceGroupPrefix'), '-logapi-01')]",
-                "connectionName": "azureloganalyticsdatacollector",
-                "id": "/subscriptions/cf75ef66-7f08-4f44-889f-e77aabbab3eb/providers/Microsoft.Web/locations/westeurope/managedApis/azureloganalyticsdatacollector"
+                "connectionName": "[concat(parameters('resourceGroupPrefix'), '-logapi-01')]",
+                "id": "[concat('/subscriptions/', parameters('subscriptionId'), '/providers/Microsoft.Web/locations/westeurope/managedApis/', parameters('resourceGroupPrefix'), '-logapi-01')]"
               }
             }
           }
