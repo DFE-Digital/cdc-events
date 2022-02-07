@@ -51,6 +51,7 @@
             serviceCollection.AddSingleton<IEntityStorageAdapterSettingsProvider, EntityStorageAdapterSettingsProvider>();
             serviceCollection.AddSingleton<IAttachmentSettingsProvider, AttachmentSettingsProvider>();
             serviceCollection.AddSingleton<INotifySettingsProvider, NotifySettingsProvider>();
+            serviceCollection.AddSingleton<IApplicationStateProvider, ApplicationStateProvider>();
         }
 
         private static void AddProcessors(IServiceCollection serviceCollection)
