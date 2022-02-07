@@ -24,16 +24,19 @@
         /// An instance of type <see cref="IControlProcessor" />.
         /// </param>
         /// <param name="notifyProcessor">An instance of <see cref="INotifyProcessor"/>.</param>
+        /// <param name="applicationStateProvider">An instance of <see cref="IApplicationStateProvider"/>.</param>
         /// <param name="loggerProvider">
         /// An instance of type <see cref="ILoggerProvider" />.
         /// </param>
         public Control(
             IControlProcessor controlProcessor,
             INotifyProcessor notifyProcessor,
+            IApplicationStateProvider applicationStateProvider,
             ILoggerProvider loggerProvider)
             : base(
                   controlProcessor,
                   notifyProcessor,
+                  applicationStateProvider,
                   loggerProvider)
         {
             this.loggerProvider = loggerProvider;
