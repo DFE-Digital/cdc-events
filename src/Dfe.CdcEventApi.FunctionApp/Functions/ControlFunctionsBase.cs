@@ -112,6 +112,7 @@
                     toReturn.Headers.Add(HeaderNameSince, $"{sinceDateTime:O}");
 
                     // init application state
+                    this.loggerProvider.Info($"Initialising ApplicationState with RunIdentifier {currentLoad.Loaded_DateTime}.");
                     this.applicationStateProvider.StartLoad(currentLoad.Load_DateTime);
                 }
                 catch (Exception exception)

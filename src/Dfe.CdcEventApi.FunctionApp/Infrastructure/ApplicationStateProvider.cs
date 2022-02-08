@@ -11,16 +11,6 @@
     {
         private int requestCount;
         private ApplicationState applicationState;
-        private ILoggerProvider loggerProvider;
-
-        /// <summary>
-        /// Initialises a new instance of the <see cref="ApplicationStateProvider"/> class.
-        /// </summary>
-        /// <param name="loggerProvider">Logger provider.</param>
-        public ApplicationStateProvider(ILoggerProvider loggerProvider)
-        {
-            this.loggerProvider = loggerProvider;
-        }
 
         /// <inheritdoc/>
         public int RequestCount
@@ -39,8 +29,6 @@
         /// <inheritdoc/>
         public void StartLoad(DateTime runIdentifier)
         {
-            this.loggerProvider.Info($"Initialising ApplicationState with RunIdentifier {runIdentifier}.");
-
             this.applicationState.RunIdentifier = runIdentifier;
             this.applicationState.ForceResponseStatusCode = string.Empty;
             this.applicationState.ForceResponseStatusCodeCount = 0;
@@ -50,8 +38,6 @@
         /// <inheritdoc/>
         public bool ForceResponseStatusCode(string statusCode, string responseCount)
         {
-            this.loggerProvider.Info($"ForceResponseStatusCode called - statusCode: {statusCode}, responseCount: {responseCount}, requestCount: {this.RequestCount}.");
-
             bool returnVal = false;
             int responseCountVal;
             int statusCodeVal;
@@ -63,8 +49,6 @@
                     returnVal = this.requestCount < responseCountVal;
                 }
             }
-
-            this.loggerProvider.Info($"ForceResponseStatusCode result {returnVal}.");
 
             this.RequestCount++;
 
