@@ -44,6 +44,7 @@
             this.applicationState.RunIdentifier = runIdentifier;
             this.applicationState.ForceResponseStatusCode = string.Empty;
             this.applicationState.ForceResponseStatusCodeCount = 0;
+            RequestCount = 0;
         }
 
         /// <inheritdoc/>
