@@ -23,9 +23,12 @@
     public abstract class EntityFunctionsBase
     {
         private const string HeaderNameRunIdentifier = "X-Run-Identifier";
+        private const string HeaderNameForceResponseStatusCode = "X-Force-Response-Status";
+        private const string HeaderNameForceResponseStatusCount = "X-Force-Response-Status-Count";
 
         private readonly IEntityProcessor entityProcessor;
         private readonly IEntityArchiveProcessor entityArchiveProcessor;
+        private readonly IApplicationStateProvider applicationStateProvider;
         private readonly ILoggerProvider loggerProvider;
 
         /// <summary>
@@ -36,16 +39,19 @@
         /// An instance of type <see cref="IEntityProcessor" />.
         /// </param>
         /// <param name="entityArchiveProcessor">An instance of <see cref="IEntityArchiveProcessor"/>.</param>
+        /// <param name="applicationStateProvider">An instance of <see cref="IApplicationStateProvider"/>.</param>
         /// <param name="loggerProvider">
         /// An instance of type <see cref="ILoggerProvider" />.
         /// </param>
         public EntityFunctionsBase(
             IEntityProcessor entityProcessor,
             IEntityArchiveProcessor entityArchiveProcessor,
+            IApplicationStateProvider applicationStateProvider,
             ILoggerProvider loggerProvider)
         {
             this.entityProcessor = entityProcessor;
             this.entityArchiveProcessor = entityArchiveProcessor;
+            this.applicationStateProvider = applicationStateProvider;
             this.loggerProvider = loggerProvider;
         }
 
@@ -80,6 +86,17 @@
                 $"Checking for header \"{HeaderNameRunIdentifier}\"...");
 
             IHeaderDictionary headerDictionary = httpRequest.Headers;
+
+            if (headerDictionary.ContainsKey(HeaderNameForceResponseStatusCode) &&
+                headerDictionary.ContainsKey(HeaderNameForceResponseStatusCount) &&
+                !string.IsNullOrEmpty(headerDictionary[HeaderNameForceResponseStatusCode]) &&
+                !string.IsNullOrEmpty(headerDictionary[HeaderNameForceResponseStatusCount]))
+            {
+                if (this.applicationStateProvider.ForceResponseStatusCode(headerDictionary[HeaderNameForceResponseStatusCode], headerDictionary[HeaderNameForceResponseStatusCount]))
+                {
+                    return new HttpResponseMessage((HttpStatusCode)int.Parse(headerDictionary[HeaderNameForceResponseStatusCode].ToString()));
+                }
+            }
 
             DateTime? runIdentifier = null;
             string runIdentifierStr = null;
