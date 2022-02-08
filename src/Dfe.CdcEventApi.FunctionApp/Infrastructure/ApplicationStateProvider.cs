@@ -10,7 +10,7 @@
     public class ApplicationStateProvider : IApplicationStateProvider
     {
         private int requestCount;
-        private ApplicationState applicationState;
+        private ApplicationState applicationState = new ApplicationState();
 
         /// <inheritdoc/>
         public int RequestCount
