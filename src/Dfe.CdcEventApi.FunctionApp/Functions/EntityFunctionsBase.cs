@@ -92,9 +92,19 @@
                 !string.IsNullOrEmpty(headerDictionary[HeaderNameForceResponseStatusCode]) &&
                 !string.IsNullOrEmpty(headerDictionary[HeaderNameForceResponseStatusCount]))
             {
-                if (this.applicationStateProvider.ForceResponseStatusCode(headerDictionary[HeaderNameForceResponseStatusCode], headerDictionary[HeaderNameForceResponseStatusCount]))
+                var statusCode = headerDictionary[HeaderNameForceResponseStatusCode];
+                var responseCount = headerDictionary[HeaderNameForceResponseStatusCount];
+
+                this.loggerProvider.Info($"Calling ForceResponseStatusCode - statusCode: {statusCode}, responseCount: {responseCount}, requestCount: {this.applicationStateProvider.RequestCount}.");
+                if (this.applicationStateProvider.ForceResponseStatusCode(statusCode, responseCount))
                 {
+                    this.loggerProvider.Info($"ForceResponseStatusCode result true");
+
                     return new HttpResponseMessage((HttpStatusCode)int.Parse(headerDictionary[HeaderNameForceResponseStatusCode].ToString()));
+                }
+                else
+                {
+                    this.loggerProvider.Info($"ForceResponseStatusCode result false");
                 }
             }
 
