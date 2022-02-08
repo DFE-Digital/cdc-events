@@ -44,13 +44,13 @@
             this.applicationState.RunIdentifier = runIdentifier;
             this.applicationState.ForceResponseStatusCode = string.Empty;
             this.applicationState.ForceResponseStatusCodeCount = 0;
-            RequestCount = 0;
+            this.RequestCount = 0;
         }
 
         /// <inheritdoc/>
         public bool ForceResponseStatusCode(string statusCode, string responseCount)
         {
-            this.loggerProvider.Info($"ForceResponseStatusCode called - statusCode: {statusCode}, responseCount: {responseCount}, requestCount: {responseCount}.");
+            this.loggerProvider.Info($"ForceResponseStatusCode called - statusCode: {statusCode}, responseCount: {responseCount}, requestCount: {this.RequestCount}.");
 
             bool returnVal = false;
             int responseCountVal;
