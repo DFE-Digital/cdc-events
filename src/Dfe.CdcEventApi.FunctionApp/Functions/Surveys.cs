@@ -24,16 +24,19 @@
         /// An instance of type <see cref="IEntityProcessor" />.
         /// </param>
         /// <param name="entityArchiveProcessor">An instance of <see cref="IEntityArchiveProcessor"/>.</param>
+        /// <param name="applicationStateProvider">An instance of <see cref="IApplicationStateProvider"/>.</param>
         /// <param name="loggerProvider">
         /// An instance of type <see cref="ILoggerProvider" />.
         /// </param>
         public Surveys(
             IEntityProcessor entityProcessor,
             IEntityArchiveProcessor entityArchiveProcessor,
+            IApplicationStateProvider applicationStateProvider,
             ILoggerProvider loggerProvider)
             : base(
                   entityProcessor,
                   entityArchiveProcessor,
+                  applicationStateProvider,
                   loggerProvider)
         {
             this.loggerProvider = loggerProvider;

@@ -32,6 +32,7 @@
         /// An instance of type <see cref="ILoggerProvider"/>.
         /// </param>
         /// <param name="notifyProcessor">An instance of <see cref="INotifyProcessor"/>.</param>
+        /// <param name="applicationStateProvider">An instance of <see cref="IApplicationStateProvider"/>.</param>
         public ControlFunctionsBase(
             IControlProcessor controlProcessor,
             INotifyProcessor notifyProcessor,
@@ -62,8 +63,6 @@
         protected async Task<HttpResponseMessage> StartLoad(HttpRequest httpRequest, CancellationToken cancellationToken)
         {
             this.loggerProvider.Info($"{nameof(this.StartLoad)} {httpRequest?.Method ?? string.Empty} called.");
-            this.applicationStateProvider.RequestCount++;
-            this.loggerProvider.Info($"Request count: {this.applicationStateProvider.RequestCount}");
 
             HttpResponseMessage toReturn = null;
 
@@ -111,6 +110,9 @@
                     // also return the previous run time
                     this.loggerProvider.Info($"Adding the since date and time to the headers.");
                     toReturn.Headers.Add(HeaderNameSince, $"{sinceDateTime:O}");
+
+                    // init application state
+                    this.applicationStateProvider.StartLoad(currentLoad.Load_DateTime);
                 }
                 catch (Exception exception)
                 {
@@ -147,8 +149,6 @@
         protected async Task<HttpResponseMessage> UpdateLoad(HttpRequest httpRequest, CancellationToken cancellationToken)
         {
             this.loggerProvider.Info($"{nameof(this.UpdateLoad)} {httpRequest?.Method ?? string.Empty} called.");
-            this.applicationStateProvider.RequestCount++;
-            this.loggerProvider.Info($"Request count: {this.applicationStateProvider.RequestCount}");
 
             HttpResponseMessage toReturn = null;
 
@@ -219,8 +219,6 @@
             CancellationToken cancellationToken)
         {
             this.loggerProvider.Info($"{nameof(this.FinishLoad)} {httpRequest?.Method ?? string.Empty} called.");
-            this.applicationStateProvider.RequestCount++;
-            this.loggerProvider.Info($"Request count: {this.applicationStateProvider.RequestCount}");
 
             HttpResponseMessage toReturn = null;
 
