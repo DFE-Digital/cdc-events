@@ -16,11 +16,11 @@ $a.resources[0].properties.definition.parameters.TargetOAUTHEndpoint.defaultValu
 $a.resources[0].properties.definition.parameters.CDC2NotifyAPIKeySecretUri.defaultValue  = "[concat(reference(variables('keyVaultSecretCDC2NotifyAPIKey'), '2019-09-01').secretUriWithVersion, '?api-version=2016-10-01')]"
 #Log Analytics Connection
 $a.resources[0].properties.parameters.'$connections'.value.azureloganalyticsdatacollector.connectionId = "[concat('/subscriptions/', parameters('subscriptionId'), '/resourceGroups/', parameters('resourceGroupPrefix'), '-cdcaeg/providers/Microsoft.Web/connections/', parameters('resourceGroupPrefix'), '-logapi-01')]"
-$a.resources[0].properties.parameters.'$connections'.value.azureloganalyticsdatacollector.connectionName = "[concat(parameters('resourceGroupPrefix'), '-logapi-01')]"
+#$a.resources[0].properties.parameters.'$connections'.value.azureloganalyticsdatacollector.connectionName = "[concat(parameters('resourceGroupPrefix'), '-logapi-01')]"
 $a.resources[0].properties.parameters.'$connections'.value.azureloganalyticsdatacollector.id = "[concat('/subscriptions/', parameters('subscriptionId'), '/providers/Microsoft.Web/locations/westeurope/managedApis/azureloganalyticsdatacollector')]"
 #File Storage Connection
 $a.resources[0].properties.parameters.'$connections'.value.azurefile.connectionId = "[concat('/subscriptions/', parameters('subscriptionId'), '/resourceGroups/', parameters('resourceGroupPrefix'), '-cdcaeg/providers/Microsoft.Web/connections/', parameters('resourceGroupPrefix'), '-fileapi-01')]"
-$a.resources[0].properties.parameters.'$connections'.value.azurefile.connectionName = "[concat(parameters('resourceGroupPrefix'), '-fileapi-01')]"
+#$a.resources[0].properties.parameters.'$connections'.value.azurefile.connectionName = "[concat(parameters('resourceGroupPrefix'), '-fileapi-01')]"
 $a.resources[0].properties.parameters.'$connections'.value.azurefile.id = "[concat('/subscriptions/', parameters('subscriptionId'), '/providers/Microsoft.Web/locations/westeurope/managedApis/azurefile')]"
 
 # The body template for sending log analytics has to be escaped here otherwise it all goes wrong when the json is unescaped in the last step
