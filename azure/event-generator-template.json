@@ -593,16 +593,7 @@
                       "actions": {},
                       "else": {
                         "actions": {
-                          "Scope-Attachments-Fail-Post-To-Target": {
-                            "description": "Throw error to exit scope and fail run - should really check for 401 and attempt re login to target",
-                            "inputs": {
-                              "name": "Control-Error",
-                              "value": "@int('__ERROR_')"
-                            },
-                            "runAfter": { "Send_Data": [ "Succeeded" ] },
-                            "type": "SetVariable"
-                          },
-                          "Send_Data": {
+                          "Log-Failed-Attachment": {
                             "inputs": {
                               "body": "{\"key\":\"@{items('For-Each-Attachment')['Key']}\",\"siteName\": \"@{items('For-Each-Attachment')?['SiteName']}\"}",
                               "headers": { "Log-Type": "PostAttachmentFailed" },
@@ -612,6 +603,15 @@
                             },
                             "runAfter": { "Set_variable": [ "Succeeded" ] },
                             "type": "ApiConnection"
+                          },
+                          "Scope-Attachments-Fail-Post-To-Target": {
+                            "description": "Throw error to exit scope and fail run - should really check for 401 and attempt re login to target",
+                            "inputs": {
+                              "name": "Control-Error",
+                              "value": "@int('__ERROR_')"
+                            },
+                            "runAfter": { "Log-Failed-Attachment": [ "Succeeded", "TimedOut", "Failed" ] },
+                            "type": "SetVariable"
                           },
                           "Set_variable": {
                             "inputs": {
@@ -932,7 +932,7 @@
                               { "equals": [ "@equals(body('Re-Authenticate-Source')['Success'],true)", "@true" ] }
                             ]
                           },
-                          "runAfter": { "Re-Authenticate-Source": [ "Succeeded" ] },
+                          "runAfter": { "Re-Authenticate-Source": [ "Succeeded", "TimedOut", "Failed" ] },
                           "type": "If"
                         },
                         "Validate-Re-Authenticate-Target": {
@@ -1014,8 +1014,19 @@
                                 "retryPolicy": { "type": "none" },
                                 "uri": "@{parameters('SourceEndpoint')}@{variables('Control-Entity')}"
                               },
-                              "runAfter": {},
+                              "runAfter": { "Log-Get-Entity-Page": [ "Succeeded", "TimedOut", "Failed" ] },
                               "type": "Http"
+                            },
+                            "Log-Get-Entity-Page": {
+                              "inputs": {
+                                "body": "{\"entity\":\"@{variables('Control-Entity')}\",\"page\":\"@{variables('Control-Page')}\"}",
+                                "headers": { "Log-Type": "GetEntityPage" },
+                                "host": { "connection": { "name": "@parameters('$connections')['azureloganalyticsdatacollector']['connectionId']" } },
+                                "method": "post",
+                                "path": "/api/logs"
+                              },
+                              "runAfter": {},
+                              "type": "ApiConnection"
                             },
                             "Validate-Get-Entity-Page": {
                               "actions": {
@@ -1024,8 +1035,19 @@
                                     "name": "Control-Page",
                                     "value": 1
                                   },
-                                  "runAfter": { "Parse-Entity-Page": [ "Succeeded" ] },
+                                  "runAfter": { "Save-Raw-Entity-Response": [ "Succeeded", "TimedOut", "Failed" ] },
                                   "type": "IncrementVariable"
+                                },
+                                "Log-Entity-Page-Record-Count": {
+                                  "inputs": {
+                                    "body": "{\"entity\": \"@{variables('Control-Entity')}\", \"page\": \"@{variables('Control-Page')}\", \"recordCount\": \"@{length(body('Parse-Entity-Page')['Infos'])}\"}",
+                                    "headers": { "Log-Type": "EntityPageSummary" },
+                                    "host": { "connection": { "name": "@parameters('$connections')['azureloganalyticsdatacollector']['connectionId']" } },
+                                    "method": "post",
+                                    "path": "/api/logs"
+                                  },
+                                  "runAfter": { "Parse-Entity-Page": [ "Succeeded" ] },
+                                  "type": "ApiConnection"
                                 },
                                 "Parse-Entity-Page": {
                                   "inputs": {
@@ -1043,6 +1065,23 @@
                                   },
                                   "runAfter": {},
                                   "type": "ParseJson"
+                                },
+                                "Save-Raw-Entity-Response": {
+                                  "inputs": {
+                                    "body": "@body('Get-Entity-Page')",
+                                    "headers": { "ReadFileMetadataFromServer": true },
+                                    "host": { "connection": { "name": "@parameters('$connections')['azurefile']['connectionId']" } },
+                                    "method": "post",
+                                    "path": "/datasets/default/files",
+                                    "queries": {
+                                      "folderPath": "@{concat('/rawapiresponses/', formatDateTime(variables('Control-Started'), 'yyyy-MM-dd_HH-mm-ss'))}",
+                                      "name": "@{variables('Control-Entity')}@{variables('Control-Page')}.json",
+                                      "queryParametersSingleEncoded": true
+                                    }
+                                  },
+                                  "runAfter": { "Log-Entity-Page-Record-Count": [ "Succeeded" ] },
+                                  "runtimeConfiguration": { "contentTransfer": { "transferMode": "Chunked" } },
+                                  "type": "ApiConnection"
                                 },
                                 "Validate-Get-Entity-Data": {
                                   "actions": {
@@ -1074,11 +1113,12 @@
                                               "Authorization": "Bearer @{variables('TargetOAUTHToken')}",
                                               "Content-Type": "application/octet-stream",
                                               "Ocp-Apim-Subscription-Key": "@variables('TargetOAUTHKey')",
+                                              "X-Force-Response-Status": "@{if(equals(parameters('ForceHttpResponseCode'), 'none'), '', parameters('ForceHttpResponseCode'))}",
+                                              "X-Force-Response-Status-Count": "@{if(equals(parameters('ForceHttpResponseCode'), 'none'), '', parameters('ForceHttpResponseCount'))}",
                                               "X-Page": "@{variables('Control-Page')}",
                                               "X-Run-Identifier": "@variables('Control-Started')"
                                             },
                                             "method": "POST",
-                                            "retryPolicy": { "type": "none" },
                                             "uri": "@{parameters('TargetEndpoint')}@{variables('Control-Entity')}"
                                           },
                                           "runAfter": { "Set-Post-Entity-Page-Re-Authenticate-Target": [ "Succeeded" ] },
@@ -1116,12 +1156,12 @@
                                             }
                                           },
                                           "expression": { "and": [ { "equals": [ "@outputs('Post-Entity-Page')['statusCode']", 202 ] } ] },
-                                          "runAfter": { "Post-Entity-Page": [ "Succeeded" ] },
+                                          "runAfter": { "Post-Entity-Page": [ "Succeeded", "TimedOut", "Failed" ] },
                                           "type": "If"
                                         }
                                       },
                                       "expression": { "and": [ { "equals": [ "@outputs('Post-Entity-Page-Re-Authenticate-Target')['statusCode']", 200 ] } ] },
-                                      "runAfter": { "Post-Entity-Page-Re-Authenticate-Target": [ "Succeeded" ] },
+                                      "runAfter": { "Post-Entity-Page-Re-Authenticate-Target": [ "Succeeded", "TimedOut", "Failed" ] },
                                       "type": "If"
                                     }
                                   },
@@ -1197,7 +1237,7 @@
                                   { "equals": [ "@equals(body('Get-Entity-Page')['Success'], true)", "@true" ] }
                                 ]
                               },
-                              "runAfter": { "Get-Entity-Page": [ "Succeeded" ] },
+                              "runAfter": { "Get-Entity-Page": [ "Succeeded", "TimedOut", "Failed" ] },
                               "type": "If"
                             }
                           },
@@ -1556,7 +1596,7 @@
                     }
                   },
                   "expression": { "and": [ { "equals": [ "@outputs('Record-Control-Status-Start')['statusCode']", 201 ] } ] },
-                  "runAfter": { "Record-Control-Status-Start": [ "Succeeded" ] },
+                  "runAfter": { "Record-Control-Status-Start": [ "Succeeded", "TimedOut", "Failed" ] },
                   "type": "If"
                 }
               },
@@ -1619,7 +1659,7 @@
                     }
                   },
                   "expression": { "and": [ { "equals": [ "@outputs('Get-TargetOAUTHToken')['statusCode']", 200 ] } ] },
-                  "runAfter": { "Get-TargetOAUTHToken": [ "Succeeded" ] },
+                  "runAfter": { "Get-TargetOAUTHToken": [ "Succeeded", "TimedOut", "Failed" ] },
                   "type": "If"
                 }
               },
@@ -1731,7 +1771,7 @@
                     }
                   },
                   "expression": { "and": [ { "equals": [ "@outputs('Record-Control-Status-Entities')['statusCode']", 202 ] } ] },
-                  "runAfter": { "Record-Control-Status-Entities": [ "Succeeded" ] },
+                  "runAfter": { "Record-Control-Status-Entities": [ "Succeeded", "TimedOut", "Failed" ] },
                   "type": "If"
                 }
               },
@@ -1751,6 +1791,14 @@
             },
             "Environment": {
               "defaultValue": "[concat(parameters('environmentName'), '-', parameters('environmentInstance'))]",
+              "type": "String"
+            },
+            "ForceHttpResponseCode": {
+              "defaultValue": "none",
+              "type": "String"
+            },
+            "ForceHttpResponseCount": {
+              "defaultValue": "0",
               "type": "String"
             },
             "ItemsPerPage": {
@@ -1865,10 +1913,15 @@
         "parameters": {
           "$connections": {
             "value": {
+              "azurefile": {
+                "connectionId": "[concat('/subscriptions/', parameters('subscriptionId'), '/resourceGroups/', parameters('resourceGroupPrefix'), '-cdcaeg/providers/Microsoft.Web/connections/', parameters('resourceGroupPrefix'), '-fileapi-01')]",
+                "connectionName": "[concat(parameters('resourceGroupPrefix'), '-fileapi-01')]",
+                "id": "[concat('/subscriptions/', parameters('subscriptionId'), '/providers/Microsoft.Web/locations/westeurope/managedApis/azurefile')]"
+              },
               "azureloganalyticsdatacollector": {
                 "connectionId": "[concat('/subscriptions/', parameters('subscriptionId'), '/resourceGroups/', parameters('resourceGroupPrefix'), '-cdcaeg/providers/Microsoft.Web/connections/', parameters('resourceGroupPrefix'), '-logapi-01')]",
                 "connectionName": "[concat(parameters('resourceGroupPrefix'), '-logapi-01')]",
-                "id": "[concat('/subscriptions/', parameters('subscriptionId'), '/providers/Microsoft.Web/locations/westeurope/managedApis/', parameters('resourceGroupPrefix'), '-logapi-01')]"
+                "id": "[concat('/subscriptions/', parameters('subscriptionId'), '/providers/Microsoft.Web/locations/westeurope/managedApis/azureloganalyticsdatacollector')]"
               }
             }
           }
