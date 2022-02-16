@@ -1914,12 +1914,12 @@
           "$connections": {
             "value": {
               "azurefile": {
-                "connectionId": "[concat('/subscriptions/', parameters('subscriptionId'), '/resourceGroups/', parameters('resourceGroupPrefix'), '-cdcaeg/providers/Microsoft.Web/connections/azurefile')]",
+                "connectionId": "[concat('/subscriptions/', parameters('subscriptionId'), '/resourceGroups/', parameters('resourceGroupPrefix'), '-cdcaeg/providers/Microsoft.Web/connections/', parameters('resourceGroupPrefix'), '-fileapi-01')]",
                 "connectionName": "[concat(parameters('resourceGroupPrefix'), '-fileapi-01')]",
                 "id": "[concat('/subscriptions/', parameters('subscriptionId'), '/providers/Microsoft.Web/locations/westeurope/managedApis/azurefile')]"
               },
               "azureloganalyticsdatacollector": {
-                "connectionId": "[concat('/subscriptions/', parameters('subscriptionId'), '/resourceGroups/', parameters('resourceGroupPrefix'), '-cdcaeg/providers/Microsoft.Web/connections/azureloganalyticsdatacollector')]",
+                "connectionId": "[concat('/subscriptions/', parameters('subscriptionId'), '/resourceGroups/', parameters('resourceGroupPrefix'), '-cdcaeg/providers/Microsoft.Web/connections/', parameters('resourceGroupPrefix'), '-logapi-01')]",
                 "connectionName": "[concat(parameters('resourceGroupPrefix'), '-logapi-01')]",
                 "id": "[concat('/subscriptions/', parameters('subscriptionId'), '/providers/Microsoft.Web/locations/westeurope/managedApis/azureloganalyticsdatacollector')]"
               }
