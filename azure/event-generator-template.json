@@ -1008,6 +1008,7 @@
                                   "PageSize": "@{parameters('ItemsPerPage')}",
                                   "SessionId": "@variables('SourceOAUTHToken')",
                                   "UpdatedSince": "@variables('Control-Since')",
+                                  "UpdatedBefore": "@variables('Control-Started')",
                                   "format": "json",
                                   "jsconfig": "dh:iso8601"
                                 },
@@ -1119,6 +1120,9 @@
                                               "X-Run-Identifier": "@variables('Control-Started')"
                                             },
                                             "method": "POST",
+                                            "retryPolicy": {
+                                              "type": "none"
+                                            },
                                             "uri": "@{parameters('TargetEndpoint')}@{variables('Control-Entity')}"
                                           },
                                           "runAfter": { "Set-Post-Entity-Page-Re-Authenticate-Target": [ "Succeeded" ] },
