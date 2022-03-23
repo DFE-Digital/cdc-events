@@ -11,4 +11,8 @@ SELECT
     Tbl.Col.value('source_DateLastModified[1]', 'nvarchar(40)') AS [source_DateLastModified],
     Tbl.Col.value('EntityStatus[1]', 'nvarchar(max)') AS [EntityStatus],
     @RunIdentifier as [Load_DateTime] 
-FROM @Entities.nodes('//Entity') Tbl(Col);
+FROM @Entities.nodes('//Entity') Tbl(Col)
+LEFT JOIN (SELECT [bk_PortfolioId], [bk_SiteId] FROM [raw].[Portfolio_SiteInfo] WHERE [Load_DateTime] = @RunIdentifier) AS [existing]
+ON Tbl.Col.value('bk_PortfolioId[1]', 'nvarchar(40)') = [existing].[bk_PortfolioId]
+AND Tbl.Col.value('bk_SiteId[1]', 'nvarchar(40)') = [existing].[bk_SiteId]
+WHERE [existing].[bk_SiteId] IS NULL;
