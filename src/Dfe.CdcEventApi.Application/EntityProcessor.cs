@@ -261,9 +261,6 @@
                 }
             }
 
-            this.loggerProvider.Debug(
-                $"Entity XML document created: {dataTableXmlStr}");
-
             toReturn = XDocument.Parse(dataTableXmlStr);
 
             return toReturn;

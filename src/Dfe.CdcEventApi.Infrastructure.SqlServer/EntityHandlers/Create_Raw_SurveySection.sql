@@ -18,4 +18,7 @@ SELECT
     Tbl.Col.value('source_DateLastModified[1]', 'nvarchar(40)') AS [source_DateLastModified],
     Tbl.Col.value('EntityStatus[1]', 'nvarchar(max)') AS [EntityStatus],
     @RunIdentifier as [Load_DateTime] 
-FROM @Entities.nodes('//Entity') Tbl(Col);
+FROM @Entities.nodes('//Entity') Tbl(Col)
+LEFT JOIN (SELECT [bk_id] FROM [raw].[SurveySection] WHERE [Load_DateTime] = @RunIdentifier) AS [existing]
+ON Tbl.Col.value('bk_Id[1]', 'nvarchar(40)') = [existing].[bk_id]
+WHERE [existing].[bk_id] IS NULL;
