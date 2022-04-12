@@ -5,6 +5,9 @@
     "workflows_s153d01_cdcaeg_la_01_scheduler_name": {
       "defaultValue": "s153d01-cdcaeg-la-01-scheduler",
       "type": "String"
+    },
+    "orchestratorWorkflowUri": {
+      "type": "String"
     }
   },
   "variables": {},
