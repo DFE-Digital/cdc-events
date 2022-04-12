@@ -1,44 +1,85 @@
 {
-  "definition": {
-    "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
-    "actions": {
-      "Trigger_Orchestration_Workflow": {
-        "inputs": {
-          "headers": {
-            "Content-Type": "application/json"
-          },
-          "method": "POST",
-          "uri": "@parameters('OrchestratorWorkflowUri')"
-        },
-        "runAfter": {},
-        "type": "Http"
-      }
-    },
-    "contentVersion": "1.0.0.0",
-    "outputs": {},
-    "parameters": {
-      "OrchestratorWorkflowUri": {
-        "defaultValue": "https://prod-83.westeurope.logic.azure.com:443/workflows/5b280791ffd14b0381576ef4207a9a99/triggers/manual/paths/invoke?api-version=2016-10-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=QXvYCGS4sCmRNOkk--go0p2BuBzQVXZn2EnaJdoqKc4",
-        "type": "String"
-      }
-    },
-    "triggers": {
-      "Recurrence": {
-        "recurrence": {
-          "frequency": "Day",
-          "interval": 1,
-          "schedule": {
-            "hours": [
-              "1"
-            ],
-            "minutes": [
-              30
-            ]
-          }
-        },
-        "type": "recurrence"
-      }
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "workflows_s153d01_cdcaeg_la_01_scheduler_name": {
+      "defaultValue": "s153d01-cdcaeg-la-01-scheduler",
+      "type": "String"
     }
   },
-  "parameters": {}
+  "variables": {},
+  "resources": [
+    {
+      "type": "Microsoft.Logic/workflows",
+      "apiVersion": "2017-07-01",
+      "name": "[parameters('workflows_s153d01_cdcaeg_la_01_scheduler_name')]",
+      "location": "westeurope",
+      "tags": {
+        "Environment": "Dev",
+        "Parent Business": "Shared IT core services",
+        "Portfolio": "Operations Group",
+        "Product": "Condition Data Collection 2",
+        "Service": "Funding and Allocations",
+        "Service Line": "Capital",
+        "Service Offering": "Condition Data Collection 2"
+      },
+      "properties": {
+        "state": "Enabled",
+        "definition": {
+          "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+          "contentVersion": "1.0.0.0",
+          "parameters": {
+            "OrchestratorWorkflowUri": {
+              "defaultValue": "[parameters('orchestratorWorkflowUri')]",
+              "type": "String"
+            }
+          },
+          "triggers": {
+            "Recurrence": {
+              "recurrence": {
+                "frequency": "Day",
+                "interval": 1,
+                "schedule": {
+                  "hours": [
+                    "0"
+                  ],
+                  "minutes": [
+                    15
+                  ]
+                }
+              },
+              "evaluatedRecurrence": {
+                "frequency": "Day",
+                "interval": 1,
+                "schedule": {
+                  "hours": [
+                    "0"
+                  ],
+                  "minutes": [
+                    15
+                  ]
+                }
+              },
+              "type": "Recurrence"
+            }
+          },
+          "actions": {
+            "Trigger_Orchestration_Workflow": {
+              "runAfter": {},
+              "type": "Http",
+              "inputs": {
+                "headers": {
+                  "Content-Type": "application/json"
+                },
+                "method": "POST",
+                "uri": "@parameters('OrchestratorWorkflowUri')"
+              }
+            }
+          },
+          "outputs": {}
+        },
+        "parameters": {}
+      }
+    }
+  ]
 }
