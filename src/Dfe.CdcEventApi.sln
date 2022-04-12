@@ -24,7 +24,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "azure", "azure", "{DC957327-85A2-40D1-BFF0-290D0FEB324D}"
 	ProjectSection(SolutionItems) = preProject
 		..\azure\event-api-template.json = ..\azure\event-api-template.json
-		event-generator-scheduler-template.json = event-generator-scheduler-template.json
+		..\azure\event-generator-scheduler-template.json = ..\azure\event-generator-scheduler-template.json
 		..\azure\event-generator-template.json = ..\azure\event-generator-template.json
 	EndProjectSection
 EndProject
