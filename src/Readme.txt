@@ -27,6 +27,9 @@ A log analytics workspace was added to enable custom output; a json body templat
 The unescaping when converting back to json caused problems so the template string is escaped - note that if further logging steps are added
 they will need to be treated in the same way
 
+A further Logic App template and pipeline have now been added to trigger the orchestrator by http so that it can accept parameters. Previously this was not possible 
+as a recurring trigger is unable to accept dynamic parameters and this is required for integration testing scenarios.
+
 GOTCHAs
 
 This was noticed from time to time, in dealing with the Azure Logic app designer.
