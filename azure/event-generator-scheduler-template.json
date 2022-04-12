@@ -45,10 +45,10 @@
                 "interval": 1,
                 "schedule": {
                   "hours": [
-                    "1"
+                    "0"
                   ],
                   "minutes": [
-                    30
+                    15
                   ]
                 }
               },
