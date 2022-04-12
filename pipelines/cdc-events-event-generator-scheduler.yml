@@ -1,0 +1,32 @@
+trigger:
+  batch: true
+  branches:
+    include:
+      - "*"
+  paths:
+    include:
+      - /pipelines/cdc-events-event-generator-scheduler.yml
+      - /azure/event-generator-scheduler-template.json
+
+workspace:
+  clean: all
+
+pool:
+    vmImage: ubuntu-20.04
+
+variables:
+  BuildConfiguration: 'Release'
+
+steps:
+  - task: CopyFiles@2
+    displayName: 'Copy ARM template'
+    inputs:
+      Contents: |
+        azure/event-generator-scheduler-template.json
+      TargetFolder: '$(Build.ArtifactStagingDirectory)/publish'
+      OverWrite: true
+
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish All Artifacts'
+    inputs:
+      PathtoPublish: '$(Build.ArtifactStagingDirectory)/publish'
