@@ -7,6 +7,7 @@
       "type": "String"
     },
     "orchestratorWorkflowUri": {
+      "defaultValue": "",
       "type": "String"
     }
   },
@@ -44,10 +45,10 @@
                 "interval": 1,
                 "schedule": {
                   "hours": [
-                    "0"
+                    "1"
                   ],
                   "minutes": [
-                    15
+                    30
                   ]
                 }
               },
