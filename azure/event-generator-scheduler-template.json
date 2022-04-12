@@ -18,7 +18,7 @@
     "outputs": {},
     "parameters": {
       "OrchestratorWorkflowUri": {
-        "defaultValue": "https://prod-83.westeurope.logic.azure.com:443/workflows/5b280791ffd14b0381576ef4207a9a99/triggers/manual/paths/invoke?api-version=2016-10-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=QXvYCGS4sCmRNOkk--go0p2BuBzQVXZn2EnaJdoqKc4",
+        "defaultValue": "[parameters('orchestratorWorkflowUri')]",
         "type": "String"
       }
     },
