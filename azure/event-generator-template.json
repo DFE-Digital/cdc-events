@@ -1899,18 +1899,22 @@
             }
           },
           "triggers": {
-            "Recurrence": {
-              "evaluatedRecurrence": {
-                "frequency": "Day",
-                "interval": 1,
-                "schedule": { "hours": [ "0" ] }
+            "manual": {
+              "inputs": {
+                "schema": {
+                  "properties": {
+                    "configKey": {
+                      "type": "string"
+                    },
+                    "triggerSource": {
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
               },
-              "recurrence": {
-                "frequency": "Day",
-                "interval": 1,
-                "schedule": { "hours": [ "0" ] }
-              },
-              "type": "Recurrence"
+              "kind": "Http",
+              "type": "Request"
             }
           }
         },
