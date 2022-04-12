@@ -2,9 +2,15 @@
   "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
   "contentVersion": "1.0.0.0",
   "parameters": {
-    "workflows_s153d01_cdcaeg_la_01_scheduler_name": {
-      "defaultValue": "s153d01-cdcaeg-la-01-scheduler",
-      "type": "String"
+    "environment": {
+      "type": "string",
+      "defaultValue": "d",
+      "allowedValues": [ "d", "t", "p" ]
+    },
+    "environmentName": {
+      "type": "string",
+      "defaultValue": "DEV",
+      "allowedValues": [ "DEV", "TEST", "PROD" ]
     },
     "orchestratorWorkflowUri": {
       "defaultValue": "",
@@ -16,10 +22,10 @@
     {
       "type": "Microsoft.Logic/workflows",
       "apiVersion": "2017-07-01",
-      "name": "[parameters('workflows_s153d01_cdcaeg_la_01_scheduler_name')]",
+      "name": "[concat('s153', parameters('environment'), '01-cdcaeg-la-01-scheduler')]",
       "location": "westeurope",
       "tags": {
-        "Environment": "Dev",
+        "Environment": "[parameters('environmentName')]",
         "Parent Business": "Shared IT core services",
         "Portfolio": "Operations Group",
         "Product": "Condition Data Collection 2",
