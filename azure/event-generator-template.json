@@ -1249,7 +1249,7 @@
                           "expression": "@equals(variables('Control-Continue'), false)",
                           "limit": {
                             "count": 5000,
-                            "timeout": "PT4H"
+                            "timeout": "PT24H"
                           },
                           "runAfter": { "Set-Control-Continue-True": [ "Succeeded" ] },
                           "type": "Until"
@@ -1274,7 +1274,7 @@
                       "expression": "@equals(variables('Control-Entity-Completed'), true)",
                       "limit": {
                         "count": 4,
-                        "timeout": "PT4H"
+                        "timeout": "PT24H"
                       },
                       "runAfter": { "Scope-Re-Authenticate": [ "Succeeded" ] },
                       "type": "Until"
