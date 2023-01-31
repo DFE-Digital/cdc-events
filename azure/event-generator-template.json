@@ -107,6 +107,21 @@
         "definition": {
           "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
           "actions": {
+            "Condition": {
+              "actions": {
+                "Set-Control-Started-From-Trigger": {
+                  "inputs": {
+                    "name": "Control-Started",
+                    "value": "@{if(contains(triggerBody(), 'endDate'), triggerBody()['endDate'], utcNow())}"
+                  },
+                  "runAfter": {},
+                  "type": "SetVariable"
+                }
+              },
+              "expression": { "and": [ { "not": { "equals": [ "@triggerBody()", "@null" ] } } ] },
+              "runAfter": { "Init-Control-Started": [ "Succeeded" ] },
+              "type": "If"
+            },
             "Delete-Queued-Attachments": {
               "inputs": {
                 "headers": {
@@ -268,7 +283,7 @@
                   }
                 ]
               },
-              "runAfter": { "Init-Control-Started": [ "Succeeded" ] },
+              "runAfter": { "Condition": [ "Succeeded" ] },
               "type": "InitializeVariable"
             },
             "Init-Control-Started": {
@@ -1007,8 +1022,8 @@
                                   "Page": "@{variables('Control-Page')}",
                                   "PageSize": "@{parameters('ItemsPerPage')}",
                                   "SessionId": "@variables('SourceOAUTHToken')",
-                                  "UpdatedSince": "@variables('Control-Since')",
                                   "UpdatedBefore": "@variables('Control-Started')",
+                                  "UpdatedSince": "@variables('Control-Since')",
                                   "format": "json",
                                   "jsconfig": "dh:iso8601"
                                 },
@@ -1120,9 +1135,7 @@
                                               "X-Run-Identifier": "@variables('Control-Started')"
                                             },
                                             "method": "POST",
-                                            "retryPolicy": {
-                                              "type": "none"
-                                            },
+                                            "retryPolicy": { "type": "none" },
                                             "uri": "@{parameters('TargetEndpoint')}@{variables('Control-Entity')}"
                                           },
                                           "runAfter": { "Set-Post-Entity-Page-Re-Authenticate-Target": [ "Succeeded" ] },
@@ -1903,12 +1916,9 @@
               "inputs": {
                 "schema": {
                   "properties": {
-                    "configKey": {
-                      "type": "string"
-                    },
-                    "triggerSource": {
-                      "type": "string"
-                    }
+                    "configKey": { "type": "string" },
+                    "endDate": { "type": "string" },
+                    "triggerSource": { "type": "string" }
                   },
                   "type": "object"
                 }
